@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **nuxt-ui-elements** is a Nuxt module that provides a collection of beautiful, animated UI components designed to work seamlessly on top of Nuxt UI. The goal is to create reusable, elegant components that can be installed via npm and used across multiple Nuxt applications.
 
+This project heavily depends on nuxt ui, consider it's codebase for most features: /Users/AV6AB7Z/Documents/git.nosync/os/ui
+
 ## Project Goals
 
 1. **Modular Component Library**: Build a growing collection of UI components that extend Nuxt UI's capabilities

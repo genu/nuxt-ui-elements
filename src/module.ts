@@ -23,7 +23,10 @@ export default defineNuxtModule<ModuleOptions>({
   defaults: {
     prefix: "UE",
   },
-  setup(options, nuxt) {
+  moduleDependencies: {
+    "motion-v/nuxt": {},
+  },
+  setup(options, _nuxt) {
     const resolver = createResolver(import.meta.url);
     const logger = useLogger("nuxt-ui-elements");
 
@@ -34,7 +37,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     // Auto-register background components from backgrounds directory
     addComponentsDir({
-      path: resolver.resolve("./runtime/components/backgrounds"),
+      path: resolver.resolve("./runtime/components/background"),
       pathPrefix: false,
       prefix: `${options.prefix}Background`,
       global: true,
