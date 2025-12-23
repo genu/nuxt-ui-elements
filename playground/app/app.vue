@@ -2,7 +2,9 @@
 import { ref } from "vue";
 
 const variant = ref<"calm" | "energetic" | "cosmic">("cosmic");
-const color = ref<"primary" | "secondary" | "success" | "info" | "warning" | "error" | "neutral">("primary");
+const color = ref<
+  "primary" | "secondary" | "success" | "info" | "warning" | "error" | "neutral"
+>("primary");
 const reverse = ref(false);
 const customMode = ref(false);
 const speed = ref(50);
@@ -11,14 +13,7 @@ const intensity = ref(50);
 
 <template>
   <div class="relative w-screen h-screen bg-white dark:bg-gray-900">
-    <UEBackgroundAurora
-      :variant="customMode ? undefined : variant"
-      :color="color"
-      :speed="customMode ? speed : undefined"
-      :intensity="customMode ? intensity : undefined"
-      :reverse="reverse"
-      pin="top-left"
-    >
+    <UEBackgroundFlickeringGrid color="info">
       <div class="relative z-10 flex items-center justify-center h-full">
         <div class="text-center space-y-6">
           <UColorModeButton />
@@ -143,6 +138,6 @@ const intensity = ref(50);
           </div>
         </div>
       </div>
-    </UEBackgroundAurora>
+    </UEBackgroundFlickeringGrid>
   </div>
 </template>
