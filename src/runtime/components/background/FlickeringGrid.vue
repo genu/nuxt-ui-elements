@@ -12,7 +12,7 @@ type BackgroundFlickeringGrid = ComponentConfig<
 export interface FlickeringGridProps {
   /**
    * The square size of the grid (before scaling)
-   * @default 4
+   * @default 12
    */
   squareSize?: number;
   /**
@@ -48,6 +48,11 @@ export interface FlickeringGridProps {
    * @default 0.3
    */
   maxOpacity?: number;
+  /**
+   * Apply radial fade to edges
+   * @default true
+   */
+  fade?: boolean;
   /**
    * Canvas width (defaults to container width)
    */
@@ -87,16 +92,18 @@ export interface FlickeringGridSlots {
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { tv } from "../../utils/tv";
+import { calculateGradientIntensity } from "../../composables/useGradient";
 import theme from "../../themes/background-flickering-grid";
 import { getThemeColor, adjustLightness, oklchToRgb } from "../../composables/useThemeColors";
 
 const props = withDefaults(defineProps<FlickeringGridProps>(), {
-  squareSize: 4,
-  gridGap: 6,
+  squareSize: 8,
+  gridGap: 8,
   flickerChance: 0.3,
-  flickerSpeed: 1,
+  flickerSpeed: 0.2,
   gradientDirection: "left-right",
   maxOpacity: 0.3,
+  fade: true,
   color: "neutral",
   variant: "subtle",
   class: "",
@@ -111,6 +118,15 @@ const ui = computed(() =>
     variant: props.variant,
   })
 );
+
+// Radial fade mask
+const maskStyle = computed(() => {
+  if (!props.fade) return {};
+  return {
+    maskImage: "radial-gradient(circle at center, black 20%, transparent 90%)",
+    WebkitMaskImage: "radial-gradient(circle at center, black 20%, transparent 90%)",
+  };
+});
 
 // Refs
 const containerRef = ref<HTMLElement>();
@@ -182,47 +198,18 @@ function rgbToString(rgb: [number, number, number], alpha = 1) {
   return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
 }
 
-// Gradient calculation
+// Gradient calculation using the reusable composable
 function getGradientT(
   i: number,
   j: number,
   cols: number,
   rows: number
 ): number {
-  switch (props.gradientDirection) {
-    case "left-right":
-      return i / (cols - 1);
-    case "right-left":
-      return 1 - i / (cols - 1);
-    case "top-bottom":
-      return j / (rows - 1);
-    case "bottom-top":
-      return 1 - j / (rows - 1);
-    case "in-out": {
-      const cx = (cols - 1) / 2;
-      const cy = (rows - 1) / 2;
-      const dx = i - cx;
-      const dy = j - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const maxDist = Math.sqrt(cx * cx + cy * cy);
-      return dist / maxDist;
-    }
-    case "out-in": {
-      const cx = (cols - 1) / 2;
-      const cy = (rows - 1) / 2;
-      const dx = i - cx;
-      const dy = j - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const maxDist = Math.sqrt(cx * cx + cy * cy);
-      return 1 - dist / maxDist;
-    }
-    case "top-left-bottom-right":
-      return (i + j) / (cols + rows - 2);
-    case "bottom-right-top-left":
-      return 1 - (i + j) / (cols + rows - 2);
-    default:
-      return i / (cols - 1);
-  }
+  // Normalize grid coordinates to 0-1 range
+  const x = cols > 1 ? i / (cols - 1) : 0.5;
+  const y = rows > 1 ? j / (rows - 1) : 0.5;
+
+  return calculateGradientIntensity(x, y, props.gradientDirection);
 }
 
 // Canvas setup
@@ -380,6 +367,7 @@ watch(
       ref="canvasRef"
       data-slot="canvas"
       :class="ui.canvas({ class: props.ui?.canvas })"
+      :style="maskStyle"
       :width="canvasSize.width"
       :height="canvasSize.height"
     />
