@@ -1,9 +1,9 @@
 {
   "name": "nuxt-ui-elements",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A collection of beautiful, animated UI components for Nuxt applications",
   "license": "MIT",
-  "repository": "your-org/nuxt-ui-elements",
+  "repository": "https://github.com/genu/nuxt-ui-elements.git",
   "files": [
     "dist"
   ],
