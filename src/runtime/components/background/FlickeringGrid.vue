@@ -27,21 +27,12 @@ export interface FlickeringGridProps {
    */
   speed?: number;
   /**
-   * Gradient direction for the grid
-   * @default 'left-right'
+   * Apply fade/vignette effect with directional masking
+   * - 'radial': Radial fade from center (spotlight effect)
+   * - 'left', 'right', 'top', 'bottom': Linear fade from specified edge
+   *
    */
-  gradient?:
-    | "left-right"
-    | "right-left"
-    | "top-bottom"
-    | "bottom-top"
-    | "in-out"
-    | "out-in";
-  /**
-   * Apply radial fade to edges
-   * @default true
-   */
-  fade?: boolean;
+  fade?: "radial" | "left" | "right" | "top" | "bottom";
   /**
    * Color for the grid. Supports:
    * - Nuxt UI semantic: 'primary', 'secondary', 'success', 'info', 'warning', 'error', 'neutral'
@@ -67,12 +58,10 @@ export interface FlickeringGridProps {
    * @example { colorDark: 'blue-300' } - Override color for dark mode
    */
 
-  element?: {
-    /**
-     * Override color specifically for dark mode
-     */
-    colorDark?: ColorInput;
-  };
+  /**
+   * Override color specifically for dark mode
+   */
+  colorDark?: ColorInput;
 
   /**
    * UI slot customization
@@ -92,7 +81,6 @@ export interface FlickeringGridSlots {
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useColorMode } from "#imports";
 import { tv } from "../../utils/tv";
-import { calculateGradientIntensity } from "../../composables/useGradient";
 import theme from "../../themes/background-flickering-grid";
 import { adjustLightness, oklchToRgb } from "../../composables/useThemeColors";
 import {
@@ -100,15 +88,14 @@ import {
   type ColorInput,
 } from "../../composables/useColorResolver";
 
-const props = withDefaults(defineProps<FlickeringGridProps>(), {
-  size: 8,
-  gap: 8,
-  speed: 5,
-  gradient: "left-right",
-  fade: false,
-  color: "neutral",
-  lightness: 95,
-});
+const {
+  size = 8,
+  gap = 9,
+  speed = 5,
+  color = "neutral",
+  lightness = 95,
+  ...props
+} = defineProps<FlickeringGridProps>();
 
 // Get color mode from Nuxt UI
 const colorMode = useColorMode();
@@ -117,16 +104,16 @@ const isDark = computed(() => colorMode.value === "dark");
 // Determine effective color based on color mode
 const effectiveColor = computed(() => {
   // If in dark mode and dark color override is specified, use it
-  if (isDark.value && props.element?.colorDark) {
-    return props.element.colorDark;
+  if (isDark.value && props.colorDark) {
+    return props.colorDark;
   }
-  return props.color;
+  return color;
 });
 
 // Map user-friendly 1-10 speed scale to internal decimal range
 // 1 → 0.01, 5 → 0.05, 10 → 0.1
 const internalSpeed = computed(() => {
-  return props.speed * 0.01;
+  return speed * 0.01;
 });
 
 // Calculate effective opacity based on lightness
@@ -142,10 +129,7 @@ const effectiveOpacity = computed(() => {
 
   const t = Math.max(
     0,
-    Math.min(
-      1,
-      (props.lightness - minLightness) / (maxLightness - minLightness)
-    )
+    Math.min(1, (lightness - minLightness) / (maxLightness - minLightness))
   );
   return maxOpacity - t * (maxOpacity - minOpacity);
 });
@@ -155,13 +139,36 @@ defineSlots<FlickeringGridSlots>();
 // Compute UI classes using tailwind-variants
 const ui = computed(() => tv(theme)());
 
-// Radial fade mask
+// Fade mask - supports radial and directional fades
 const maskStyle = computed(() => {
   if (!props.fade) return {};
+
+  let maskImage: string;
+
+  switch (props.fade) {
+    case "radial":
+      maskImage =
+        "radial-gradient(circle at center, black 20%, transparent 90%)";
+      break;
+    case "left":
+      maskImage = "linear-gradient(to right, transparent 0%, black 30%)";
+      break;
+    case "right":
+      maskImage = "linear-gradient(to left, transparent 0%, black 30%)";
+      break;
+    case "top":
+      maskImage = "linear-gradient(to bottom, transparent 0%, black 30%)";
+      break;
+    case "bottom":
+      maskImage = "linear-gradient(to top, transparent 0%, black 30%)";
+      break;
+    default:
+      return {};
+  }
+
   return {
-    maskImage: "radial-gradient(circle at center, black 20%, transparent 90%)",
-    WebkitMaskImage:
-      "radial-gradient(circle at center, black 20%, transparent 90%)",
+    maskImage,
+    WebkitMaskImage: maskImage,
   };
 });
 
@@ -191,21 +198,17 @@ const gridColors = computed(() => {
   // Resolve the color input to an actual color value
   const baseColor = resolveColor(effectiveColor.value);
 
-  // Calculate lightness values based on the lightness prop
-  // Use proportional spacing for better visual differentiation
-  const lightnessStart = props.lightness;
-  const lightnessEnd = Math.min(100, props.lightness + 3); // Slightly lighter
-  const lightnessFlicker = Math.max(0, props.lightness - 10); // More prominent flicker
+  // Calculate lightness values for base and flicker states
+  const lightnessBase = lightness;
+  const lightnessFlicker = Math.max(0, lightness - 10); // More prominent flicker
 
   // Create OKLCH colors with adjusted lightness and convert to RGB
-  const startRgb = oklchToRgb(adjustLightness(baseColor, lightnessStart));
-  const endRgb = oklchToRgb(adjustLightness(baseColor, lightnessEnd));
+  const baseRgb = oklchToRgb(adjustLightness(baseColor, lightnessBase));
   const flickerRgb = oklchToRgb(adjustLightness(baseColor, lightnessFlicker));
 
   // Parse to tuples for canvas
   return {
-    start: parseColor(startRgb),
-    end: parseColor(endRgb),
+    base: parseColor(baseRgb),
     flicker: parseColor(flickerRgb),
   };
 });
@@ -232,20 +235,6 @@ function rgbToString(rgb: [number, number, number], alpha = 1) {
   return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
 }
 
-// Gradient calculation using the reusable composable
-function getGradientT(
-  i: number,
-  j: number,
-  cols: number,
-  rows: number
-): number {
-  // Normalize grid coordinates to 0-1 range
-  const x = cols > 1 ? i / (cols - 1) : 0.5;
-  const y = rows > 1 ? j / (rows - 1) : 0.5;
-
-  return calculateGradientIntensity(x, y, props.gradient);
-}
-
 // Canvas setup
 function setupCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
   const dpr = window.devicePixelRatio || 1;
@@ -253,8 +242,8 @@ function setupCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
   canvas.height = height * dpr;
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
-  const cols = Math.floor(width / (props.size + props.gap));
-  const rows = Math.floor(height / (props.size + props.gap));
+  const cols = Math.floor(width / (size + gap));
+  const rows = Math.floor(height / (size + gap));
   const squares = new Float32Array(cols * rows);
   for (let i = 0; i < squares.length; i++) {
     squares[i] = Math.random() * effectiveOpacity.value;
@@ -290,23 +279,25 @@ function drawGrid(
     for (let j = 0; j < rows; j++) {
       const idx = i * rows + j;
       const opacity = squares[idx] ?? 0;
-      const t = getGradientT(i, j, cols, rows);
-      const baseColor = lerpColor(colors.start, colors.end, t);
-      let cellColor: [number, number, number] = baseColor;
+
+      // Use base color, blend to flicker color for brighter squares
+      let cellColor: [number, number, number] = colors.base;
       let cellAlpha = opacity;
+
       if (opacity > 0.5 * effectiveOpacity.value) {
         const blendT =
           (opacity - 0.5 * effectiveOpacity.value) /
           (0.5 * effectiveOpacity.value);
-        cellColor = lerpColor(baseColor, colors.flicker, blendT);
+        cellColor = lerpColor(colors.base, colors.flicker, blendT);
         cellAlpha = Math.min(1, opacity + 0.2);
       }
+
       ctx.fillStyle = rgbToString(cellColor, cellAlpha);
       ctx.fillRect(
-        i * (props.size + props.gap) * dpr,
-        j * (props.size + props.gap) * dpr,
-        props.size * dpr,
-        props.size * dpr
+        i * (size + gap) * dpr,
+        j * (size + gap) * dpr,
+        size * dpr,
+        size * dpr
       );
     }
   }
@@ -376,18 +367,9 @@ onBeforeUnmount(() => {
 });
 
 // Watch for prop changes that require redraw
-watch(
-  [
-    () => props.gradient,
-    () => props.size,
-    () => props.gap,
-    () => props.color,
-    () => props.lightness,
-  ],
-  () => {
-    updateCanvasSize();
-  }
-);
+watch([() => size, () => gap, () => color, () => lightness], () => {
+  updateCanvasSize();
+});
 </script>
 
 <template>
