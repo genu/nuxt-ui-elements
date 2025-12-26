@@ -2,8 +2,8 @@ const colors = ['primary', 'secondary', 'success', 'info', 'warning', 'error'] a
 
 export default {
   slots: {
-    base: "w-full h-full absolute inset-0 pointer-events-none",
-    canvas: "w-full h-full block",
+    base: "w-full h-full absolute inset-0",
+    canvas: "w-full h-full block pointer-events-none",
   },
   variants: {
     color: {

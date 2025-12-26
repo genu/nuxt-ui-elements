@@ -12,24 +12,20 @@ type BackgroundFlickeringGrid = ComponentConfig<
 export interface FlickeringGridProps {
   /**
    * The square size of the grid (before scaling)
-   * @default 12
+   * @default 8
    */
-  squareSize?: number;
+  size?: number;
   /**
    * The gap between grid squares
-   * @default 6
+   * @default 8
    */
-  gridGap?: number;
+  gap?: number;
   /**
-   * The flicker animation speed (higher = faster)
-   * @default 0.3
+   * Animation speed (higher = faster flicker)
+   * Scale from 1 (slowest) to 10 (fastest)
+   * @default 5
    */
-  flickerChance?: number;
-  /**
-   * Speed multiplier for flicker animation
-   * @default 1
-   */
-  flickerSpeed?: number;
+  speed?: number;
   /**
    * Gradient direction for the grid
    * @default 'left-right'
@@ -43,11 +39,6 @@ export interface FlickeringGridProps {
     | "out-in"
     | "top-left-bottom-right"
     | "bottom-right-top-left";
-  /**
-   * Maximum opacity of flickering squares
-   * @default 0.3
-   */
-  maxOpacity?: number;
   /**
    * Apply radial fade to edges
    * @default true
@@ -75,14 +66,24 @@ export interface FlickeringGridProps {
    */
   color?: ColorInput;
   /**
-   * Color intensity variant
-   * @default 'subtle'
+   * Lightness value for the grid (controls how light/subtle the grid appears)
+   * Range: 0-100, where higher values = lighter/more subtle
+   * @default 95
    */
-  variant?: "subtle" | "soft" | "solid";
+  lightness?: number;
   /**
-   * Additional CSS classes for the container
+   * Fine-grained element customization (similar to Nuxt UI's ui prop)
+   *
+   * @example { colorDark: 'blue-300' } - Override color for dark mode
    */
-  class?: any;
+
+  element?: {
+    /**
+     * Override color specifically for dark mode
+     */
+    colorDark?: ColorInput;
+  };
+
   /**
    * UI slot customization
    */
@@ -99,23 +100,58 @@ export interface FlickeringGridSlots {
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { useColorMode } from "#imports";
 import { tv } from "../../utils/tv";
 import { calculateGradientIntensity } from "../../composables/useGradient";
 import theme from "../../themes/background-flickering-grid";
 import { adjustLightness, oklchToRgb } from "../../composables/useThemeColors";
-import { resolveColor, type ColorInput } from "../../composables/useColorResolver";
+import {
+  resolveColor,
+  type ColorInput,
+} from "../../composables/useColorResolver";
 
 const props = withDefaults(defineProps<FlickeringGridProps>(), {
-  squareSize: 8,
-  gridGap: 8,
-  flickerChance: 0.3,
-  flickerSpeed: 0.2,
+  size: 8,
+  gap: 8,
+  speed: 5,
   gradientDirection: "left-right",
-  maxOpacity: 0.3,
   fade: false,
   color: "neutral",
-  variant: "subtle",
-  class: "",
+  lightness: 95,
+});
+
+// Get color mode from Nuxt UI
+const colorMode = useColorMode();
+const isDark = computed(() => colorMode.value === "dark");
+
+// Determine effective color based on color mode
+const effectiveColor = computed(() => {
+  // If in dark mode and dark color override is specified, use it
+  if (isDark.value && props.element?.colorDark) {
+    return props.element.colorDark;
+  }
+  return props.color;
+});
+
+// Map user-friendly 1-10 speed scale to internal decimal range
+// 1 → 0.01, 5 → 0.05, 10 → 0.1
+const internalSpeed = computed(() => {
+  return props.speed * 0.01;
+});
+
+// Calculate effective opacity based on lightness
+// Lower lightness (darker colors) need higher opacity to be visible
+// Higher lightness (lighter colors) need lower opacity to stay subtle
+const effectiveOpacity = computed(() => {
+  // Map lightness (70-100) to opacity (0.6-0.2)
+  // Linear interpolation: opacity = 0.6 - (lightness - 70) * (0.4 / 30)
+  const minLightness = 70;
+  const maxLightness = 100;
+  const maxOpacity = 0.8;
+  const minOpacity = 0.15;
+
+  const t = Math.max(0, Math.min(1, (props.lightness - minLightness) / (maxLightness - minLightness)));
+  return maxOpacity - t * (maxOpacity - minOpacity);
 });
 
 defineSlots<FlickeringGridSlots>();
@@ -123,8 +159,8 @@ defineSlots<FlickeringGridSlots>();
 // Compute UI classes using tailwind-variants (only for layout, not colors)
 const ui = computed(() =>
   tv(theme)({
-    color: 'neutral', // Use neutral for base classes only
-    variant: props.variant,
+    color: "neutral", // Use neutral for base classes only
+    variant: "subtle", // Use subtle variant for base classes
   })
 );
 
@@ -133,7 +169,8 @@ const maskStyle = computed(() => {
   if (!props.fade) return {};
   return {
     maskImage: "radial-gradient(circle at center, black 20%, transparent 90%)",
-    WebkitMaskImage: "radial-gradient(circle at center, black 20%, transparent 90%)",
+    WebkitMaskImage:
+      "radial-gradient(circle at center, black 20%, transparent 90%)",
   };
 });
 
@@ -159,24 +196,21 @@ function parseColor(color: string): [number, number, number] {
   return [255, 255, 255];
 }
 
-// Get grid colors based on resolved color and variant
+// Get grid colors based on resolved color and lightness
 const gridColors = computed(() => {
   // Resolve the color input to an actual color value
-  const baseColor = resolveColor(props.color);
+  const baseColor = resolveColor(effectiveColor.value);
 
-  // Define lightness values for each variant
-  const lightnessMap = {
-    subtle: { start: 96, end: 98, flicker: 93 },
-    soft: { start: 92, end: 96, flicker: 88 },
-    solid: { start: 80, end: 92, flicker: 70 },
-  };
-
-  const lightness = lightnessMap[props.variant];
+  // Calculate lightness values based on the lightness prop
+  // Use proportional spacing for better visual differentiation
+  const lightnessStart = props.lightness;
+  const lightnessEnd = Math.min(100, props.lightness + 3); // Slightly lighter
+  const lightnessFlicker = Math.max(0, props.lightness - 10); // More prominent flicker
 
   // Create OKLCH colors with adjusted lightness and convert to RGB
-  const startRgb = oklchToRgb(adjustLightness(baseColor, lightness.start));
-  const endRgb = oklchToRgb(adjustLightness(baseColor, lightness.end));
-  const flickerRgb = oklchToRgb(adjustLightness(baseColor, lightness.flicker));
+  const startRgb = oklchToRgb(adjustLightness(baseColor, lightnessStart));
+  const endRgb = oklchToRgb(adjustLightness(baseColor, lightnessEnd));
+  const flickerRgb = oklchToRgb(adjustLightness(baseColor, lightnessFlicker));
 
   // Parse to tuples for canvas
   return {
@@ -229,11 +263,11 @@ function setupCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
   canvas.height = height * dpr;
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
-  const cols = Math.floor(width / (props.squareSize + props.gridGap));
-  const rows = Math.floor(height / (props.squareSize + props.gridGap));
+  const cols = Math.floor(width / (props.size + props.gap));
+  const rows = Math.floor(height / (props.size + props.gap));
   const squares = new Float32Array(cols * rows);
   for (let i = 0; i < squares.length; i++) {
-    squares[i] = Math.random() * props.maxOpacity;
+    squares[i] = Math.random() * effectiveOpacity.value;
   }
   return { cols, rows, squares, dpr };
 }
@@ -241,8 +275,8 @@ function setupCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
 // Animation logic
 function updateSquares(squares: Float32Array, deltaTime: number) {
   for (let i = 0; i < squares.length; i++) {
-    if (Math.random() < props.flickerChance * props.flickerSpeed * deltaTime) {
-      squares[i] = Math.random() * props.maxOpacity;
+    if (Math.random() < internalSpeed.value * deltaTime) {
+      squares[i] = Math.random() * effectiveOpacity.value;
     }
   }
 }
@@ -270,18 +304,18 @@ function drawGrid(
       const baseColor = lerpColor(colors.start, colors.end, t);
       let cellColor: [number, number, number] = baseColor;
       let cellAlpha = opacity;
-      if (opacity > 0.5 * props.maxOpacity) {
+      if (opacity > 0.5 * effectiveOpacity.value) {
         const blendT =
-          (opacity - 0.5 * props.maxOpacity) / (0.5 * props.maxOpacity);
+          (opacity - 0.5 * effectiveOpacity.value) / (0.5 * effectiveOpacity.value);
         cellColor = lerpColor(baseColor, colors.flicker, blendT);
         cellAlpha = Math.min(1, opacity + 0.2);
       }
       ctx.fillStyle = rgbToString(cellColor, cellAlpha);
       ctx.fillRect(
-        i * (props.squareSize + props.gridGap) * dpr,
-        j * (props.squareSize + props.gridGap) * dpr,
-        props.squareSize * dpr,
-        props.squareSize * dpr
+        i * (props.size + props.gap) * dpr,
+        j * (props.size + props.gap) * dpr,
+        props.size * dpr,
+        props.size * dpr
       );
     }
   }
@@ -355,11 +389,10 @@ onBeforeUnmount(() => {
 watch(
   [
     () => props.gradientDirection,
-    () => props.squareSize,
-    () => props.gridGap,
-    () => props.maxOpacity,
+    () => props.size,
+    () => props.gap,
     () => props.color,
-    () => props.variant,
+    () => props.lightness,
   ],
   () => {
     updateCanvasSize();
@@ -371,7 +404,7 @@ watch(
   <div
     ref="containerRef"
     data-slot="base"
-    :class="ui.base({ class: [props.ui?.base, props.class] })"
+    :class="ui.base({ class: [props.ui?.base] })"
   >
     <canvas
       ref="canvasRef"
