@@ -4,9 +4,7 @@ export type GradientDirection =
   | "top-bottom"
   | "bottom-top"
   | "in-out"
-  | "out-in"
-  | "top-left-bottom-right"
-  | "bottom-right-top-left";
+  | "out-in";
 
 /**
  * Calculate gradient intensity for a position based on direction
@@ -39,10 +37,6 @@ export function calculateGradientIntensity(
       const dy = y - 0.5;
       return 1 - Math.sqrt(dx * dx + dy * dy) * Math.sqrt(2);
     }
-    case "top-left-bottom-right":
-      return (x + y) / 2;
-    case "bottom-right-top-left":
-      return 1 - (x + y) / 2;
     default:
       return 0;
   }

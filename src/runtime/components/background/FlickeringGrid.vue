@@ -30,28 +30,18 @@ export interface FlickeringGridProps {
    * Gradient direction for the grid
    * @default 'left-right'
    */
-  gradientDirection?:
+  gradient?:
     | "left-right"
     | "right-left"
     | "top-bottom"
     | "bottom-top"
     | "in-out"
-    | "out-in"
-    | "top-left-bottom-right"
-    | "bottom-right-top-left";
+    | "out-in";
   /**
    * Apply radial fade to edges
    * @default true
    */
   fade?: boolean;
-  /**
-   * Canvas width (defaults to container width)
-   */
-  width?: number;
-  /**
-   * Canvas height (defaults to container height)
-   */
-  height?: number;
   /**
    * Color for the grid. Supports:
    * - Nuxt UI semantic: 'primary', 'secondary', 'success', 'info', 'warning', 'error', 'neutral'
@@ -114,7 +104,7 @@ const props = withDefaults(defineProps<FlickeringGridProps>(), {
   size: 8,
   gap: 8,
   speed: 5,
-  gradientDirection: "left-right",
+  gradient: "left-right",
   fade: false,
   color: "neutral",
   lightness: 95,
@@ -150,19 +140,20 @@ const effectiveOpacity = computed(() => {
   const maxOpacity = 0.8;
   const minOpacity = 0.15;
 
-  const t = Math.max(0, Math.min(1, (props.lightness - minLightness) / (maxLightness - minLightness)));
+  const t = Math.max(
+    0,
+    Math.min(
+      1,
+      (props.lightness - minLightness) / (maxLightness - minLightness)
+    )
+  );
   return maxOpacity - t * (maxOpacity - minOpacity);
 });
 
 defineSlots<FlickeringGridSlots>();
 
-// Compute UI classes using tailwind-variants (only for layout, not colors)
-const ui = computed(() =>
-  tv(theme)({
-    color: "neutral", // Use neutral for base classes only
-    variant: "subtle", // Use subtle variant for base classes
-  })
-);
+// Compute UI classes using tailwind-variants
+const ui = computed(() => tv(theme)());
 
 // Radial fade mask
 const maskStyle = computed(() => {
@@ -179,7 +170,6 @@ const containerRef = ref<HTMLElement>();
 const canvasRef = ref<HTMLCanvasElement>();
 const context = ref<CanvasRenderingContext2D | null>(null);
 const isInView = ref(false);
-const canvasSize = ref({ width: 0, height: 0 });
 const gridParams = ref<{
   cols: number;
   rows: number;
@@ -253,7 +243,7 @@ function getGradientT(
   const x = cols > 1 ? i / (cols - 1) : 0.5;
   const y = rows > 1 ? j / (rows - 1) : 0.5;
 
-  return calculateGradientIntensity(x, y, props.gradientDirection);
+  return calculateGradientIntensity(x, y, props.gradient);
 }
 
 // Canvas setup
@@ -283,16 +273,16 @@ function updateSquares(squares: Float32Array, deltaTime: number) {
 
 function drawGrid(
   ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
+  canvasWidth: number,
+  canvasHeight: number,
   cols: number,
   rows: number,
   squares: Float32Array,
   dpr: number
 ) {
-  ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   ctx.fillStyle = "transparent";
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
   const colors = gridColors.value;
 
@@ -306,7 +296,8 @@ function drawGrid(
       let cellAlpha = opacity;
       if (opacity > 0.5 * effectiveOpacity.value) {
         const blendT =
-          (opacity - 0.5 * effectiveOpacity.value) / (0.5 * effectiveOpacity.value);
+          (opacity - 0.5 * effectiveOpacity.value) /
+          (0.5 * effectiveOpacity.value);
         cellColor = lerpColor(baseColor, colors.flicker, blendT);
         cellAlpha = Math.min(1, opacity + 0.2);
       }
@@ -322,9 +313,8 @@ function drawGrid(
 }
 
 function updateCanvasSize() {
-  const newWidth = props.width || containerRef.value?.clientWidth || 0;
-  const newHeight = props.height || containerRef.value?.clientHeight || 0;
-  canvasSize.value = { width: newWidth, height: newHeight };
+  const newWidth = containerRef.value?.clientWidth || 0;
+  const newHeight = containerRef.value?.clientHeight || 0;
   if (canvasRef.value) {
     gridParams.value = setupCanvas(canvasRef.value, newWidth, newHeight);
   }
@@ -388,7 +378,7 @@ onBeforeUnmount(() => {
 // Watch for prop changes that require redraw
 watch(
   [
-    () => props.gradientDirection,
+    () => props.gradient,
     () => props.size,
     () => props.gap,
     () => props.color,
@@ -401,18 +391,11 @@ watch(
 </script>
 
 <template>
-  <div
-    ref="containerRef"
-    data-slot="base"
-    :class="ui.base({ class: [props.ui?.base] })"
-  >
+  <div ref="containerRef" :class="ui.base({ class: [props.ui?.base] })">
     <canvas
       ref="canvasRef"
-      data-slot="canvas"
       :class="ui.canvas({ class: props.ui?.canvas })"
       :style="maskStyle"
-      :width="canvasSize.width"
-      :height="canvasSize.height"
     />
     <slot />
   </div>
