@@ -122,13 +122,8 @@ export function getThemeColor(colorName: string, shade: number = 500): string {
 
   const styles = getComputedStyle(document.documentElement);
 
-  // Try Nuxt UI v3 format first
-  let colorValue = styles.getPropertyValue(`--ui-color-${colorName}-${shade}`).trim();
-
-  // Fallback to Nuxt UI v2 format
-  if (!colorValue) {
-    colorValue = styles.getPropertyValue(`--color-${colorName}-${shade}`).trim();
-  }
+  // Nuxt UI v3+ format
+  const colorValue = styles.getPropertyValue(`--ui-color-${colorName}-${shade}`).trim();
 
   return colorValue || "oklch(50% 0 0)";
 }

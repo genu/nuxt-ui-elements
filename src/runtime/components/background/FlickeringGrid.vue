@@ -62,15 +62,23 @@ export interface FlickeringGridProps {
    */
   height?: number;
   /**
-   * Color variant
+   * Color for the grid. Supports:
+   * - Nuxt UI semantic: 'primary', 'secondary', 'success', 'info', 'warning', 'error', 'neutral'
+   * - Tailwind colors: 'blue-500', 'red-600', 'slate-200', etc.
+   * - Direct values: '#3b82f6', 'oklch(0.6 0.15 250)', 'rgb(59, 130, 246)'
+   *
+   * @example 'primary' - Nuxt UI semantic color
+   * @example 'blue-500' - Tailwind color
+   * @example '#3b82f6' - Direct hex color value
+   *
    * @default 'neutral'
    */
-  color?: BackgroundFlickeringGrid["variants"]["color"];
+  color?: ColorInput;
   /**
-   * Style variant
+   * Color intensity variant
    * @default 'subtle'
    */
-  variant?: BackgroundFlickeringGrid["variants"]["variant"];
+  variant?: "subtle" | "soft" | "solid";
   /**
    * Additional CSS classes for the container
    */
@@ -94,7 +102,8 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { tv } from "../../utils/tv";
 import { calculateGradientIntensity } from "../../composables/useGradient";
 import theme from "../../themes/background-flickering-grid";
-import { getThemeColor, adjustLightness, oklchToRgb } from "../../composables/useThemeColors";
+import { adjustLightness, oklchToRgb } from "../../composables/useThemeColors";
+import { resolveColor, type ColorInput } from "../../composables/useColorResolver";
 
 const props = withDefaults(defineProps<FlickeringGridProps>(), {
   squareSize: 8,
@@ -103,7 +112,7 @@ const props = withDefaults(defineProps<FlickeringGridProps>(), {
   flickerSpeed: 0.2,
   gradientDirection: "left-right",
   maxOpacity: 0.3,
-  fade: true,
+  fade: false,
   color: "neutral",
   variant: "subtle",
   class: "",
@@ -111,10 +120,10 @@ const props = withDefaults(defineProps<FlickeringGridProps>(), {
 
 defineSlots<FlickeringGridSlots>();
 
-// Compute UI classes using tailwind-variants
+// Compute UI classes using tailwind-variants (only for layout, not colors)
 const ui = computed(() =>
   tv(theme)({
-    color: props.color,
+    color: 'neutral', // Use neutral for base classes only
     variant: props.variant,
   })
 );
@@ -150,9 +159,10 @@ function parseColor(color: string): [number, number, number] {
   return [255, 255, 255];
 }
 
-// Get grid colors based on theme color and variant
+// Get grid colors based on resolved color and variant
 const gridColors = computed(() => {
-  const baseColor = getThemeColor(props.color, 500);
+  // Resolve the color input to an actual color value
+  const baseColor = resolveColor(props.color);
 
   // Define lightness values for each variant
   const lightnessMap = {
