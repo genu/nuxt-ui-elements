@@ -1,8 +1,6 @@
 # Changelog
 
-
 ## v0.1.1
-
 
 ### 💅 Refactors
 
@@ -16,4 +14,3 @@
 ### ❤️ Contributors
 
 - Eugen Istoc <eugenistoc@gmail.com>
-

@@ -374,11 +374,7 @@ watch([() => size, () => gap, () => color, () => lightness], () => {
 
 <template>
   <div ref="containerRef" :class="ui.base({ class: [props.ui?.base] })">
-    <canvas
-      ref="canvasRef"
-      :class="ui.canvas({ class: props.ui?.canvas })"
-      :style="maskStyle"
-    />
+    <canvas ref="canvasRef" :class="ui.canvas({ class: props.ui?.canvas })" :style="maskStyle" />
     <slot />
   </div>
 </template>

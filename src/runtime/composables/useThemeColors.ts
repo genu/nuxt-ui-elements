@@ -23,7 +23,7 @@ export function parseOklch(oklchStr: string): { l: number; c: number; h: number 
  * Create OKLCH string from L, C, H components
  */
 export function createOklch(l: number, c: number, h: number): string {
-  return formatCss({ mode: 'oklch', l: l / 100, c, h });
+  return formatCss({ mode: "oklch", l: l / 100, c, h });
 }
 
 /**
@@ -33,12 +33,12 @@ export function createOklch(l: number, c: number, h: number): string {
 export function adjustLightness(colorStr: string, targetLightness: number): string {
   const parsed = parse(colorStr);
   if (!parsed) return colorStr;
-  
+
   const oklch = toOklch(parsed);
   if (!oklch) return colorStr;
-  
+
   oklch.l = targetLightness / 100;
-  
+
   return formatCss(oklch);
 }
 
@@ -48,12 +48,12 @@ export function adjustLightness(colorStr: string, targetLightness: number): stri
 export function adjustChroma(colorStr: string, targetChroma: number): string {
   const parsed = parse(colorStr);
   if (!parsed) return colorStr;
-  
+
   const oklch = toOklch(parsed);
   if (!oklch) return colorStr;
-  
+
   oklch.c = targetChroma;
-  
+
   return formatCss(oklch);
 }
 
@@ -63,12 +63,12 @@ export function adjustChroma(colorStr: string, targetChroma: number): string {
 export function adjustHue(colorStr: string, targetHue: number): string {
   const parsed = parse(colorStr);
   if (!parsed) return colorStr;
-  
+
   const oklch = toOklch(parsed);
   if (!oklch) return colorStr;
-  
+
   oklch.h = targetHue;
-  
+
   return formatCss(oklch);
 }
 
@@ -77,18 +77,18 @@ export function adjustHue(colorStr: string, targetHue: number): string {
  */
 export function adjustOklch(
   colorStr: string,
-  adjustments: { l?: number; c?: number; h?: number }
+  adjustments: { l?: number; c?: number; h?: number },
 ): string {
   const parsed = parse(colorStr);
   if (!parsed) return colorStr;
-  
+
   const oklch = toOklch(parsed);
   if (!oklch) return colorStr;
-  
+
   if (adjustments.l !== undefined) oklch.l = adjustments.l / 100;
   if (adjustments.c !== undefined) oklch.c = adjustments.c;
   if (adjustments.h !== undefined) oklch.h = adjustments.h;
-  
+
   return formatCss(oklch);
 }
 
@@ -132,21 +132,15 @@ export function getThemeColor(colorName: string, shade: number = 500): string {
  * Get multiple shades of a color by adjusting lightness
  * Useful for creating gradients or multi-tone effects
  */
-export function getColorShades(
-  colorName: string,
-  lightnessValues: number[]
-): string[] {
+export function getColorShades(colorName: string, lightnessValues: number[]): string[] {
   const baseColor = getThemeColor(colorName, 500);
-  return lightnessValues.map(lightness => adjustLightness(baseColor, lightness));
+  return lightnessValues.map((lightness) => adjustLightness(baseColor, lightness));
 }
 
 /**
  * Get multiple shades and convert to RGB
  */
-export function getColorShadesRgb(
-  colorName: string,
-  lightnessValues: number[]
-): string[] {
+export function getColorShadesRgb(colorName: string, lightnessValues: number[]): string[] {
   const shades = getColorShades(colorName, lightnessValues);
   return shades.map(oklchToRgb);
 }
@@ -157,10 +151,10 @@ export function getColorShadesRgb(
  */
 export function createColorPalette(
   colorName: string,
-  adjustments: Array<{ l?: number; c?: number; h?: number }>
+  adjustments: Array<{ l?: number; c?: number; h?: number }>,
 ): string[] {
   const baseColor = getThemeColor(colorName, 500);
-  return adjustments.map(adj => {
+  return adjustments.map((adj) => {
     const adjusted = adjustOklch(baseColor, adj);
     return oklchToRgb(adjusted);
   });

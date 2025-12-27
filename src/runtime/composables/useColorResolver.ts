@@ -6,16 +6,16 @@ import colors from "tailwindcss/colors";
  * Nuxt UI semantic colors
  */
 const SEMANTIC_COLORS = [
-  'primary',
-  'secondary',
-  'success',
-  'info',
-  'warning',
-  'error',
-  'neutral'
+  "primary",
+  "secondary",
+  "success",
+  "info",
+  "warning",
+  "error",
+  "neutral",
 ] as const;
 
-export type SemanticColor = typeof SEMANTIC_COLORS[number];
+export type SemanticColor = (typeof SEMANTIC_COLORS)[number];
 
 /**
  * Tailwind color names
@@ -25,7 +25,18 @@ type TailwindColorName = keyof typeof colors;
 /**
  * Tailwind color shades
  */
-type TailwindShade = '50' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900' | '950';
+type TailwindShade =
+  | "50"
+  | "100"
+  | "200"
+  | "300"
+  | "400"
+  | "500"
+  | "600"
+  | "700"
+  | "800"
+  | "900"
+  | "950";
 
 /**
  * Tailwind color format: colorName-shade (e.g., 'blue-500', 'red-600')
@@ -42,7 +53,7 @@ export type ColorInput = SemanticColor | TailwindColor | (string & {});
  */
 function getTailwindDefaultColor(colorName: string, shade: number): string | null {
   const colorObj = colors[colorName as keyof typeof colors];
-  if (colorObj && typeof colorObj === 'object' && !Array.isArray(colorObj)) {
+  if (colorObj && typeof colorObj === "object" && !Array.isArray(colorObj)) {
     return (colorObj as Record<string, string>)[shade.toString()] || null;
   }
   return null;
@@ -60,12 +71,12 @@ function isSemanticColor(color: string): color is SemanticColor {
  */
 function isDirectColor(color: string): boolean {
   return (
-    color.startsWith('#') ||
-    color.startsWith('rgb') ||
-    color.startsWith('hsl') ||
-    color.startsWith('oklch') ||
-    color.startsWith('lab') ||
-    color.startsWith('lch')
+    color.startsWith("#") ||
+    color.startsWith("rgb") ||
+    color.startsWith("hsl") ||
+    color.startsWith("oklch") ||
+    color.startsWith("lab") ||
+    color.startsWith("lch")
   );
 }
 
@@ -82,10 +93,10 @@ function isDirectColor(color: string): boolean {
  */
 export function resolveColor(
   colorInput: string | undefined,
-  fallback: SemanticColor = 'neutral'
+  fallback: SemanticColor = "neutral",
 ): string {
   // Handle undefined/empty
-  if (!colorInput || colorInput.trim() === '') {
+  if (!colorInput || colorInput.trim() === "") {
     return getThemeColor(fallback, 500);
   }
 
@@ -113,7 +124,7 @@ export function resolveColor(
     const [, colorName, shade] = tailwindColorMatch;
     if (colorName && shade) {
       // Try Nuxt UI format: --ui-color-red-500
-      if (typeof document !== 'undefined') {
+      if (typeof document !== "undefined") {
         const resolvedColor = getThemeColor(colorName, parseInt(shade));
         if (resolvedColor !== "oklch(50% 0 0)") {
           return resolvedColor;
@@ -131,10 +142,10 @@ export function resolveColor(
   // 4. Fallback - warn and use default
   console.warn(
     `[resolveColor] Could not resolve color: "${colorInput}". ` +
-    `Supported formats: Nuxt UI semantic colors ('primary', 'secondary', etc.), ` +
-    `Tailwind colors ('blue-500', 'red-600', etc.), ` +
-    `or direct color values ('#3b82f6', 'oklch(...)', 'rgb(...)'). ` +
-    `Falling back to "${fallback}".`
+      `Supported formats: Nuxt UI semantic colors ('primary', 'secondary', etc.), ` +
+      `Tailwind colors ('blue-500', 'red-600', etc.), ` +
+      `or direct color values ('#3b82f6', 'oklch(...)', 'rgb(...)'). ` +
+      `Falling back to "${fallback}".`,
   );
   return getThemeColor(fallback, 500);
 }
@@ -145,12 +156,12 @@ export function resolveColor(
  */
 export function resolveColorAsOklch(
   colorInput: string | undefined,
-  fallback: SemanticColor = 'neutral'
+  fallback: SemanticColor = "neutral",
 ): string {
   const resolved = resolveColor(colorInput, fallback);
 
   // If it's already from getThemeColor, it's likely OKLCH
-  if (isSemanticColor(colorInput || '')) {
+  if (isSemanticColor(colorInput || "")) {
     return resolved;
   }
 

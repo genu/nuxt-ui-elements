@@ -16,7 +16,7 @@ export type GradientDirection =
 export function calculateGradientIntensity(
   x: number,
   y: number,
-  direction: GradientDirection
+  direction: GradientDirection,
 ): number {
   switch (direction) {
     case "left-right":
@@ -48,10 +48,7 @@ export function calculateGradientIntensity(
  * @param angle - Gradient angle in degrees
  * @returns CSS repeating-linear-gradient string
  */
-export function createRepeatingGradient(
-  colors: string[],
-  angle: number = 100
-): string {
+export function createRepeatingGradient(colors: string[], angle: number = 100): string {
   const stops = colors
     .map((color, i) => {
       const position = 10 + i * 5;
