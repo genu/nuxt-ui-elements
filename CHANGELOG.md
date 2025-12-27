@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.7
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.6...v0.1.7)
+
+### 🚀 Enhancements
+
+- Wrap canvas element in ClientOnly for improved SSR handling ([ea997b8](https://github.com/genu/nuxt-ui-elements/commit/ea997b8))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.6
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.5...v0.1.6)
