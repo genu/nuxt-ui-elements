@@ -31,7 +31,8 @@
     "lint:fix": "oxlint --fix --type-aware",
     "format": "oxfmt --write",
     "format:check": "oxfmt --check",
-    "release": "pnpm lint && pnpm test && pnpm prepack && changelogen --release && pnpm publish && git push --follow-tags",
+    "release": "pnpm lint && pnpm test && pnpm prepack && changelogen --release",
+    "publish": "pnpm publish && git push --follow-tags",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
