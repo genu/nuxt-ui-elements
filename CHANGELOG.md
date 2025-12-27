@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.1.2
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.1...v0.1.2)
+
+### 💅 Refactors
+
+- Enhance color handling in FlickeringGrid and add color resolver utility ([6296537](https://github.com/genu/nuxt-ui-elements/commit/6296537))
+- Update FlickeringGridProps for improved customization and adjust theme styles ([9112c65](https://github.com/genu/nuxt-ui-elements/commit/9112c65))
+- Simplify FlickeringGridProps by consolidating gradient properties and removing unused dimensions ([e2eac49](https://github.com/genu/nuxt-ui-elements/commit/e2eac49))
+- Update FlickeringGridProps to enhance fade options and simplify prop handling ([1cbfb05](https://github.com/genu/nuxt-ui-elements/commit/1cbfb05))
+- Add imports directory support in module setup ([711c2c0](https://github.com/genu/nuxt-ui-elements/commit/711c2c0))
+- Implement flexible color system in FlickeringGrid with enhanced mode selection and lightness control ([e18f1fe](https://github.com/genu/nuxt-ui-elements/commit/e18f1fe))
+- Clean up code formatting and remove unnecessary line breaks across multiple files ([e4a5e35](https://github.com/genu/nuxt-ui-elements/commit/e4a5e35))
+
+### 🏡 Chore
+
+- Update playground ([9aeee40](https://github.com/genu/nuxt-ui-elements/commit/9aeee40))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.1
 
 ### 💅 Refactors
