@@ -21,6 +21,7 @@ A collection of beautiful, animated UI components for Nuxt applications. Built w
 ## Features
 
 - ✨ **FlickeringGrid** - Animated canvas-based grid background with gradient effects
+- 🌟 **ShimmerButton** - Animated button with elegant shimmer effect
 - 🎨 **Dark Mode Support** - Automatic theme switching with customizable colors
 - 🚀 **Performance Optimized** - Uses IntersectionObserver and only animates when visible
 - 📦 **Auto-import** - Components are automatically available in your app
@@ -99,6 +100,92 @@ A beautiful animated grid background component perfect for hero sections and lan
 - `out-in` (radial to center)
 - `top-left-bottom-right`
 - `bottom-right-top-left`
+
+### ShimmerButton
+
+An animated button component with an elegant shimmer effect, perfect for call-to-action buttons and hero sections.
+
+```vue
+<template>
+  <UEButtonShimmer
+    label="Get Started"
+    size="lg"
+    shimmer-color="#60a5fa"
+    background="rgba(59, 130, 246, 1)"
+    :speed="2.5"
+    @click="handleClick"
+  />
+</template>
+```
+
+#### Props
+
+| Prop            | Type     | Default              | Description                                      |
+| --------------- | -------- | -------------------- | ------------------------------------------------ |
+| `label`         | `string` | -                    | Button label text                                |
+| `shimmerColor`  | `string` | `'#ffffff'`          | Color of the shimmer effect                      |
+| `shimmerSize`   | `string` | `'0.05em'`           | Size of the shimmer effect                       |
+| `speed`         | `number` | `3`                  | Animation speed in seconds (lower = faster)      |
+| `background`    | `string` | `'rgba(0, 0, 0, 1)'` | Background color of the button                   |
+| `radius`        | `string` | `'100px'`            | Border radius of the button                      |
+| `size`          | `string` | `'md'`               | Button size: `xs`, `sm`, `md`, `lg`, `xl`        |
+| `class`         | `string` | -                    | Additional CSS classes                           |
+| `ui`            | `object` | -                    | UI slot customization for advanced styling       |
+
+#### Slots
+
+- `leading` - Content before the label (e.g., icons)
+- `default` - Main button content (overrides `label` prop)
+- `trailing` - Content after the label (e.g., icons)
+
+#### Events
+
+- `click` - Emitted when the button is clicked
+
+#### Examples
+
+**Basic Usage:**
+```vue
+<UEButtonShimmer label="Click Me" />
+```
+
+**With Custom Colors:**
+```vue
+<UEButtonShimmer
+  label="Primary Action"
+  shimmer-color="#a78bfa"
+  background="rgba(139, 92, 246, 1)"
+/>
+```
+
+**Different Sizes:**
+```vue
+<UEButtonShimmer label="Small" size="sm" />
+<UEButtonShimmer label="Medium" size="md" />
+<UEButtonShimmer label="Large" size="lg" />
+<UEButtonShimmer label="Extra Large" size="xl" />
+```
+
+**With Slots:**
+```vue
+<UEButtonShimmer>
+  <template #leading>
+    <Icon name="i-heroicons-arrow-right" />
+  </template>
+  Get Started
+  <template #trailing>
+    <Icon name="i-heroicons-arrow-right" />
+  </template>
+</UEButtonShimmer>
+```
+
+**Fast Animation:**
+```vue
+<UEButtonShimmer
+  label="Fast Shimmer"
+  :speed="1.5"
+/>
+```
 
 ## Configuration
 

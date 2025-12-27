@@ -37,12 +37,11 @@ export default defineNuxtModule<ModuleOptions>({
       logger.error("[nuxt-ui-elements] @nuxt/ui is required. Please install it");
     }
 
-    // Auto-register background components from backgrounds directory
+    // Auto-register components
     addComponentsDir({
-      path: resolver.resolve("./runtime/components/background"),
+      path: resolver.resolve("./runtime/components"),
       pathPrefix: false,
-      prefix: `${options.prefix}Background`,
-      global: true,
+      prefix: options.prefix,
     });
   },
 });
