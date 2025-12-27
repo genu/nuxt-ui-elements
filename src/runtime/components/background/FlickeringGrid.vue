@@ -39,43 +39,71 @@ export interface FlickeringGridProps {
    * - Tailwind colors: 'blue-500', 'red-600', 'slate-200', etc.
    * - Direct values: '#3b82f6', 'oklch(0.6 0.15 250)', 'rgb(59, 130, 246)'
    *
-   * Choose lighter shades (e.g., 'blue-200') for subtle backgrounds or darker shades (e.g., 'blue-600') for bolder effects.
+   * This controls the base hue/color of the grid. Use `lightness` to adjust how bright/washed out it appears.
    *
    * @example 'primary' - Nuxt UI semantic color
-   * @example 'blue-200' - Light Tailwind color for subtle effect
-   * @example 'blue-600' - Dark Tailwind color for bold effect
-   * @example '#e0f2fe' - Direct hex color value (light blue)
+   * @example 'blue-500' - Tailwind color
+   * @example '#3b82f6' - Direct hex color value
    *
    * @default 'neutral'
    */
   color?: ColorInput;
 
   /**
-   * Opacity/visibility of the grid squares.
-   * Controls how transparent the grid appears.
+   * Lightness adjustment in OKLCH color space (0-100).
    *
-   * - 0: Completely invisible
-   * - 0.3: Subtle, background texture
-   * - 0.5: Medium visibility
-   * - 0.8: Bold, prominent
-   * - 1: Fully opaque
+   * Controls how bright or washed-out the color appears WITHOUT changing transparency.
+   * This modifies the color itself, making it closer to white (higher values) or more saturated (lower values).
    *
-   * Range: 0-1
+   * Think of it as a "color brightness" slider:
+   * - Lower values (70-80): Darker, more saturated, vibrant colors
+   * - Medium values (85-92): Balanced, natural colors
+   * - Higher values (93-100): Very light, pastel, washed-out colors (approaching white)
    *
-   * @default 0.5
+   * Use cases:
+   * - Subtle background: `color="blue-500" lightness={95}` → Very light blue tint
+   * - Bold accent: `color="blue-500" lightness={75}` → Vibrant, saturated blue
+   * - Combined with opacity: `lightness={90} opacity={0.3}` → Medium-tone color, very transparent
+   *
+   * Range: 0-100
+   * @default 95
+   */
+  lightness?: number;
+
+  /**
+   * Opacity/transparency of the grid squares (0-100).
+   *
+   * Controls how see-through the grid is WITHOUT changing the color itself.
+   * This is pure transparency - the color stays the same, just more/less visible.
+   *
+   * Think of it as a "visibility" slider:
+   * - 0: Completely invisible (transparent)
+   * - 30: Very subtle, barely visible
+   * - 50: Medium visibility
+   * - 80: Bold, prominent
+   * - 100: Fully opaque, no transparency
+   *
+   * Use cases:
+   * - Gentle texture: `opacity={20}` → Barely visible background pattern
+   * - Strong effect: `opacity={80}` → Prominent, eye-catching grid
+   * - Combined with lightness: `lightness={95} opacity={50}` → Light color, medium transparency
+   *
+   * Range: 0-100
+   * @default 50
    */
   opacity?: number;
 
   /**
-   * Dark mode overrides for color and opacity.
+   * Dark mode overrides for color, lightness, and opacity.
    *
    * Allows you to customize the grid appearance specifically for dark mode.
    * Any property not specified will use the default light mode value.
    *
-   * @example { color: 'blue-300', opacity: 0.3 }
+   * @example { color: 'blue-300', lightness: 90, opacity: 0.3 }
    */
   dark?: {
     color?: ColorInput;
+    lightness?: number;
     opacity?: number;
   };
 
@@ -98,7 +126,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useColorMode } from "#imports";
 import { tv } from "../../utils/tv";
 import theme from "../../themes/background-flickering-grid";
-import { darkenColor, oklchToRgb } from "../../composables/useThemeColors";
+import { adjustLightness, darkenColor, oklchToRgb } from "../../composables/useThemeColors";
 import {
   resolveColor,
   type ColorInput,
@@ -109,7 +137,8 @@ const {
   gap = 9,
   speed = 5,
   color = "neutral",
-  opacity = 0.5,
+  lightness = 95,
+  opacity = 50,
   ...props
 } = defineProps<FlickeringGridProps>();
 
@@ -119,20 +148,26 @@ const isDark = computed(() => colorMode.value === "dark");
 
 // Determine effective color based on color mode
 const effectiveColor = computed(() => {
-  // If in dark mode and dark color override is specified, use it
   if (isDark.value && props.dark?.color) {
     return props.dark.color;
   }
   return color;
 });
 
-// Determine effective opacity based on color mode
-const effectiveOpacity = computed(() => {
-  // If in dark mode and dark opacity override is specified, use it
-  if (isDark.value && props.dark?.opacity !== undefined) {
-    return props.dark.opacity;
+// Determine effective lightness based on color mode
+const effectiveLightness = computed(() => {
+  if (isDark.value && props.dark?.lightness !== undefined) {
+    return props.dark.lightness;
   }
-  return opacity;
+  return lightness;
+});
+
+// Determine effective opacity based on color mode (convert 0-100 to 0-1)
+const effectiveOpacity = computed(() => {
+  const opacityValue = isDark.value && props.dark?.opacity !== undefined
+    ? props.dark.opacity
+    : opacity;
+  return opacityValue / 100;
 });
 
 // Map user-friendly 1-10 speed scale to internal decimal range
@@ -200,16 +235,17 @@ function parseColor(color: string): [number, number, number] {
   return [255, 255, 255];
 }
 
-// Get grid colors based on resolved color
+// Get grid colors based on resolved color and lightness
 const gridColors = computed(() => {
   // Resolve the color input to an actual color value
   const baseColor = resolveColor(effectiveColor.value);
 
-  // Convert base color to RGB for canvas
-  const baseRgb = oklchToRgb(baseColor);
+  // Apply lightness adjustment to get the actual color to display
+  const adjustedColor = adjustLightness(baseColor, effectiveLightness.value);
+  const baseRgb = oklchToRgb(adjustedColor);
 
-  // For flicker effect, darken the color by 10%
-  const darkerColor = darkenColor(baseColor, 10);
+  // For flicker effect, darken the adjusted color by 10%
+  const darkerColor = darkenColor(adjustedColor, 10);
   const flickerRgb = oklchToRgb(darkerColor);
 
   return {
@@ -377,8 +413,10 @@ watch(
     () => size,
     () => gap,
     () => color,
+    () => lightness,
     () => opacity,
     () => props.dark?.color,
+    () => props.dark?.lightness,
     () => props.dark?.opacity,
   ],
   () => {
