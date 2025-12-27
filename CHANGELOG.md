@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.1.5
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.4...v0.1.5)
+
+### 🚀 Enhancements
+
+- Add Flickering Grid component with customizable parameters and controls ([c68e72b](https://github.com/genu/nuxt-ui-elements/commit/c68e72b))
+
+### 💅 Refactors
+
+- Enhance release script to include publishing step ([8e1ac46](https://github.com/genu/nuxt-ui-elements/commit/8e1ac46))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.4
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.3...v0.1.4)
