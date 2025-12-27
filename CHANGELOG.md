@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.4
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.3...v0.1.4)
+
+### 💅 Refactors
+
+- Update lightness and opacity handling in FlickeringGrid and app.vue for improved color control ([e91d999](https://github.com/genu/nuxt-ui-elements/commit/e91d999))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.3
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.2...v0.1.3)
