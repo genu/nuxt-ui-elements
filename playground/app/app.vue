@@ -2,14 +2,16 @@
 import { ref, computed } from "vue";
 import colors from "tailwindcss/colors";
 
-const lightness = ref(95);
-const fade = ref<"radial" | "left" | "right" | "top" | "bottom" | undefined>("radial");
+const opacity = ref(0.5);
+const fade = ref<"radial" | "left" | "right" | "top" | "bottom" | undefined>(
+  "radial"
+);
 const colorMode = ref<"semantic" | "tailwind" | "direct">("semantic");
 
 // Color options for different modes
 const semanticColor = ref("primary");
-const tailwindColor = ref("blue-500");
-const directColor = ref("#3b82f6");
+const tailwindColor = ref("blue-200");
+const directColor = ref("#dbeafe");
 
 // Computed current color based on mode
 const currentColor = computed(() => {
@@ -23,9 +25,12 @@ const currentColor = computed(() => {
   <div class="relative w-screen h-screen bg-white dark:bg-gray-900">
     <UEBackgroundFlickeringGrid
       :color="currentColor"
-      :lightness="lightness"
+      :opacity="opacity"
       :fade="fade"
-      class="z-0"
+      :dark="{
+        color: 'gray-700',
+        opacity: 0.5,
+      }"
     >
       <div class="absolute flex items-center justify-center h-full top-0 z-30">
         <div class="text-center space-y-6 max-w-2xl mx-auto p-6">
@@ -34,14 +39,18 @@ const currentColor = computed(() => {
             <UColorModeButton />
           </div>
 
-          <h1 class="text-6xl font-bold mb-4 text-gray-900 dark:text-white">Nuxt UI Elements</h1>
+          <h1 class="text-6xl font-bold mb-4 text-gray-900 dark:text-white">
+            Nuxt UI Elements
+          </h1>
           <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
             FlickeringGrid Component - Flexible Color System
           </p>
 
           <!-- Color Mode Selection -->
           <div class="space-y-4">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Color Input Mode</h3>
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Color Input Mode
+            </h3>
             <div class="flex gap-2 justify-center">
               <UButton
                 :color="colorMode === 'semantic' ? 'primary' : 'neutral'"
@@ -128,40 +137,40 @@ const currentColor = computed(() => {
             </h3>
             <div class="flex gap-1 flex-wrap justify-center">
               <UButton
-                :color="tailwindColor === 'blue-500' ? 'primary' : 'neutral'"
-                label="blue-500"
+                :color="tailwindColor === 'blue-200' ? 'primary' : 'neutral'"
+                label="blue-200"
                 size="xs"
-                @click="tailwindColor = 'blue-500'"
+                @click="tailwindColor = 'blue-200'"
               />
               <UButton
-                :color="tailwindColor === 'red-600' ? 'primary' : 'neutral'"
-                label="red-600"
+                :color="tailwindColor === 'red-200' ? 'primary' : 'neutral'"
+                label="red-200"
                 size="xs"
-                @click="tailwindColor = 'red-600'"
+                @click="tailwindColor = 'red-200'"
               />
               <UButton
-                :color="tailwindColor === 'green-500' ? 'primary' : 'neutral'"
-                label="green-500"
+                :color="tailwindColor === 'green-200' ? 'primary' : 'neutral'"
+                label="green-200"
                 size="xs"
-                @click="tailwindColor = 'green-500'"
+                @click="tailwindColor = 'green-200'"
               />
               <UButton
-                :color="tailwindColor === 'purple-600' ? 'primary' : 'neutral'"
-                label="purple-600"
+                :color="tailwindColor === 'purple-300' ? 'primary' : 'neutral'"
+                label="purple-300"
                 size="xs"
-                @click="tailwindColor = 'purple-600'"
+                @click="tailwindColor = 'purple-300'"
               />
               <UButton
-                :color="tailwindColor === 'amber-500' ? 'primary' : 'neutral'"
-                label="amber-500"
+                :color="tailwindColor === 'amber-200' ? 'primary' : 'neutral'"
+                label="amber-200"
                 size="xs"
-                @click="tailwindColor = 'amber-500'"
+                @click="tailwindColor = 'amber-200'"
               />
               <UButton
-                :color="tailwindColor === 'cyan-500' ? 'primary' : 'neutral'"
-                label="cyan-500"
+                :color="tailwindColor === 'cyan-200' ? 'primary' : 'neutral'"
+                label="cyan-200"
                 size="xs"
-                @click="tailwindColor = 'cyan-500'"
+                @click="tailwindColor = 'cyan-200'"
               />
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -179,32 +188,32 @@ const currentColor = computed(() => {
             </h3>
             <div class="flex gap-1 flex-wrap justify-center">
               <UButton
-                :color="directColor === '#3b82f6' ? 'primary' : 'neutral'"
-                label="Hex Blue"
+                :color="directColor === '#dbeafe' ? 'primary' : 'neutral'"
+                label="Light Blue"
                 size="xs"
-                @click="directColor = '#3b82f6'"
+                @click="directColor = '#dbeafe'"
               />
               <UButton
-                :color="directColor === '#ef4444' ? 'primary' : 'neutral'"
-                label="Hex Red"
+                :color="directColor === '#fecaca' ? 'primary' : 'neutral'"
+                label="Light Red"
                 size="xs"
-                @click="directColor = '#ef4444'"
+                @click="directColor = '#fecaca'"
               />
               <UButton
                 :color="
-                  directColor === 'oklch(0.6 0.15 250)' ? 'primary' : 'neutral'
+                  directColor === 'oklch(0.85 0.1 250)' ? 'primary' : 'neutral'
                 "
                 label="OKLCH Blue"
                 size="xs"
-                @click="directColor = 'oklch(0.6 0.15 250)'"
+                @click="directColor = 'oklch(0.85 0.1 250)'"
               />
               <UButton
                 :color="
-                  directColor === 'rgb(139, 92, 246)' ? 'primary' : 'neutral'
+                  directColor === 'rgb(233, 213, 255)' ? 'primary' : 'neutral'
                 "
                 label="RGB Purple"
                 size="xs"
-                @click="directColor = 'rgb(139, 92, 246)'"
+                @click="directColor = 'rgb(233, 213, 255)'"
               />
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -217,8 +226,12 @@ const currentColor = computed(() => {
           </div>
 
           <!-- Fade Direction -->
-          <div class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Fade Direction</h3>
+          <div
+            class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700"
+          >
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Fade Direction
+            </h3>
             <div class="flex gap-1 flex-wrap justify-center">
               <UButton
                 :color="fade === undefined ? 'primary' : 'neutral'"
@@ -259,41 +272,47 @@ const currentColor = computed(() => {
             </div>
           </div>
 
-          <!-- Lightness Control -->
-          <div class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <!-- Opacity Control -->
+          <div
+            class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700"
+          >
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Lightness ({{ lightness }})
+              Opacity ({{ opacity }})
             </h3>
             <div class="flex gap-4 items-center justify-center">
-              <span class="text-xs text-gray-500 dark:text-gray-400">Dark</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400"
+                >Invisible</span
+              >
               <input
-                v-model.number="lightness"
+                v-model.number="opacity"
                 type="range"
-                min="70"
-                max="100"
-                step="1"
+                min="0"
+                max="1"
+                step="0.1"
                 class="w-48"
               />
-              <span class="text-xs text-gray-500 dark:text-gray-400">Light</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400"
+                >Opaque</span
+              >
             </div>
             <div class="flex gap-2 justify-center">
               <UButton
-                :color="lightness === 80 ? 'primary' : 'neutral'"
-                label="Bold (80)"
+                :color="opacity === 0.2 ? 'primary' : 'neutral'"
+                label="Subtle (0.2)"
                 size="xs"
-                @click="lightness = 80"
+                @click="opacity = 0.2"
               />
               <UButton
-                :color="lightness === 90 ? 'primary' : 'neutral'"
-                label="Medium (90)"
+                :color="opacity === 0.5 ? 'primary' : 'neutral'"
+                label="Medium (0.5)"
                 size="xs"
-                @click="lightness = 90"
+                @click="opacity = 0.5"
               />
               <UButton
-                :color="lightness === 95 ? 'primary' : 'neutral'"
-                label="Subtle (95)"
+                :color="opacity === 0.8 ? 'primary' : 'neutral'"
+                label="Bold (0.8)"
                 size="xs"
-                @click="lightness = 95"
+                @click="opacity = 0.8"
               />
             </div>
           </div>

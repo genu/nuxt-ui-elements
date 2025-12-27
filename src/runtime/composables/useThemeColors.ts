@@ -43,6 +43,27 @@ export function adjustLightness(colorStr: string, targetLightness: number): stri
 }
 
 /**
+ * Darken a color by reducing its lightness
+ * @param colorStr - Any valid CSS color string
+ * @param amount - Amount to reduce lightness by (in percentage points, 0-100)
+ * @returns Darkened color string
+ */
+export function darkenColor(colorStr: string, amount: number = 10): string {
+  const parsed = parse(colorStr);
+  if (!parsed) return colorStr;
+
+  const oklch = toOklch(parsed);
+  if (!oklch || oklch.l === undefined) return colorStr;
+
+  const currentLightness = oklch.l * 100;
+  const newLightness = Math.max(0, currentLightness - amount);
+
+  oklch.l = newLightness / 100;
+
+  return formatCss(oklch);
+}
+
+/**
  * Adjust the chroma (saturation) of a color while preserving lightness and hue
  */
 export function adjustChroma(colorStr: string, targetChroma: number): string {

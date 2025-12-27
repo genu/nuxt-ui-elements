@@ -39,29 +39,45 @@ export interface FlickeringGridProps {
    * - Tailwind colors: 'blue-500', 'red-600', 'slate-200', etc.
    * - Direct values: '#3b82f6', 'oklch(0.6 0.15 250)', 'rgb(59, 130, 246)'
    *
+   * Choose lighter shades (e.g., 'blue-200') for subtle backgrounds or darker shades (e.g., 'blue-600') for bolder effects.
+   *
    * @example 'primary' - Nuxt UI semantic color
-   * @example 'blue-500' - Tailwind color
-   * @example '#3b82f6' - Direct hex color value
+   * @example 'blue-200' - Light Tailwind color for subtle effect
+   * @example 'blue-600' - Dark Tailwind color for bold effect
+   * @example '#e0f2fe' - Direct hex color value (light blue)
    *
    * @default 'neutral'
    */
   color?: ColorInput;
-  /**
-   * Lightness value for the grid (controls how light/subtle the grid appears)
-   * Range: 0-100, where higher values = lighter/more subtle
-   * @default 95
-   */
-  lightness?: number;
-  /**
-   * Fine-grained element customization (similar to Nuxt UI's ui prop)
-   *
-   * @example { colorDark: 'blue-300' } - Override color for dark mode
-   */
 
   /**
-   * Override color specifically for dark mode
+   * Opacity/visibility of the grid squares.
+   * Controls how transparent the grid appears.
+   *
+   * - 0: Completely invisible
+   * - 0.3: Subtle, background texture
+   * - 0.5: Medium visibility
+   * - 0.8: Bold, prominent
+   * - 1: Fully opaque
+   *
+   * Range: 0-1
+   *
+   * @default 0.5
    */
-  colorDark?: ColorInput;
+  opacity?: number;
+
+  /**
+   * Dark mode overrides for color and opacity.
+   *
+   * Allows you to customize the grid appearance specifically for dark mode.
+   * Any property not specified will use the default light mode value.
+   *
+   * @example { color: 'blue-300', opacity: 0.3 }
+   */
+  dark?: {
+    color?: ColorInput;
+    opacity?: number;
+  };
 
   /**
    * UI slot customization
@@ -82,7 +98,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useColorMode } from "#imports";
 import { tv } from "../../utils/tv";
 import theme from "../../themes/background-flickering-grid";
-import { adjustLightness, oklchToRgb } from "../../composables/useThemeColors";
+import { darkenColor, oklchToRgb } from "../../composables/useThemeColors";
 import {
   resolveColor,
   type ColorInput,
@@ -93,7 +109,7 @@ const {
   gap = 9,
   speed = 5,
   color = "neutral",
-  lightness = 95,
+  opacity = 0.5,
   ...props
 } = defineProps<FlickeringGridProps>();
 
@@ -104,34 +120,25 @@ const isDark = computed(() => colorMode.value === "dark");
 // Determine effective color based on color mode
 const effectiveColor = computed(() => {
   // If in dark mode and dark color override is specified, use it
-  if (isDark.value && props.colorDark) {
-    return props.colorDark;
+  if (isDark.value && props.dark?.color) {
+    return props.dark.color;
   }
   return color;
+});
+
+// Determine effective opacity based on color mode
+const effectiveOpacity = computed(() => {
+  // If in dark mode and dark opacity override is specified, use it
+  if (isDark.value && props.dark?.opacity !== undefined) {
+    return props.dark.opacity;
+  }
+  return opacity;
 });
 
 // Map user-friendly 1-10 speed scale to internal decimal range
 // 1 → 0.01, 5 → 0.05, 10 → 0.1
 const internalSpeed = computed(() => {
   return speed * 0.01;
-});
-
-// Calculate effective opacity based on lightness
-// Lower lightness (darker colors) need higher opacity to be visible
-// Higher lightness (lighter colors) need lower opacity to stay subtle
-const effectiveOpacity = computed(() => {
-  // Map lightness (70-100) to opacity (0.6-0.2)
-  // Linear interpolation: opacity = 0.6 - (lightness - 70) * (0.4 / 30)
-  const minLightness = 70;
-  const maxLightness = 100;
-  const maxOpacity = 0.8;
-  const minOpacity = 0.15;
-
-  const t = Math.max(
-    0,
-    Math.min(1, (lightness - minLightness) / (maxLightness - minLightness))
-  );
-  return maxOpacity - t * (maxOpacity - minOpacity);
 });
 
 defineSlots<FlickeringGridSlots>();
@@ -193,20 +200,18 @@ function parseColor(color: string): [number, number, number] {
   return [255, 255, 255];
 }
 
-// Get grid colors based on resolved color and lightness
+// Get grid colors based on resolved color
 const gridColors = computed(() => {
   // Resolve the color input to an actual color value
   const baseColor = resolveColor(effectiveColor.value);
 
-  // Calculate lightness values for base and flicker states
-  const lightnessBase = lightness;
-  const lightnessFlicker = Math.max(0, lightness - 10); // More prominent flicker
+  // Convert base color to RGB for canvas
+  const baseRgb = oklchToRgb(baseColor);
 
-  // Create OKLCH colors with adjusted lightness and convert to RGB
-  const baseRgb = oklchToRgb(adjustLightness(baseColor, lightnessBase));
-  const flickerRgb = oklchToRgb(adjustLightness(baseColor, lightnessFlicker));
+  // For flicker effect, darken the color by 10%
+  const darkerColor = darkenColor(baseColor, 10);
+  const flickerRgb = oklchToRgb(darkerColor);
 
-  // Parse to tuples for canvas
   return {
     base: parseColor(baseRgb),
     flicker: parseColor(flickerRgb),
@@ -367,9 +372,19 @@ onBeforeUnmount(() => {
 });
 
 // Watch for prop changes that require redraw
-watch([() => size, () => gap, () => color, () => lightness], () => {
-  updateCanvasSize();
-});
+watch(
+  [
+    () => size,
+    () => gap,
+    () => color,
+    () => opacity,
+    () => props.dark?.color,
+    () => props.dark?.opacity,
+  ],
+  () => {
+    updateCanvasSize();
+  }
+);
 </script>
 
 <template>
