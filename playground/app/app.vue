@@ -39,18 +39,14 @@ const currentColor = computed(() => {
             <UColorModeButton />
           </div>
 
-          <h1 class="text-6xl font-bold mb-4 text-gray-900 dark:text-white">
-            Nuxt UI Elements
-          </h1>
+          <h1 class="text-6xl font-bold mb-4 text-gray-900 dark:text-white">Nuxt UI Elements</h1>
           <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
             FlickeringGrid Component - Flexible Color System
           </p>
 
           <!-- Color Mode Selection -->
           <div class="space-y-4">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Color Input Mode
-            </h3>
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Color Input Mode</h3>
             <div class="flex gap-2 justify-center">
               <UButton
                 :color="colorMode === 'semantic' ? 'primary' : 'neutral'"
@@ -226,12 +222,8 @@ const currentColor = computed(() => {
           </div>
 
           <!-- Fade Direction -->
-          <div
-            class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700"
-          >
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Fade Direction
-            </h3>
+          <div class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Fade Direction</h3>
             <div class="flex gap-1 flex-wrap justify-center">
               <UButton
                 :color="fade === undefined ? 'primary' : 'neutral'"
@@ -273,16 +265,12 @@ const currentColor = computed(() => {
           </div>
 
           <!-- Opacity Control -->
-          <div
-            class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700"
-          >
+          <div class="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
               Opacity ({{ opacity }})
             </h3>
             <div class="flex gap-4 items-center justify-center">
-              <span class="text-xs text-gray-500 dark:text-gray-400"
-                >Invisible</span
-              >
+              <span class="text-xs text-gray-500 dark:text-gray-400">Invisible</span>
               <input
                 v-model.number="opacity"
                 type="range"
@@ -291,9 +279,7 @@ const currentColor = computed(() => {
                 step="0.1"
                 class="w-48"
               />
-              <span class="text-xs text-gray-500 dark:text-gray-400"
-                >Opaque</span
-              >
+              <span class="text-xs text-gray-500 dark:text-gray-400">Opaque</span>
             </div>
             <div class="flex gap-2 justify-center">
               <UButton
