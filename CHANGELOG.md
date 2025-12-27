@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.1.3
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.2...v0.1.3)
+
+### 💅 Refactors
+
+- Separate publish command from release script in package.json ([9b290ab](https://github.com/genu/nuxt-ui-elements/commit/9b290ab))
+- Replace lightness control with opacity in FlickeringGrid and update color options for better flexibility ([b10aaed](https://github.com/genu/nuxt-ui-elements/commit/b10aaed))
+- Streamline markup and improve readability in app.vue ([42d3da0](https://github.com/genu/nuxt-ui-elements/commit/42d3da0))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.2
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.1...v0.1.2)
