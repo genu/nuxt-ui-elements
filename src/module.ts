@@ -1,6 +1,7 @@
 import {
   defineNuxtModule,
   addComponentsDir,
+  addImportsDir,
   createResolver,
   hasNuxtModule,
   useLogger,
@@ -25,6 +26,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
   moduleDependencies: {
     "motion-v/nuxt": {},
+    "@nuxtjs/color-mode": {},
   },
   setup(options, _nuxt) {
     const resolver = createResolver(import.meta.url);
