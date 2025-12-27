@@ -427,7 +427,9 @@ watch(
 
 <template>
   <div ref="containerRef" :class="ui.base({ class: [props.ui?.base] })">
-    <canvas ref="canvasRef" :class="ui.canvas({ class: props.ui?.canvas })" :style="maskStyle" />
+    <ClientOnly>
+      <canvas ref="canvasRef" :class="ui.canvas({ class: props.ui?.canvas })" :style="maskStyle" />
+    </ClientOnly>
     <slot />
   </div>
 </template>
