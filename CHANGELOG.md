@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.8
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.7...v0.1.8)
+
+### 💅 Refactors
+
+- Remove ClientOnly wrapper from BackgroundAurora and BackgroundFlickeringGrid components for improved SSR handling ([7f98d9e](https://github.com/genu/nuxt-ui-elements/commit/7f98d9e))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.7
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.6...v0.1.7)
