@@ -377,6 +377,9 @@ function animate(time: number) {
 
 // Lifecycle
 onMounted(() => {
+  // Only run on client-side
+  if (!import.meta.client) return;
+
   if (!canvasRef.value || !containerRef.value) return;
   context.value = canvasRef.value.getContext("2d");
   if (!context.value) return;
@@ -427,9 +430,7 @@ watch(
 
 <template>
   <div ref="containerRef" :class="ui.base({ class: [props.ui?.base] })">
-    <ClientOnly>
-      <canvas ref="canvasRef" :class="ui.canvas({ class: props.ui?.canvas })" :style="maskStyle" />
-    </ClientOnly>
+    <canvas ref="canvasRef" :class="ui.canvas({ class: props.ui?.canvas })" :style="maskStyle" />
     <slot />
   </div>
 </template>

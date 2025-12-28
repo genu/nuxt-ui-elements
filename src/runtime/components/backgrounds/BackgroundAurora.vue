@@ -305,12 +305,10 @@ const maskGradient = computed(() => {
       class="absolute inset-0 overflow-hidden"
       :style="maskGradient ? { maskImage: maskGradient } : {}"
     >
-      <ClientOnly>
-        <div
-          class="aurora-effect pointer-events-none absolute -inset-2.5 h-full w-full will-change-transform animate-in fade-in duration-1000"
-          :style="{ opacity: auroraOpacityValue }"
-        />
-      </ClientOnly>
+      <div
+        class="aurora-effect pointer-events-none absolute -inset-2.5 h-full w-full will-change-transform animate-in fade-in duration-1000"
+        :style="{ opacity: auroraOpacityValue }"
+      />
     </div>
 
     <div class="relative z-10">
