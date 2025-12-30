@@ -8,14 +8,13 @@ export interface NavigationItem {
 export interface ComponentItem {
   name: string
   path: string
-  category: 'backgrounds' | 'buttons' | 'other'
+  category: 'overlays' | 'backgrounds' | 'buttons' | 'animations' | 'other'
 }
 
 export function useNavigation() {
   // List of all components organized by category
   const components: ComponentItem[] = [
-    { name: 'Aurora', path: '/components/aurora', category: 'backgrounds' },
-    { name: 'Flickering Grid', path: '/components/flickering-grid', category: 'backgrounds' },
+    { name: 'Dialog', path: '/components/dialog', category: 'overlays' },
   ]
 
   // Group components by category
@@ -40,24 +39,12 @@ export function useNavigation() {
       }
     ]
 
-    // Add Backgrounds section
-    if (componentsByCategory.value.backgrounds?.length) {
+    // Add Overlays section
+    if (componentsByCategory.value.overlays?.length) {
       links.push({
-        label: 'Backgrounds',
-        icon: 'i-heroicons-photo',
-        children: componentsByCategory.value.backgrounds.map(c => ({
-          label: c.name,
-          to: c.path
-        }))
-      })
-    }
-
-    // Add Buttons section
-    if (componentsByCategory.value.buttons?.length) {
-      links.push({
-        label: 'Buttons',
-        icon: 'i-heroicons-cursor-arrow-ripple',
-        children: componentsByCategory.value.buttons.map(c => ({
+        label: 'Overlays',
+        icon: 'i-heroicons-rectangle-stack',
+        children: componentsByCategory.value.overlays.map(c => ({
           label: c.name,
           to: c.path
         }))

@@ -1,6 +1,5 @@
 import {
   defineNuxtModule,
-  addComponentsDir,
   addImportsDir,
   createResolver,
   hasNuxtModule,
@@ -25,23 +24,16 @@ export default defineNuxtModule<ModuleOptions>({
     prefix: "UE",
   },
   moduleDependencies: {
-    "motion-v/nuxt": {},
-    "@nuxtjs/color-mode": {},
+    "@nuxt/ui": {},
   },
-  setup(options, _nuxt) {
+  setup(_options, _nuxt) {
     const resolver = createResolver(import.meta.url);
     const logger = useLogger("nuxt-ui-elements");
 
-    // Check for @nuxt/ui after all modules are loaded
-    if (!hasNuxtModule("@nuxt/ui")) {
-      logger.error("[nuxt-ui-elements] @nuxt/ui is required. Please install it");
-    }
+    // Auto-import composables (useDialog)
+    addImportsDir(resolver.resolve("./runtime/composables"));
 
-    // Auto-register components
-    addComponentsDir({
-      path: resolver.resolve("./runtime/components"),
-      pathPrefix: false,
-      prefix: options.prefix,
-    });
+    // Note: DialogConfirm component is NOT auto-registered
+    // It's used internally by useDialog composable via useOverlay
   },
 });

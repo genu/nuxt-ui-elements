@@ -15,7 +15,7 @@ useSeoMeta({
       </p>
       <div class="flex gap-4 justify-center pt-4">
         <UButton
-          to="/components/flickering-grid"
+          to="/components/dialog"
           size="lg"
           label="View Components"
         />
