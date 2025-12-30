@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.10
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.9...v0.1.10)
+
+### 💅 Refactors
+
+- Remove BackgroundAurora and BackgroundFlickeringGrid components ([28c6184](https://github.com/genu/nuxt-ui-elements/commit/28c6184))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.9
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.8...v0.1.9)
