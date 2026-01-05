@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.1.12
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.11...v0.1.12)
+
+### 🏡 Chore
+
+- Add build configuration file ([920581a](https://github.com/genu/nuxt-ui-elements/commit/920581a))
+- Update confirm function in useDialog to specify return type and remove unnecessary return ([6f829ec](https://github.com/genu/nuxt-ui-elements/commit/6f829ec))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.11
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.10...v0.1.11)
