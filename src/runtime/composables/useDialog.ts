@@ -23,7 +23,7 @@ export interface DialogConfirmOptions {
 export const useDialog = () => {
   const overlay = useOverlay()
 
-  const confirm = (options: DialogConfirmOptions) => {
+  const confirm = (options: DialogConfirmOptions): void => {
     const modal = overlay.create(DialogConfirm, {
       destroyOnClose: true,
       props: options as any,
@@ -31,8 +31,6 @@ export const useDialog = () => {
 
     // Auto-open the dialog
     modal.open()
-
-    return modal
   }
 
   const confirmNavigate = (path: string, options?: Omit<DialogConfirmOptions, "title" | "description" | "onConfirm">) => {
