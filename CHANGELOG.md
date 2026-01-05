@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.14
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.13...v0.1.14)
+
+### 💅 Refactors
+
+- **DialogConfirm:** Simplify props and emit structure, update button styles ([6c0b7c2](https://github.com/genu/nuxt-ui-elements/commit/6c0b7c2))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.13
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.12...v0.1.13)
