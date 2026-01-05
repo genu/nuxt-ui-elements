@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.16
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.15...v0.1.16)
+
+### 🩹 Fixes
+
+- **std:** Update dayjs import to use ESM version for better tree-shaking ([974265f](https://github.com/genu/nuxt-ui-elements/commit/974265f))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.15
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.14...v0.1.15)
