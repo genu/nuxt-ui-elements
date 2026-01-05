@@ -1,21 +1,49 @@
 <script setup lang="ts">
 const { confirm, confirmNavigate } = useDialog();
 
-const isLoading = ref(false);
+type Color =
+  | "primary"
+  | "secondary"
+  | "success"
+  | "info"
+  | "warning"
+  | "error"
+  | (string & {});
+type Variant = "solid" | "outline";
 
-// Basic confirmation dialog
+// Basic confirmation dialog with customizable color and variant
+const selectedColor = ref<Color>("primary");
+const selectedVariant = ref<Variant>("solid");
+
+const colorOptions = [
+  { label: "Primary", value: "primary" },
+  { label: "Secondary", value: "secondary" },
+  { label: "Success", value: "success" },
+  { label: "Info", value: "info" },
+  { label: "Warning", value: "warning" },
+  { label: "Error", value: "error" },
+  { label: "Neutral", value: "neutral" },
+];
+
+const variantOptions = [
+  { label: "Solid", value: "solid" },
+  { label: "Outline", value: "outline" },
+];
+
 function showBasicDialog() {
   confirm({
     title: "Confirm Action",
     description: "Are you sure you want to proceed with this action?",
-  })
-    .onConfirm(() => {
+    color: selectedColor.value,
+    variant: selectedVariant.value,
+    close: true,
+    onConfirm: () => {
       console.log("User confirmed!");
-    })
-    .onDismiss(() => {
+    },
+    onDismiss: () => {
       console.log("User dismissed");
-    })
-    .open();
+    },
+  });
 }
 
 // Custom labels
@@ -26,11 +54,11 @@ function showCustomLabels() {
       "This action cannot be undone. Are you sure you want to delete this item?",
     confirmLabel: "Delete",
     dismissLabel: "Cancel",
-  })
-    .onConfirm(() => {
+    color: "error",
+    onConfirm: () => {
       console.log("Item deleted!");
-    })
-    .open();
+    },
+  });
 }
 
 // Async operation (success)
@@ -38,15 +66,13 @@ function showAsyncDialog() {
   confirm({
     title: "Process Data",
     description: "This will start processing your data. Continue?",
-    async: true,
-  })
-    .onConfirm(async () => {
+    onConfirm: async () => {
       console.log("Starting async operation...");
       // Simulate async operation
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log("Async operation completed!");
-    })
-    .open();
+    },
+  });
 }
 
 // Async operation (with error)
@@ -55,15 +81,14 @@ function showAsyncErrorDialog() {
     title: "Delete All Data",
     description:
       "This action will permanently delete all your data. Are you absolutely sure?",
-    async: true,
     confirmLabel: "Delete Everything",
-  })
-    .onConfirm(async () => {
+    color: "error",
+    onConfirm: async () => {
       // Simulate async operation that fails
       await new Promise((resolve) => setTimeout(resolve, 1500));
       throw new Error("Failed to delete: Permission denied");
-    })
-    .open();
+    },
+  });
 }
 
 // Without dismiss button
@@ -73,11 +98,10 @@ function showNoDismiss() {
     description: "Please read and acknowledge this important information.",
     dismissLabel: "",
     confirmLabel: "I Understand",
-  })
-    .onConfirm(() => {
+    onConfirm: () => {
       console.log("Acknowledged");
-    })
-    .open();
+    },
+  });
 }
 
 // Navigation confirmation
@@ -101,11 +125,10 @@ function showHTMLDialog() {
     `,
     confirmLabel: "Accept",
     dismissLabel: "Decline",
-  })
-    .onConfirm(() => {
+    onConfirm: () => {
       console.log("Terms accepted");
-    })
-    .open();
+    },
+  });
 }
 
 useSeoMeta({
@@ -132,8 +155,27 @@ useSeoMeta({
 
         <div class="space-y-4">
           <div>
-            <h3 class="font-medium mb-2">Basic Confirmation</h3>
-            <UButton @click="showBasicDialog" label="Show Basic Dialog" />
+            <h3 class="font-medium mb-3">Basic Confirmation</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Customize the appearance with different colors and variants
+            </p>
+            <div class="flex flex-wrap gap-3 mb-3">
+              <USelectMenu
+                v-model="selectedColor"
+                :items="colorOptions"
+                value-key="value"
+                placeholder="Color"
+                class="w-40"
+              />
+              <USelectMenu
+                v-model="selectedVariant"
+                :items="variantOptions"
+                value-key="value"
+                placeholder="Variant"
+                class="w-40"
+              />
+            </div>
+            <UButton @click="showBasicDialog" label="Show Dialog" />
           </div>
 
           <USeparator />

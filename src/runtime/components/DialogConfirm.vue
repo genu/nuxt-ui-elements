@@ -1,131 +1,240 @@
-<script lang="ts" setup>
-import { computed, ref } from "vue";
+<script lang="ts">
+import type { AppConfig } from "@nuxt/schema";
+import theme from "#build/ui-elements/dialog-confirm";
+import type { ButtonProps } from "@nuxt/ui";
+import type { ComponentConfig } from "../types/tv";
 
-interface Props {
-  open?: boolean;
-  size?: "sm" | "md";
+type DialogConfirm = ComponentConfig<typeof theme, AppConfig, "dialogConfirm">;
+
+export interface DialogConfirmProps {
   title: string;
   description?: string;
+  icon?: boolean;
   confirmLabel?: string;
   dismissLabel?: string;
-  clickToClose?: boolean;
-  async?: boolean;
-  successDelay?: number; // How long to show "Complete" state before closing (ms)
+  close?: boolean;
+  color?: DialogConfirm["variants"]["color"];
+  variant?: DialogConfirm["variants"]["variant"];
   onConfirm?: (() => void) | (() => Promise<void>);
   onDismiss?: () => void;
-  onClose?: () => void;
+  ui?: Partial<DialogConfirm["slots"]>;
 }
-const {
-  open = false,
-  size = "sm",
-  confirmLabel = "Yes",
-  dismissLabel = "No",
-  async = false,
-  successDelay = 1200,
-  ...props
-} = defineProps<Props>();
 
-defineEmits<{
+export interface DialogConfirmEmits {
   "update:open": [value: boolean];
   close: [value?: any];
   "after:leave": [];
-}>();
+}
 
-const sizeClass = computed(() => {
-  switch (size) {
-    case "sm":
-      return "sm:max-w-md";
-    case "md":
-      return "sm:max-w-3xl";
-    default:
-      return "max-w-3xl";
-  }
+export interface DialogConfirmSlots {
+  title(props?: {}): any;
+  description(props?: {}): any;
+  actions(props?: {}): any;
+}
+</script>
+
+<script lang="ts" setup>
+import { computed, ref } from "vue";
+import { DialogTitle, DialogDescription } from "reka-ui";
+import { tv } from "../utils/tv";
+
+// Explicit import for UIcon (should be auto-imported, but being explicit)
+import { UIcon } from "#components";
+
+const {
+  title,
+  description,
+  icon = true,
+  confirmLabel = "Yes",
+  dismissLabel = "No",
+  close = false,
+  color = "neutral",
+  variant = "solid",
+  onConfirm,
+  onDismiss,
+  ui: uiProps,
+} = defineProps<DialogConfirmProps>();
+
+const emits = defineEmits<DialogConfirmEmits>();
+
+// Async state
+const isLoading = ref(false);
+const isComplete = ref(false);
+const isError = ref(false);
+
+const ui = computed(() =>
+  tv({
+    extend: tv(theme),
+  })({
+    size: "sm",
+    color: color as DialogConfirm["variants"]["color"],
+    variant,
+  })
+);
+
+// Icon defaults based on color
+const colorIconMap: Record<string, string> = {
+  primary: "i-lucide-info",
+  secondary: "i-lucide-info",
+  success: "i-lucide-circle-check",
+  info: "i-lucide-info",
+  warning: "i-lucide-triangle-alert",
+  error: "i-lucide-circle-x",
+  neutral: "i-lucide-info",
+};
+
+const dialogIcon = computed(() => {
+  if (icon === false) return undefined;
+  return colorIconMap[color];
 });
 
-const isConfirming = ref(false);
-const isComplete = ref(false);
-const error = ref<string | null>(null);
+// Close button props
+const closeButtonProps = computed<ButtonProps>(() => ({
+  icon: "i-lucide-x",
+  size: "md",
+  color: "neutral",
+  variant: "ghost",
+}));
 
-const confirm = async () => {
-  if (props.onConfirm) {
-    if (async) {
-      isConfirming.value = true;
-      error.value = null;
-      try {
-        await Promise.resolve(props.onConfirm());
-        isConfirming.value = false;
-        isComplete.value = true;
-        // Show success state before closing
-        await new Promise((resolve) => setTimeout(resolve, successDelay));
-        props.onClose?.();
-      } catch (e) {
-        isConfirming.value = false;
-        error.value = e instanceof Error ? e.message : "An error occurred";
-        return; // Don't close on error
-      }
+// Handlers
+const confirmHandler = async () => {
+  if (!onConfirm) {
+    emits("close");
+    return;
+  }
+
+  try {
+    const result = onConfirm();
+
+    // Only show loading state if it's a Promise
+    const isAsync = result instanceof Promise;
+
+    if (isAsync) {
+      isLoading.value = true;
+      await result;
+
+      // Show success state
+      isLoading.value = false;
+      isComplete.value = true;
+
+      // Wait a bit to show the checkmark, then close
+      setTimeout(() => {
+        emits("close");
+      }, 800);
     } else {
-      props.onConfirm();
-      props.onClose?.();
+      // Sync function, close immediately
+      emits("close");
     }
+  } catch (error) {
+    // On error, show error state
+    isLoading.value = false;
+    isError.value = true;
+    console.error("Dialog confirm error:", error);
+
+    // Reset error state after showing it briefly
+    setTimeout(() => {
+      isError.value = false;
+    }, 2000);
   }
 };
 
 const dismiss = () => {
-  if (props.onDismiss) {
-    props.onDismiss();
+  if (onDismiss) {
+    onDismiss();
   }
-  props.onClose?.();
+  emits("close");
+};
+
+const handleClose = () => {
+  dismiss();
 };
 </script>
 
 <template>
   <UModal
-    :open="open"
-    :dismissible="clickToClose"
+    :dismissible="false"
     :close="false"
     :title="title"
+    :description="description"
     :ui="{
-      content: `${sizeClass} divide-y-0`,
-      header: 'px-2 sm:px-5 py-3',
-      body: 'p-2 sm:p-5 sm:pt-0',
-      footer: 'justify-end gap-3',
+      content: ui.content({ class: uiProps?.content }),
+      header: ui.header({ class: uiProps?.header }),
+      body: ui.body({ class: uiProps?.body }),
+      footer: ui.footer({ class: uiProps?.footer }),
     }"
-    @update:open="$emit('update:open', $event)"
-    @close="$emit('close', $event)"
-    @after:leave="$emit('after:leave')"
+    @close="emits('close', $event)"
+    @after:leave="emits('after:leave')"
   >
-    <template #body>
-      <div class="space-y-3">
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="text-sm text-gray-500" v-html="description" />
+    <template #header>
+      <div class="relative w-full flex items-start gap-3">
+        <UIcon
+          v-if="dialogIcon"
+          :name="dialogIcon"
+          data-slot="icon"
+          :class="ui.icon({ class: uiProps?.icon })"
+        />
+        <div class="flex-1 min-w-0">
+          <DialogTitle
+            v-if="title"
+            data-slot="title"
+            :class="ui.title({ class: uiProps?.title })"
+          >
+            <slot name="title">
+              {{ title }}
+            </slot>
+          </DialogTitle>
 
-        <!-- Error message -->
-        <div
-          v-if="error"
-          class="text-sm text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950 p-3 rounded"
-        >
-          {{ error }}
+          <DialogDescription
+            v-if="description"
+            :class="ui.description({ class: uiProps?.description })"
+          >
+            <slot name="description">
+              {{ description }}
+            </slot>
+          </DialogDescription>
         </div>
+
+        <UButton
+          v-if="close"
+          v-bind="closeButtonProps"
+          data-slot="close"
+          :class="ui.close({ class: uiProps?.close })"
+          @click="handleClose"
+        />
       </div>
     </template>
+
     <template #footer>
-      <UButton
-        v-if="dismissLabel"
-        :ui="{ base: 'justify-around' }"
-        color="neutral"
-        variant="outline"
-        :label="dismissLabel"
-        @click="dismiss"
-      />
-      <UButton
-        color="neutral"
-        :loading="isConfirming"
-        :disabled="isComplete"
-        :label="isComplete ? undefined : confirmLabel"
-        :icon="isComplete ? 'i-heroicons-check' : undefined"
-        :ui="{ base: 'justify-around' }"
-        @click="confirm"
-      />
+      <slot name="actions">
+        <!-- Dismiss button (No) - hidden when loading, complete, or error -->
+        <UButton
+          v-if="dismissLabel && !isLoading && !isComplete && !isError"
+          :label="dismissLabel"
+          size="lg"
+          :color="color"
+          variant="solid"
+          @click="dismiss"
+        />
+
+        <!-- Confirm button (Yes) - shows loading/complete/error states -->
+        <UButton
+          :label="isError ? 'Error' : isComplete ? 'Complete' : confirmLabel"
+          size="lg"
+          color="neutral"
+          variant="outline"
+          :loading="isLoading"
+          :disabled="isComplete"
+          :leading-icon="
+            isError
+              ? 'i-lucide-circle-x'
+              : isComplete
+              ? 'i-lucide-check'
+              : undefined
+          "
+          :class="{ 'animate-shake': isError }"
+          @click="confirmHandler"
+        />
+      </slot>
     </template>
   </UModal>
 </template>

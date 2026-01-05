@@ -8,10 +8,13 @@ export default defineNuxtConfig({
   // App configuration
   app: {
     head: {
-      title: 'Nuxt UI Elements',
+      title: "Nuxt UI Elements",
       meta: [
-        { name: 'description', content: 'Beautiful, animated UI components for Nuxt UI' }
-      ]
-    }
-  }
+        {
+          name: "description",
+          content: "Beautiful, animated UI components for Nuxt UI",
+        },
+      ],
+    },
+  },
 });

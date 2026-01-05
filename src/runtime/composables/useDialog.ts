@@ -3,68 +3,51 @@ import { useOverlay } from "#imports";
 import { navigateTo } from "#app";
 
 type CallbackFn = () => void | Promise<void>;
-interface DialogInstance {
-  onConfirm: (fn: CallbackFn) => DialogInstance;
-  onDismiss: (fn: CallbackFn) => DialogInstance;
-  open: () => DialogInstance;
+type Color = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | (string & {})
+type Variant = "solid" | "outline";
+
+export interface DialogConfirmOptions {
+  title: string;
+  description?: string;
+  icon?: boolean;
+  confirmLabel?: string;
+  dismissLabel?: string;
+  color?: Color;
+  variant?: Variant;
+  close?: boolean;
+  onConfirm?: CallbackFn;
+  onDismiss?: CallbackFn;
+  ui?: any;
 }
+
 export const useDialog = () => {
   const overlay = useOverlay();
 
-  const confirm = (
-    options: Omit<
-      InstanceType<typeof DialogConfirm>["$props"],
-      "onDismiss" | "onConfirm" | "class"
-    >
-  ) => {
-    let confirmCallback: CallbackFn = () => {};
-    let dismissCallback: CallbackFn = () => {};
-
+  const confirm = (options: DialogConfirmOptions) => {
     const modal = overlay.create(DialogConfirm, {
       destroyOnClose: true,
-      props: {
-        ...options,
-        onConfirm: async () => {
-          await confirmCallback();
-        },
-        onDismiss: async () => {
-          await dismissCallback();
-        },
-        // onClose: () => {
-        //   modal.close();
-        // },
-      },
+      props: options as any,
     });
 
-    const dialogInstance: DialogInstance = {
-      onConfirm: (fn: CallbackFn) => {
-        confirmCallback = fn;
-        return dialogInstance;
-      },
-      onDismiss: (fn: CallbackFn) => {
-        dismissCallback = fn;
-        return dialogInstance;
-      },
-      open: () => {
-        modal.open();
+    // Auto-open the dialog
+    modal.open();
 
-        return dialogInstance;
-      },
-    };
-
-    return dialogInstance;
+    return modal;
   };
 
-  const confirmNavigate = (path: string) => {
+  const confirmNavigate = (
+    path: string,
+    options?: Omit<DialogConfirmOptions, "title" | "description" | "onConfirm">
+  ) => {
     confirm({
       title: "Leave this page?",
       description:
         "Are you sure you want to navigate away? Unsaved changes will be lost.",
-    })
-      .onConfirm(() => {
+      ...options,
+      onConfirm: () => {
         navigateTo(path);
-      })
-      .open();
+      },
+    });
   };
 
   return { confirm, confirmNavigate };
