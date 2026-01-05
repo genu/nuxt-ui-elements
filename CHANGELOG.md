@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.15
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.14...v0.1.15)
+
+### 🚀 Enhancements
+
+- Add #std alias for standard utilities and create utility library ([69093d5](https://github.com/genu/nuxt-ui-elements/commit/69093d5))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.14
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.13...v0.1.14)
