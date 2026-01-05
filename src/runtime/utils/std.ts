@@ -13,4 +13,4 @@
 export { default as plur } from "plur"
 
 // Date utilities
-export { default as dayjs } from "dayjs"
+export { default as dayjs } from "dayjs/esm"
