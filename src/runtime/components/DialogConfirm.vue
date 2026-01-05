@@ -10,20 +10,14 @@
 
   type DialogConfirm = ComponentConfig<typeof theme, AppConfig, "dialogConfirm">
 
-  export interface DialogConfirmEmits {
+  interface DialogConfirmEmits {
     "update:open": [value: boolean]
     close: [value?: any]
     "after:leave": []
   }
 
-  export interface DialogConfirmSlots {
-    title(props?: {}): any
-    description(props?: {}): any
-    actions(props?: {}): any
-  }
-
-  export interface DialogConfirmProps {
-    title: string
+  interface DialogConfirmProps {
+    title?: string
     description?: string
     icon?: boolean
     confirmLabel?: string
@@ -33,13 +27,13 @@
     variant?: DialogConfirm["variants"]["variant"]
     onConfirm?: (() => void) | (() => Promise<void>)
     onDismiss?: () => void
-    ui?: Partial<DialogConfirm["slots"]>
+    ui?: DialogConfirm["slots"]
   }
 </script>
 
 <script lang="ts" setup>
   const {
-    title,
+    title = "",
     description = "",
     icon = true,
     confirmLabel = "Yes",
@@ -47,9 +41,9 @@
     close = false,
     color = "neutral",
     variant = "solid",
-    onConfirm,
-    onDismiss,
-    ui: uiProps,
+    onConfirm = () => {},
+    onDismiss = () => {},
+    ui: uiProps = {},
   } = defineProps<DialogConfirmProps>()
 
   const emits = defineEmits<DialogConfirmEmits>()
@@ -95,13 +89,8 @@
 
   // Handlers
   const confirmHandler = async () => {
-    if (!onConfirm) {
-      emits("close")
-      return
-    }
-
     try {
-      const result = onConfirm()
+      const result = onConfirm() as void | Promise<void>
 
       // Only show loading state if it's a Promise
       const isAsync = result instanceof Promise
@@ -166,15 +155,11 @@
         <UIcon v-if="dialogIcon" :name="dialogIcon" data-slot="icon" :class="ui.icon({ class: uiProps?.icon })" />
         <div class="flex-1 min-w-0">
           <DialogTitle v-if="title" data-slot="title" :class="ui.title({ class: uiProps?.title })">
-            <slot name="title">
-              {{ title }}
-            </slot>
+            {{ title }}
           </DialogTitle>
 
           <DialogDescription v-if="description" :class="ui.description({ class: uiProps?.description })">
-            <slot name="description">
-              {{ description }}
-            </slot>
+            {{ description }}
           </DialogDescription>
         </div>
 
@@ -182,34 +167,35 @@
           v-if="close"
           v-bind="closeButtonProps"
           data-slot="close"
-          :class="ui.close({ class: uiProps?.close })"
+          :ui="{
+            base: 'text-white hover:bg-white/10 active:bg-white/20',
+          }"
           @click="handleClose" />
       </div>
     </template>
 
     <template #footer>
-      <slot name="actions">
-        <!-- Dismiss button (No) - hidden when loading, complete, or error -->
-        <UButton
-          v-if="dismissLabel && !isLoading && !isComplete && !isError"
-          :label="dismissLabel"
-          size="lg"
-          :color="color"
-          variant="solid"
-          @click="dismiss" />
+      <UButton
+        v-if="dismissLabel && !isLoading && !isComplete && !isError"
+        :label="dismissLabel"
+        size="lg"
+        color="neutral"
+        variant="ghost"
+        :ui="{
+          base: 'text-white hover:bg-white/10 active:bg-white/20',
+        }"
+        @click="dismiss" />
 
-        <!-- Confirm button (Yes) - shows loading/complete/error states -->
-        <UButton
-          :label="isError ? 'Error' : isComplete ? 'Complete' : confirmLabel"
-          size="lg"
-          color="neutral"
-          variant="outline"
-          :loading="isLoading"
-          :disabled="isComplete"
-          :leading-icon="isError ? 'i-lucide-circle-x' : isComplete ? 'i-lucide-check' : undefined"
-          :class="{ 'animate-shake': isError }"
-          @click="confirmHandler" />
-      </slot>
+      <UButton
+        :label="isError ? 'Error' : isComplete ? 'Complete' : confirmLabel"
+        size="lg"
+        color="neutral"
+        variant="outline"
+        :loading="isLoading"
+        :disabled="isComplete"
+        :leading-icon="isError ? 'i-lucide-circle-x' : isComplete ? 'i-lucide-check' : undefined"
+        :class="{ 'animate-shake': isError }"
+        @click="confirmHandler" />
     </template>
   </UModal>
 </template>

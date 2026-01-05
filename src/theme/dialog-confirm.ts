@@ -40,7 +40,6 @@ export default (options: ThemeOptions) => ({
       variant: "solid",
       class: {
         content: `bg-${color} text-inverted`,
-        close: "!text-white hover:bg-white/10 active:bg-white/20",
       },
     })),
     {
@@ -48,7 +47,6 @@ export default (options: ThemeOptions) => ({
       variant: "solid",
       class: {
         content: "text-inverted bg-inverted",
-        close: "!text-white hover:bg-white/10 active:bg-white/20",
       },
     },
 
