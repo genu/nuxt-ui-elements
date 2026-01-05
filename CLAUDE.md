@@ -89,10 +89,10 @@ Users can customize the module in their `nuxt.config.ts`:
 
 ```typescript
 export default defineNuxtConfig({
-  modules: ['nuxt-ui-elements'],
+  modules: ["nuxt-ui-elements"],
   uiElements: {
-    prefix: 'Custom' // Changes component names to CustomFlickeringGrid, etc.
-  }
+    prefix: "Custom", // Changes component names to CustomFlickeringGrid, etc.
+  },
 })
 ```
 
@@ -220,12 +220,11 @@ if (import.meta.client) {
   try {
     const colorMode = useColorMode?.()
     if (colorMode) {
-      isDark = computed(() => colorMode.value === 'dark')
+      isDark = computed(() => colorMode.value === "dark")
     }
-  }
-  catch {
+  } catch {
     // Fallback to prefers-color-scheme
-    isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+    isDark.value = window.matchMedia("(prefers-color-scheme: dark)").matches
   }
 }
 ```
@@ -279,7 +278,7 @@ npm publish
 3. Add to target project's `nuxt.config.ts`:
    ```typescript
    export default defineNuxtConfig({
-     modules: ['nuxt-ui-elements']
+     modules: ["nuxt-ui-elements"],
    })
    ```
 
@@ -297,32 +296,32 @@ Then configure in `nuxt.config.ts` as shown above.
 
 ```vue
 <script setup lang="ts">
-export interface MyComponentProps {
-  // Props with defaults
-  speed?: number
-  color?: string
-}
+  export interface MyComponentProps {
+    // Props with defaults
+    speed?: number
+    color?: string
+  }
 
-const props = withDefaults(defineProps<MyComponentProps>(), {
-  speed: 1,
-  color: '#000',
-})
+  const props = withDefaults(defineProps<MyComponentProps>(), {
+    speed: 1,
+    color: "#000",
+  })
 
-// Animation setup
-let animationFrameId: number | undefined
+  // Animation setup
+  let animationFrameId: number | undefined
 
-function animate() {
-  // Animation logic
-  animationFrameId = requestAnimationFrame(animate)
-}
+  function animate() {
+    // Animation logic
+    animationFrameId = requestAnimationFrame(animate)
+  }
 
-onMounted(() => {
-  animate()
-})
+  onMounted(() => {
+    animate()
+  })
 
-onBeforeUnmount(() => {
-  if (animationFrameId) cancelAnimationFrame(animationFrameId)
-})
+  onBeforeUnmount(() => {
+    if (animationFrameId) cancelAnimationFrame(animationFrameId)
+  })
 </script>
 
 <template>
@@ -343,7 +342,7 @@ onMounted(() => {
     (entries) => {
       isInView.value = entries[0]?.isIntersecting ?? false
     },
-    { threshold: 0 }
+    { threshold: 0 },
   )
   intersectionObserver.observe(elementRef.value!)
 })

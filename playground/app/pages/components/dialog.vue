@@ -1,119 +1,110 @@
 <script setup lang="ts">
-const { confirm, confirmNavigate } = useDialog();
+  const { confirm, confirmNavigate } = useDialog()
 
-type Color =
-  | "primary"
-  | "secondary"
-  | "success"
-  | "info"
-  | "warning"
-  | "error"
-  | (string & {});
-type Variant = "solid" | "outline";
+  type Color = "primary" | "secondary" | "success" | "info" | "warning" | "error" | (string & {})
+  type Variant = "solid" | "outline"
 
-// Basic confirmation dialog with customizable color and variant
-const selectedColor = ref<Color>("primary");
-const selectedVariant = ref<Variant>("solid");
+  // Basic confirmation dialog with customizable color and variant
+  const selectedColor = ref<Color>("primary")
+  const selectedVariant = ref<Variant>("solid")
 
-const colorOptions = [
-  { label: "Primary", value: "primary" },
-  { label: "Secondary", value: "secondary" },
-  { label: "Success", value: "success" },
-  { label: "Info", value: "info" },
-  { label: "Warning", value: "warning" },
-  { label: "Error", value: "error" },
-  { label: "Neutral", value: "neutral" },
-];
+  const colorOptions = [
+    { label: "Primary", value: "primary" },
+    { label: "Secondary", value: "secondary" },
+    { label: "Success", value: "success" },
+    { label: "Info", value: "info" },
+    { label: "Warning", value: "warning" },
+    { label: "Error", value: "error" },
+    { label: "Neutral", value: "neutral" },
+  ]
 
-const variantOptions = [
-  { label: "Solid", value: "solid" },
-  { label: "Outline", value: "outline" },
-];
+  const variantOptions = [
+    { label: "Solid", value: "solid" },
+    { label: "Outline", value: "outline" },
+  ]
 
-function showBasicDialog() {
-  confirm({
-    title: "Confirm Action",
-    description: "Are you sure you want to proceed with this action?",
-    color: selectedColor.value,
-    variant: selectedVariant.value,
-    close: true,
-    onConfirm: () => {
-      console.log("User confirmed!");
-    },
-    onDismiss: () => {
-      console.log("User dismissed");
-    },
-  });
-}
+  function showBasicDialog() {
+    confirm({
+      title: "Confirm Action",
+      description: "Are you sure you want to proceed with this action?",
+      color: selectedColor.value,
+      variant: selectedVariant.value,
+      close: true,
+      onConfirm: () => {
+        console.log("User confirmed!")
+      },
+      onDismiss: () => {
+        console.log("User dismissed")
+      },
+    })
+  }
 
-// Custom labels
-function showCustomLabels() {
-  confirm({
-    title: "Delete Item",
-    description:
-      "This action cannot be undone. Are you sure you want to delete this item?",
-    confirmLabel: "Delete",
-    dismissLabel: "Cancel",
-    color: "error",
-    onConfirm: () => {
-      console.log("Item deleted!");
-    },
-  });
-}
+  // Custom labels
+  function showCustomLabels() {
+    confirm({
+      title: "Delete Item",
+      description: "This action cannot be undone. Are you sure you want to delete this item?",
+      confirmLabel: "Delete",
+      dismissLabel: "Cancel",
+      color: "error",
+      onConfirm: () => {
+        console.log("Item deleted!")
+      },
+    })
+  }
 
-// Async operation (success)
-function showAsyncDialog() {
-  confirm({
-    title: "Process Data",
-    description: "This will start processing your data. Continue?",
-    onConfirm: async () => {
-      console.log("Starting async operation...");
-      // Simulate async operation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Async operation completed!");
-    },
-  });
-}
+  // Async operation (success)
+  function showAsyncDialog() {
+    confirm({
+      title: "Process Data",
+      description: "This will start processing your data. Continue?",
+      onConfirm: async () => {
+        console.log("Starting async operation...")
+        // Simulate async operation
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        console.log("Async operation completed!")
+      },
+    })
+  }
 
-// Async operation (with error)
-function showAsyncErrorDialog() {
-  confirm({
-    title: "Delete All Data",
-    description:
-      "This action will permanently delete all your data. Are you absolutely sure?",
-    confirmLabel: "Delete Everything",
-    color: "error",
-    onConfirm: async () => {
-      // Simulate async operation that fails
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      throw new Error("Failed to delete: Permission denied");
-    },
-  });
-}
+  // Async operation (with error)
+  function showAsyncErrorDialog() {
+    confirm({
+      title: "Delete All Data",
+      description: "This action will permanently delete all your data. Are you absolutely sure?",
+      confirmLabel: "Delete Everything",
+      color: "error",
+      onConfirm: async () => {
+        // Simulate async operation that fails
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+        throw new Error("Failed to delete: Permission denied")
+      },
+    })
+  }
 
-// Without dismiss button
-function showNoDismiss() {
-  confirm({
-    title: "Important Notice",
-    description: "Please read and acknowledge this important information.",
-    dismissLabel: "",
-    confirmLabel: "I Understand",
-    onConfirm: () => {
-      console.log("Acknowledged");
-    },
-  });
-}
+  // Without dismiss button
+  function showNoDismiss() {
+    confirm({
+      title: "Important Notice",
+      description: "Please read and acknowledge this important information.",
+      dismissLabel: "",
+      confirmLabel: "I Understand",
+      onConfirm: () => {
+        console.log("Acknowledged")
+      },
+    })
+  }
 
-// Navigation confirmation
-function showNavigationDialog() {
-  confirmNavigate("/");
-}
+  // Navigation confirmation
+  function showNavigationDialog() {
+    confirmNavigate("/")
+  }
 
-// HTML in description
-function showHTMLDialog() {
-  confirm({
-    title: "Terms and Conditions",
-    description: `
+  // HTML in description
+  function showHTMLDialog() {
+    confirm({
+      title: "Terms and Conditions",
+      description: `
       <div class="space-y-2">
         <p>By clicking accept, you agree to:</p>
         <ul class="list-disc list-inside space-y-1">
@@ -123,18 +114,18 @@ function showHTMLDialog() {
         </ul>
       </div>
     `,
-    confirmLabel: "Accept",
-    dismissLabel: "Decline",
-    onConfirm: () => {
-      console.log("Terms accepted");
-    },
-  });
-}
+      confirmLabel: "Accept",
+      dismissLabel: "Decline",
+      onConfirm: () => {
+        console.log("Terms accepted")
+      },
+    })
+  }
 
-useSeoMeta({
-  title: "Dialog - Nuxt UI Elements",
-  description: "Confirmation dialog composable for Nuxt UI",
-});
+  useSeoMeta({
+    title: "Dialog - Nuxt UI Elements",
+    description: "Confirmation dialog composable for Nuxt UI",
+  })
 </script>
 
 <template>
@@ -142,8 +133,7 @@ useSeoMeta({
     <div>
       <h1 class="text-3xl font-bold mb-2">Dialog</h1>
       <p class="text-gray-600 dark:text-gray-400">
-        A composable for creating confirmation dialogs with async support and
-        customizable options.
+        A composable for creating confirmation dialogs with async support and customizable options.
       </p>
     </div>
 
@@ -156,37 +146,19 @@ useSeoMeta({
         <div class="space-y-4">
           <div>
             <h3 class="font-medium mb-3">Basic Confirmation</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Customize the appearance with different colors and variants
-            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Customize the appearance with different colors and variants</p>
             <div class="flex flex-wrap gap-3 mb-3">
-              <USelectMenu
-                v-model="selectedColor"
-                :items="colorOptions"
-                value-key="value"
-                placeholder="Color"
-                class="w-40"
-              />
-              <USelectMenu
-                v-model="selectedVariant"
-                :items="variantOptions"
-                value-key="value"
-                placeholder="Variant"
-                class="w-40"
-              />
+              <USelectMenu v-model="selectedColor" :items="colorOptions" value-key="value" placeholder="Color" class="w-40" />
+              <USelectMenu v-model="selectedVariant" :items="variantOptions" value-key="value" placeholder="Variant" class="w-40" />
             </div>
-            <UButton @click="showBasicDialog" label="Show Dialog" />
+            <UButton label="Show Dialog" @click="showBasicDialog" />
           </div>
 
           <USeparator />
 
           <div>
             <h3 class="font-medium mb-2">Custom Labels</h3>
-            <UButton
-              @click="showCustomLabels"
-              color="error"
-              label="Delete Item"
-            />
+            <UButton color="error" label="Delete Item" @click="showCustomLabels" />
           </div>
 
           <USeparator />
@@ -196,55 +168,39 @@ useSeoMeta({
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
               Shows loading state, then "Complete" with checkmark before closing
             </p>
-            <UButton @click="showAsyncDialog" label="Start Async Process" />
+            <UButton label="Start Async Process" @click="showAsyncDialog" />
           </div>
 
           <USeparator />
 
           <div>
             <h3 class="font-medium mb-2">Async Operation (Error)</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Demonstrates error handling - dialog stays open on error
-            </p>
-            <UButton
-              @click="showAsyncErrorDialog"
-              color="error"
-              label="Trigger Error"
-            />
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Demonstrates error handling - dialog stays open on error</p>
+            <UButton color="error" label="Trigger Error" @click="showAsyncErrorDialog" />
           </div>
 
           <USeparator />
 
           <div>
             <h3 class="font-medium mb-2">Without Dismiss Button</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Use for acknowledgments or required actions
-            </p>
-            <UButton @click="showNoDismiss" label="Show Notice" />
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Use for acknowledgments or required actions</p>
+            <UButton label="Show Notice" @click="showNoDismiss" />
           </div>
 
           <USeparator />
 
           <div>
             <h3 class="font-medium mb-2">HTML Description</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Support for HTML content in descriptions
-            </p>
-            <UButton @click="showHTMLDialog" label="Show Terms" />
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Support for HTML content in descriptions</p>
+            <UButton label="Show Terms" @click="showHTMLDialog" />
           </div>
 
           <USeparator />
 
           <div>
             <h3 class="font-medium mb-2">Navigation Confirmation</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Confirm before navigating away (uses confirmNavigate helper)
-            </p>
-            <UButton
-              @click="showNavigationDialog"
-              label="Navigate to Home"
-              color="neutral"
-            />
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Confirm before navigating away (uses confirmNavigate helper)</p>
+            <UButton label="Navigate to Home" color="neutral" @click="showNavigationDialog" />
           </div>
         </div>
       </UCard>
@@ -258,8 +214,7 @@ useSeoMeta({
           <div>
             <h3 class="font-medium mb-2">useDialog()</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Returns an object with <code>confirm()</code> and
-              <code>confirmNavigate()</code> methods.
+              Returns an object with <code>confirm()</code> and <code>confirmNavigate()</code> methods.
             </p>
           </div>
 
@@ -268,18 +223,13 @@ useSeoMeta({
           <div>
             <h3 class="font-medium mb-2">confirm(options)</h3>
             <div class="space-y-2 text-sm">
-              <p
-                class="font-mono text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded"
-              >
-                interface Options { title: string description?: string
-                confirmLabel?: string // default: "Yes" dismissLabel?: string //
-                default: "No" size?: "sm" | "md" // default: "sm" async?:
-                boolean // default: false clickToClose?: boolean // default:
+              <p class="font-mono text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                interface Options { title: string description?: string confirmLabel?: string // default: "Yes" dismissLabel?: string //
+                default: "No" size?: "sm" | "md" // default: "sm" async?: boolean // default: false clickToClose?: boolean // default:
                 false }
               </p>
               <p class="text-gray-600 dark:text-gray-400">
-                Returns a dialog instance with <code>onConfirm()</code>,
-                <code>onDismiss()</code>, and <code>open()</code> methods.
+                Returns a dialog instance with <code>onConfirm()</code>, <code>onDismiss()</code>, and <code>open()</code> methods.
               </p>
             </div>
           </div>
@@ -289,14 +239,8 @@ useSeoMeta({
           <div>
             <h3 class="font-medium mb-2">Dialog Instance Methods</h3>
             <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li>
-                <code>onConfirm(callback)</code> - Set callback for confirm
-                action (chainable)
-              </li>
-              <li>
-                <code>onDismiss(callback)</code> - Set callback for dismiss
-                action (chainable)
-              </li>
+              <li><code>onConfirm(callback)</code> - Set callback for confirm action (chainable)</li>
+              <li><code>onDismiss(callback)</code> - Set callback for dismiss action (chainable)</li>
               <li><code>open()</code> - Open the dialog (chainable)</li>
             </ul>
           </div>
@@ -306,8 +250,8 @@ useSeoMeta({
           <div>
             <h3 class="font-medium mb-2">confirmNavigate(path)</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              Helper method that shows a confirmation dialog before navigating
-              to the specified path. Uses default "Leave this page?" messaging.
+              Helper method that shows a confirmation dialog before navigating to the specified path. Uses default "Leave this page?"
+              messaging.
             </p>
           </div>
         </div>
@@ -317,36 +261,6 @@ useSeoMeta({
         <template #header>
           <h2 class="text-xl font-semibold">Code Example</h2>
         </template>
-
-        <pre
-          class="bg-gray-100 dark:bg-gray-800 p-4 rounded overflow-x-auto text-sm"
-        ><code>const { confirm, confirmNavigate } = useDialog()
-
-// Basic usage
-confirm({
-  title: 'Confirm Action',
-  description: 'Are you sure?',
-})
-  .onConfirm(() => {
-    console.log('Confirmed!')
-  })
-  .onDismiss(() => {
-    console.log('Dismissed')
-  })
-  .open()
-
-// Async operation
-confirm({
-  title: 'Delete Item',
-  async: true,
-})
-  .onConfirm(async () => {
-    await deleteItem()
-  })
-  .open()
-
-// Navigation helper
-confirmNavigate('/home')</code></pre>
       </UCard>
     </div>
   </div>

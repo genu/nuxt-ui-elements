@@ -1,30 +1,34 @@
-import type { ClassValue, TVVariants, TVCompoundVariants, TVDefaultVariants } from 'tailwind-variants'
+import type { ClassValue, TVVariants, TVCompoundVariants, TVDefaultVariants } from "tailwind-variants"
 
 /**
  * Defines the AppConfig object based on the tailwind-variants configuration.
  */
 export type TVConfig<T extends Record<string, any>> = {
   [P in keyof T]?: {
-    [K in keyof T[P]as K extends 'base' | 'slots' | 'variants' | 'defaultVariants' ? K : never]?: K extends 'base' ? ClassValue
-      : K extends 'slots' ? {
-        [S in keyof T[P]['slots']]?: ClassValue
-      }
-        : K extends 'variants' ? TVVariants<T[P]['slots'], ClassValue, WidenVariantsValues<T[P]['variants']>>
-          : K extends 'defaultVariants' ? TVDefaultVariants<WidenVariantsValues<T[P]['variants']>, T[P]['slots'], object, undefined>
+    [K in keyof T[P] as K extends "base" | "slots" | "variants" | "defaultVariants" ? K : never]?: K extends "base"
+      ? ClassValue
+      : K extends "slots"
+        ? {
+            [S in keyof T[P]["slots"]]?: ClassValue
+          }
+        : K extends "variants"
+          ? TVVariants<T[P]["slots"], ClassValue, WidenVariantsValues<T[P]["variants"]>>
+          : K extends "defaultVariants"
+            ? TVDefaultVariants<WidenVariantsValues<T[P]["variants"]>, T[P]["slots"], object, undefined>
             : never
   }
 } & {
   [P in keyof T]?: {
-    compoundVariants?: TVCompoundVariants<WidenVariantsValues<T[P]['variants']>, T[P]['slots'], ClassValue, object, undefined>
+    compoundVariants?: TVCompoundVariants<WidenVariantsValues<T[P]["variants"]>, T[P]["slots"], ClassValue, object, undefined>
   }
 }
 
-type WidenVariantsValues<V extends Record<string, any> | undefined>
-  = V extends Record<string, any> ? V & {
-    [K in keyof V]: V[K] extends Record<string, any>
-      ? V[K] & Record<string & {}, any>
-      : V[K]
-  } : V
+type WidenVariantsValues<V extends Record<string, any> | undefined> =
+  V extends Record<string, any>
+    ? V & {
+        [K in keyof V]: V[K] extends Record<string, any> ? V[K] & Record<string & {}, any> : V[K]
+      }
+    : V
 
 /**
  * Utility type to flatten intersection types for better IDE hover information.
@@ -33,30 +37,24 @@ type WidenVariantsValues<V extends Record<string, any> | undefined>
 type Id<T> = {} & { [P in keyof T]: T[P] }
 
 type ComponentVariants<T extends { variants?: Record<string, Record<string, any>> }> = {
-  [K in keyof T['variants']]: keyof T['variants'][K]
+  [K in keyof T["variants"]]: keyof T["variants"][K]
 }
 
 type ComponentSlots<T extends { slots?: Record<string, any> }> = Id<{
-  [K in keyof T['slots']]?: ClassValue
+  [K in keyof T["slots"]]?: ClassValue
 }>
 
 type ComponentUI<T extends { slots?: Record<string, any> }> = Id<{
-  [K in keyof Required<T['slots']>]: (props?: Record<string, any>) => string
+  [K in keyof Required<T["slots"]>]: (props?: Record<string, any>) => string
 }>
 
-type GetComponentAppConfig<A, U extends string, K extends string>
-  = A extends Record<U, Record<K, any>> ? A[U][K] : {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+type GetComponentAppConfig<A, U extends string, K extends string> = A extends Record<U, Record<K, any>> ? A[U][K] : {}
 
-type ComponentAppConfig<
-  T,
-  A extends Record<string, any>,
-  K extends string,
-  U extends string = 'ui' | 'uiElements'
-> = A & (
-  U extends 'uiElements'
+type ComponentAppConfig<T, A extends Record<string, any>, K extends string, U extends string = "ui" | "uiElements"> = A &
+  (U extends "uiElements"
     ? { uiElements?: { [k in K]?: Partial<T> } }
-    : { [key in Exclude<U, 'uiElements'>]?: { [k in K]?: Partial<T> } }
-)
+    : { [key in Exclude<U, "uiElements">]?: { [k in K]?: Partial<T> } })
 
 /**
  * Defines the configuration shape expected for a component.
@@ -69,7 +67,7 @@ export type ComponentConfig<
   T extends Record<string, any>,
   A extends Record<string, any>,
   K extends string,
-  U extends 'ui' | 'uiElements' = 'uiElements'
+  U extends "ui" | "uiElements" = "uiElements",
 > = {
   AppConfig: ComponentAppConfig<T, A, K, U>
   variants: ComponentVariants<T & GetComponentAppConfig<A, U, K>>

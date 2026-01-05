@@ -40,7 +40,7 @@ pnpm add nuxt-ui-elements
 
 ```ts
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui', 'nuxt-ui-elements']
+  modules: ["@nuxt/ui", "nuxt-ui-elements"],
 })
 ```
 
@@ -71,8 +71,7 @@ A beautiful animated grid background component perfect for hero sections and lan
       gradient-direction="left-right"
       gradient-end-color="white"
       :flicker-speed="0.2"
-      class="z-0"
-    />
+      class="z-0" />
     <div class="relative z-10">
       <!-- Your content here -->
     </div>
@@ -123,24 +122,23 @@ An animated button component with an elegant shimmer effect, perfect for call-to
     shimmer-color="#60a5fa"
     background="rgba(59, 130, 246, 1)"
     :speed="2.5"
-    @click="handleClick"
-  />
+    @click="handleClick" />
 </template>
 ```
 
 #### Props
 
-| Prop            | Type     | Default              | Description                                      |
-| --------------- | -------- | -------------------- | ------------------------------------------------ |
-| `label`         | `string` | -                    | Button label text                                |
-| `shimmerColor`  | `string` | `'#ffffff'`          | Color of the shimmer effect                      |
-| `shimmerSize`   | `string` | `'0.05em'`           | Size of the shimmer effect                       |
-| `speed`         | `number` | `3`                  | Animation speed in seconds (lower = faster)      |
-| `background`    | `string` | `'rgba(0, 0, 0, 1)'` | Background color of the button                   |
-| `radius`        | `string` | `'100px'`            | Border radius of the button                      |
-| `size`          | `string` | `'md'`               | Button size: `xs`, `sm`, `md`, `lg`, `xl`        |
-| `class`         | `string` | -                    | Additional CSS classes                           |
-| `ui`            | `object` | -                    | UI slot customization for advanced styling       |
+| Prop           | Type     | Default              | Description                                 |
+| -------------- | -------- | -------------------- | ------------------------------------------- |
+| `label`        | `string` | -                    | Button label text                           |
+| `shimmerColor` | `string` | `'#ffffff'`          | Color of the shimmer effect                 |
+| `shimmerSize`  | `string` | `'0.05em'`           | Size of the shimmer effect                  |
+| `speed`        | `number` | `3`                  | Animation speed in seconds (lower = faster) |
+| `background`   | `string` | `'rgba(0, 0, 0, 1)'` | Background color of the button              |
+| `radius`       | `string` | `'100px'`            | Border radius of the button                 |
+| `size`         | `string` | `'md'`               | Button size: `xs`, `sm`, `md`, `lg`, `xl`   |
+| `class`        | `string` | -                    | Additional CSS classes                      |
+| `ui`           | `object` | -                    | UI slot customization for advanced styling  |
 
 #### Slots
 
@@ -155,20 +153,19 @@ An animated button component with an elegant shimmer effect, perfect for call-to
 #### Examples
 
 **Basic Usage:**
+
 ```vue
 <UEButtonShimmer label="Click Me" />
 ```
 
 **With Custom Colors:**
+
 ```vue
-<UEButtonShimmer
-  label="Primary Action"
-  shimmer-color="#a78bfa"
-  background="rgba(139, 92, 246, 1)"
-/>
+<UEButtonShimmer label="Primary Action" shimmer-color="#a78bfa" background="rgba(139, 92, 246, 1)" />
 ```
 
 **Different Sizes:**
+
 ```vue
 <UEButtonShimmer label="Small" size="sm" />
 <UEButtonShimmer label="Medium" size="md" />
@@ -177,6 +174,7 @@ An animated button component with an elegant shimmer effect, perfect for call-to
 ```
 
 **With Slots:**
+
 ```vue
 <UEButtonShimmer>
   <template #leading>
@@ -190,11 +188,9 @@ An animated button component with an elegant shimmer effect, perfect for call-to
 ```
 
 **Fast Animation:**
+
 ```vue
-<UEButtonShimmer
-  label="Fast Shimmer"
-  :speed="1.5"
-/>
+<UEButtonShimmer label="Fast Shimmer" :speed="1.5" />
 ```
 
 ## Configuration
@@ -203,10 +199,10 @@ You can customize the component prefix in your `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  modules: ['nuxt-ui-elements'],
+  modules: ["nuxt-ui-elements"],
   uiElements: {
-    prefix: 'Custom' // Components will be named CustomFlickeringGrid
-  }
+    prefix: "Custom", // Components will be named CustomFlickeringGrid
+  },
 })
 ```
 

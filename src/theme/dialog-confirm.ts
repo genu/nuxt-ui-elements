@@ -25,8 +25,8 @@ export default (options: ThemeOptions) => ({
       },
     },
     color: {
-      ...Object.fromEntries((options.theme.colors || []).map((color: string) => [color, ''])),
-      neutral: ''
+      ...Object.fromEntries((options.theme.colors || []).map((color: string) => [color, ""])),
+      neutral: "",
     },
     variant: {
       solid: "",
@@ -37,28 +37,28 @@ export default (options: ThemeOptions) => ({
     // Solid variants - dynamically generated for all theme colors
     ...(options.theme.colors || []).map((color: string) => ({
       color,
-      variant: 'solid',
+      variant: "solid",
       class: {
         content: `bg-${color} text-inverted`,
-        close: "!text-white hover:bg-white/10 active:bg-white/20"
-      }
+        close: "!text-white hover:bg-white/10 active:bg-white/20",
+      },
     })),
     {
       color: "neutral",
       variant: "solid",
       class: {
         content: "text-inverted bg-inverted",
-        close: "!text-white hover:bg-white/10 active:bg-white/20"
+        close: "!text-white hover:bg-white/10 active:bg-white/20",
       },
     },
 
     // Outline variants - dynamically generated for all theme colors
     ...(options.theme.colors || []).map((color: string) => ({
       color,
-      variant: 'outline',
+      variant: "outline",
       class: {
-        content: `bg-gradient-to-b from-${color}/5 to-${color}/5 bg-default text-${color} !ring !ring-inset !ring-${color}`
-      }
+        content: `bg-gradient-to-b from-${color}/5 to-${color}/5 bg-default text-${color} !ring !ring-inset !ring-${color}`,
+      },
     })),
     {
       color: "neutral",

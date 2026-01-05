@@ -8,19 +8,17 @@ export interface NavigationItem {
 export interface ComponentItem {
   name: string
   path: string
-  category: 'overlays' | 'backgrounds' | 'buttons' | 'animations' | 'other'
+  category: "overlays" | "backgrounds" | "buttons" | "animations" | "other"
 }
 
 export function useNavigation() {
   // List of all components organized by category
-  const components: ComponentItem[] = [
-    { name: 'Dialog', path: '/components/dialog', category: 'overlays' },
-  ]
+  const components: ComponentItem[] = [{ name: "Dialog", path: "/components/dialog", category: "overlays" }]
 
   // Group components by category
   const componentsByCategory = computed(() => {
     const grouped: Record<string, ComponentItem[]> = {}
-    components.forEach(component => {
+    components.forEach((component) => {
       if (!grouped[component.category]) {
         grouped[component.category] = []
       }
@@ -33,21 +31,21 @@ export function useNavigation() {
   const navigation = computed<NavigationItem[]>(() => {
     const links: NavigationItem[] = [
       {
-        label: 'Home',
-        to: '/',
-        icon: 'i-heroicons-home'
-      }
+        label: "Home",
+        to: "/",
+        icon: "i-heroicons-home",
+      },
     ]
 
     // Add Overlays section
     if (componentsByCategory.value.overlays?.length) {
       links.push({
-        label: 'Overlays',
-        icon: 'i-heroicons-rectangle-stack',
-        children: componentsByCategory.value.overlays.map(c => ({
+        label: "Overlays",
+        icon: "i-heroicons-rectangle-stack",
+        children: componentsByCategory.value.overlays.map((c) => ({
           label: c.name,
-          to: c.path
-        }))
+          to: c.path,
+        })),
       })
     }
 
@@ -55,14 +53,14 @@ export function useNavigation() {
   })
 
   // Flat list of all component routes for navigation
-  const componentRoutes = computed(() => components.map(c => c.path))
+  const componentRoutes = computed(() => components.map((c) => c.path))
 
   // Get next/previous component based on current route
-  function getAdjacentComponent(currentPath: string, direction: 'next' | 'previous') {
-    const currentIndex = components.findIndex(c => c.path === currentPath)
+  function getAdjacentComponent(currentPath: string, direction: "next" | "previous") {
+    const currentIndex = components.findIndex((c) => c.path === currentPath)
     if (currentIndex === -1) return null
 
-    const nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1
+    const nextIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1
     if (nextIndex < 0 || nextIndex >= components.length) return null
 
     return components[nextIndex]
@@ -73,6 +71,6 @@ export function useNavigation() {
     components,
     componentsByCategory,
     componentRoutes,
-    getAdjacentComponent
+    getAdjacentComponent,
   }
 }

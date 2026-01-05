@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const route = useRoute()
-const { navigation } = useNavigation()
+  const route = useRoute()
+  const { navigation } = useNavigation()
 </script>
 
 <template>
@@ -33,8 +33,7 @@ const { navigation } = useNavigation()
               variant="ghost"
               block
               icon="i-heroicons-code-bracket"
-              label="GitHub"
-            />
+              label="GitHub" />
             <UButton
               to="https://ui.nuxt.com"
               target="_blank"
@@ -42,8 +41,7 @@ const { navigation } = useNavigation()
               variant="ghost"
               block
               icon="i-heroicons-cube"
-              label="Nuxt UI"
-            />
+              label="Nuxt UI" />
           </div>
         </template>
       </UDashboardSidebar>
