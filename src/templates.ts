@@ -51,6 +51,40 @@ export function addTemplates(options: ModuleOptions, _nuxt: Nuxt) {
   // Generate theme files
   writeThemeTemplate(theme)
 
+  // Generate CSS file with @source directive pointing to generated theme files
+  templates.push({
+    filename: "ui-elements.css",
+    write: true,
+    getContents: () => {
+      return `@source "./ui-elements";
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+`
+    },
+  })
+
   // Add all templates to Nuxt
   templates.forEach((template) => addTemplate(template))
 }
