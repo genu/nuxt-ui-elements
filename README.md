@@ -30,21 +30,31 @@ A collection of beautiful, animated UI components for Nuxt applications. Built w
 
 ## Quick Setup
 
-Install the module to your Nuxt application with one command:
+1. Install the module to your Nuxt application:
 
 ```bash
 pnpm add nuxt-ui-elements
 ```
 
-Add the module to your `nuxt.config.ts`:
+2. Add the module to your `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  modules: ['nuxt-ui-elements']
+  modules: ['@nuxt/ui', 'nuxt-ui-elements']
 })
 ```
 
+3. Import the module's CSS in your main CSS file (e.g., `assets/css/main.css`):
+
+```css
+@import "tailwindcss";
+@import "@nuxt/ui";
+@import "nuxt-ui-elements";
+```
+
 That's it! You can now use Nuxt UI Elements in your Nuxt app ✨
+
+> **Note:** This module requires `@nuxt/ui` v4.x as a peer dependency. The CSS import is required for Tailwind v4 to properly scan and generate styles from the component themes.
 
 ## Usage
 
