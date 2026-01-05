@@ -54,5 +54,8 @@ export default defineNuxtModule<ModuleOptions>({
 
     // Auto-import composables (useDialog)
     addImportsDir(resolver.resolve("./runtime/composables"))
+
+    // Add #std alias for standard utilities (tree-shakeable)
+    nuxt.options.alias["#std"] = resolver.resolve("./runtime/utils/std")
   },
 })
