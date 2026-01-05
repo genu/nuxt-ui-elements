@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.13
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.12...v0.1.13)
+
+### 🏡 Chore
+
+- Update CSS generation to include shake animation and adjust source directives ([9b9ac93](https://github.com/genu/nuxt-ui-elements/commit/9b9ac93))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.12
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.11...v0.1.12)
