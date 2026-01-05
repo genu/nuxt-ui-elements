@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.1.11
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.10...v0.1.11)
+
+### 🚀 Enhancements
+
+- Add ESLint and Prettier configuration files for improved code quality ([7b33888](https://github.com/genu/nuxt-ui-elements/commit/7b33888))
+- Implement theme management and add utility types for Tailwind variants ([37ed361](https://github.com/genu/nuxt-ui-elements/commit/37ed361))
+- Enhance dialog component with customizable colors and variants ([fcaf69e](https://github.com/genu/nuxt-ui-elements/commit/fcaf69e))
+
+### 🏡 Chore
+
+- Refactor code structure for improved readability and maintainability ([f84d6d5](https://github.com/genu/nuxt-ui-elements/commit/f84d6d5))
+- Refactor code structure for improved readability and maintainability ([09b1ab2](https://github.com/genu/nuxt-ui-elements/commit/09b1ab2))
+- Simplify ESLint configuration for better readability ([017114b](https://github.com/genu/nuxt-ui-elements/commit/017114b))
+- Run prettier/lint ([c0e5d99](https://github.com/genu/nuxt-ui-elements/commit/c0e5d99))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.10
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.9...v0.1.10)
