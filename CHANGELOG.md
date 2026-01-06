@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.21
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.20...v0.1.21)
+
+### 🚀 Enhancements
+
+- Add alert dialog component ([ba0cc8f](https://github.com/genu/nuxt-ui-elements/commit/ba0cc8f))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.20
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.19...v0.1.20)
