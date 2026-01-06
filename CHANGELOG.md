@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.1.17
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.16...v0.1.17)
+
+### 🚀 Enhancements
+
+- Add `@internationalized/date` utilities ([b2ea684](https://github.com/genu/nuxt-ui-elements/commit/b2ea684))
+
+### 🏡 Chore
+
+- Add .prettierignore ([a3e4d0c](https://github.com/genu/nuxt-ui-elements/commit/a3e4d0c))
+- Format/lint ([dd4c8b3](https://github.com/genu/nuxt-ui-elements/commit/dd4c8b3))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.16
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.15...v0.1.16)
