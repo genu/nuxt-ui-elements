@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.20
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.19...v0.1.20)
+
+### 💅 Refactors
+
+- Update std utility library for improved tree-shaking and usage examples ([8dd0aff](https://github.com/genu/nuxt-ui-elements/commit/8dd0aff))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.19
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.18...v0.1.19)
