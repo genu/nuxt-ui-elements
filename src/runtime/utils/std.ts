@@ -3,14 +3,14 @@
  * Import from '#std' for tree-shakeable utilities
  *
  * @example
- * import { plur, dayjs } from '#std'
+ * import { plur, date } from '#std'
  *
  * const text = plur('item', count)
- * const date = dayjs().format('YYYY-MM-DD')
+ * const nextMonth = date.add(date.today(), 1, 'month')
  */
 
 // String utilities
 export { default as plur } from "plur"
 
-// Date utilities
-export { default as dayjs } from "dayjs/esm"
+// Date utilities - all functions exported as namespace
+export * as date from "./std/date"

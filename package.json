@@ -39,8 +39,8 @@
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
   },
   "dependencies": {
+    "@internationalized/date": "^3.10.1",
     "@nuxt/kit": "^4.2.2",
-    "dayjs": "^1.11.19",
     "plur": "^6.0.0",
     "scule": "^1.3.0",
     "tailwind-variants": "^3.2.2"
@@ -61,7 +61,7 @@
     "prettier": "^3.7.4",
     "typescript": "~5.9.3",
     "vitest": "^4.0.16",
-    "vue-tsc": "^3.2.1"
+    "vue-tsc": "^3.2.2"
   },
   "peerDependencies": {
     "@nuxt/ui": "^4.0.0"

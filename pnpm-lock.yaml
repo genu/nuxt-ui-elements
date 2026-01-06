@@ -8,15 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@internationalized/date':
+        specifier: ^3.10.1
+        version: 3.10.1
       '@nuxt/kit':
         specifier: ^4.2.2
         version: 4.2.2(magicast@0.5.1)
       '@nuxt/ui':
         specifier: ^4.0.0
         version: 4.2.1(@babel/parser@7.28.5)(change-case@5.4.4)(db0@0.3.4)(embla-carousel@8.6.0)(ioredis@5.8.2)(magicast@0.5.1)(typescript@5.9.3)(vite@7.3.0(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.2))(vue-router@4.6.4(vue@3.5.25(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))
-      dayjs:
-        specifier: ^1.11.19
-        version: 1.11.19
       plur:
         specifier: ^6.0.0
         version: 6.0.0
@@ -661,8 +661,8 @@ packages:
     peerDependencies:
       vue: '>=3'
 
-  '@internationalized/date@3.10.0':
-    resolution: {integrity: sha512-oxDR/NTEJ1k+UFVQElaNIk65E/Z83HK1z1WI3lQyhTtnNg4R5oVXaPzK3jcpKG8UHKDVuDQHzn+wsxSz8RP3aw==}
+  '@internationalized/date@3.10.1':
+    resolution: {integrity: sha512-oJrXtQiAXLvT9clCf1K4kxp3eKsQhIaZqxEyowkBcsvZDdZkbWrVmnGknxs5flTD0VGsxrxKgBCZty1EzoiMzA==}
 
   '@internationalized/number@3.6.5':
     resolution: {integrity: sha512-6hY4Kl4HPBvtfS62asS/R22JzNNy8vi/Ssev7x6EobfCp+9QIB2hKvI2EtbdJ0VSQacxVNtqhE/NmF/NZ0gm6g==}
@@ -2494,9 +2494,6 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
-
-  dayjs@1.11.19:
-    resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
 
   db0@0.3.4:
     resolution: {integrity: sha512-RiXXi4WaNzPTHEOu8UPQKMooIbqOEyqA1t7Z6MsdxSCeb8iUC9ko3LcmsLmeUt2SM5bctfArZKkRQggKZz7JNw==}
@@ -5519,7 +5516,7 @@ snapshots:
       '@iconify/types': 2.0.0
       vue: 3.5.26(typescript@5.9.3)
 
-  '@internationalized/date@3.10.0':
+  '@internationalized/date@3.10.1':
     dependencies:
       '@swc/helpers': 0.5.17
 
@@ -6057,7 +6054,7 @@ snapshots:
   '@nuxt/ui@4.2.1(@babel/parser@7.28.5)(change-case@5.4.4)(db0@0.3.4)(embla-carousel@8.6.0)(ioredis@5.8.2)(magicast@0.5.1)(typescript@5.9.3)(vite@7.3.0(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.2))(vue-router@4.6.4(vue@3.5.25(typescript@5.9.3)))(vue@3.5.26(typescript@5.9.3))':
     dependencies:
       '@iconify/vue': 5.0.0(vue@3.5.26(typescript@5.9.3))
-      '@internationalized/date': 3.10.0
+      '@internationalized/date': 3.10.1
       '@internationalized/number': 3.6.5
       '@nuxt/fonts': 0.12.1(db0@0.3.4)(ioredis@5.8.2)(magicast@0.5.1)(vite@7.3.0(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.2))
       '@nuxt/icon': 2.1.1(magicast@0.5.1)(vite@7.3.0(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(yaml@2.8.2))(vue@3.5.26(typescript@5.9.3))
@@ -7704,8 +7701,6 @@ snapshots:
       css-tree: 2.2.1
 
   csstype@3.2.3: {}
-
-  dayjs@1.11.19: {}
 
   db0@0.3.4: {}
 
@@ -9540,7 +9535,7 @@ snapshots:
     dependencies:
       '@floating-ui/dom': 1.7.4
       '@floating-ui/vue': 1.1.9(vue@3.5.26(typescript@5.9.3))
-      '@internationalized/date': 3.10.0
+      '@internationalized/date': 3.10.1
       '@internationalized/number': 3.6.5
       '@tanstack/vue-virtual': 3.13.13(vue@3.5.26(typescript@5.9.3))
       '@vueuse/core': 12.8.2(typescript@5.9.3)
