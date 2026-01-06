@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.1.19
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.18...v0.1.19)
+
+### 🚀 Enhancements
+
+- Enhance date parsing and manipulation functions with timezone support ([3ecbbce](https://github.com/genu/nuxt-ui-elements/commit/3ecbbce))
+
+### 🏡 Chore
+
+- Add @vitest/coverage-v8 dependency ([559f359](https://github.com/genu/nuxt-ui-elements/commit/559f359))
+- Add coverage testing configuration with Vitest ([571dc4a](https://github.com/genu/nuxt-ui-elements/commit/571dc4a))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.18
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.17...v0.1.18)
