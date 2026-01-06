@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.18
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.17...v0.1.18)
+
+### 🚀 Enhancements
+
+- Add slugify utility ([a96c932](https://github.com/genu/nuxt-ui-elements/commit/a96c932))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.17
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.16...v0.1.17)
