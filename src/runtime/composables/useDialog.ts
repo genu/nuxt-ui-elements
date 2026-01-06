@@ -1,6 +1,6 @@
 import DialogConfirm from "../components/DialogConfirm.vue"
+import DialogAlert from "../components/DialogAlert.vue"
 import { useOverlay } from "#imports"
-import { navigateTo } from "#app"
 
 type CallbackFn = () => void | Promise<void>
 type Color = "primary" | "secondary" | "success" | "info" | "warning" | "error" | (string & {})
@@ -20,6 +20,17 @@ export interface DialogConfirmOptions {
   ui?: any
 }
 
+export interface DialogAlertOptions {
+  title: string
+  description?: string
+  icon?: string
+  label?: string
+  color?: Color
+  variant?: Variant
+  onDismiss?: CallbackFn
+  ui?: any
+}
+
 export const useDialog = () => {
   const overlay = useOverlay()
 
@@ -33,16 +44,15 @@ export const useDialog = () => {
     modal.open()
   }
 
-  const confirmNavigate = (path: string, options?: Omit<DialogConfirmOptions, "title" | "description" | "onConfirm">) => {
-    confirm({
-      title: "Leave this page?",
-      description: "Are you sure you want to navigate away? Unsaved changes will be lost.",
-      ...options,
-      onConfirm: () => {
-        navigateTo(path)
-      },
+  const alert = (options: DialogAlertOptions): void => {
+    const modal = overlay.create(DialogAlert, {
+      destroyOnClose: true,
+      props: options as any,
     })
+
+    // Auto-open the dialog
+    modal.open()
   }
 
-  return { confirm, confirmNavigate }
+  return { confirm, alert }
 }

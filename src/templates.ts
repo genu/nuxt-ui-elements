@@ -81,6 +81,24 @@ export function addTemplates(options: ModuleOptions, _nuxt: Nuxt) {
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+@keyframes alert-bounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-alert-bounce {
+  animation: alert-bounce 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 `
     },
   })

@@ -13,7 +13,10 @@ export interface ComponentItem {
 
 export function useNavigation() {
   // List of all components organized by category
-  const components: ComponentItem[] = [{ name: "Dialog", path: "/components/dialog", category: "overlays" }]
+  const components: ComponentItem[] = [
+    { name: "Dialog", path: "/components/dialog", category: "overlays" },
+    { name: "Dialog Alert", path: "/components/dialog-alert", category: "overlays" },
+  ]
 
   // Group components by category
   const componentsByCategory = computed(() => {
@@ -22,7 +25,7 @@ export function useNavigation() {
       if (!grouped[component.category]) {
         grouped[component.category] = []
       }
-      grouped[component.category].push(component)
+      grouped[component.category]!.push(component)
     })
     return grouped
   })
