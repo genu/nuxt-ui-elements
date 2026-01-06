@@ -1,18 +1,20 @@
 /**
- * Standard utility library re-exports
- * Import from '#std' for tree-shakeable utilities
+ * Standard utility library
  *
  * @example
- * import { plur, slugify, date } from '#std'
+ * import std from '#std'
  *
- * const text = plur('item', count)
- * const slug = slugify('Hello World')
- * const nextMonth = date.add(date.today(), 1, 'month')
+ * const text = std.plur('item', count)
+ * const slug = std.slugify('Hello World')
+ * const nextMonth = std.date.add(std.date.today(), 1, 'month')
  */
 
-// String utilities
-export { default as plur } from "plur"
-export { default as slugify } from "@sindresorhus/slugify"
+import plur from "plur"
+import slugify from "@sindresorhus/slugify"
+import * as date from "./std/date"
 
-// Date utilities - all functions exported as namespace
-export * as date from "./std/date"
+export default {
+  plur,
+  slugify,
+  date,
+} as const
