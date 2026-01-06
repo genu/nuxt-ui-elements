@@ -9,12 +9,7 @@
  * const formatted = format(nextMonth, 'MMMM D, YYYY') // "January 15, 2024"
  */
 
-import type {
-  CalendarDate,
-  CalendarDateTime,
-  DateValue,
-  ZonedDateTime,
-} from "@internationalized/date"
+import type { CalendarDate, CalendarDateTime, DateValue, ZonedDateTime } from "@internationalized/date"
 import {
   endOfWeek,
   getDayOfWeek,
@@ -150,16 +145,11 @@ export function set(
   let dateValue = parseDateInput(input)
 
   if (values.year !== undefined) dateValue = dateValue.set({ year: values.year })
-  if (values.month !== undefined)
-    dateValue = dateValue.set({ month: values.month })
+  if (values.month !== undefined) dateValue = dateValue.set({ month: values.month })
   if (values.day !== undefined) dateValue = dateValue.set({ day: values.day })
 
   // For time components, ensure we have a CalendarDateTime or ZonedDateTime
-  if (
-    values.hour !== undefined ||
-    values.minute !== undefined ||
-    values.second !== undefined
-  ) {
+  if (values.hour !== undefined || values.minute !== undefined || values.second !== undefined) {
     if (!("hour" in dateValue)) {
       dateValue = toCalendarDateTime(dateValue as CalendarDate)
     }
@@ -215,16 +205,11 @@ export function toDate(input: Date | string | DateValue, timeZone?: string): Dat
  * format(someDate, 'MMMM D, YYYY')
  * format(someDate, 'MMM DD, YYYY h:mm A')
  */
-export function format(
-  input: Date | string | DateValue,
-  formatString = "YYYY-MM-DD",
-  locale = "en-US",
-): string {
+export function format(input: Date | string | DateValue, formatString = "YYYY-MM-DD", locale = "en-US"): string {
   const jsDate = toDate(input)
 
   // Helper to pad numbers
-  const pad = (num: number, length = 2): string =>
-    String(num).padStart(length, "0")
+  const pad = (num: number, length = 2): string => String(num).padStart(length, "0")
 
   // Helper to get locale-specific names
   const getMonthName = (monthIndex: number, short = false): string => {
@@ -329,10 +314,7 @@ export function format(
  * relative(someDate) // "2 days ago"
  * relative(futureDate) // "in 3 months"
  */
-export function relative(
-  input: Date | string | DateValue,
-  locale = "en-US",
-): string {
+export function relative(input: Date | string | DateValue, locale = "en-US"): string {
   const nowMs = new Date().getTime()
   const targetMs = toDate(input).getTime()
   const diffMs = targetMs - nowMs
@@ -374,9 +356,7 @@ export function asCalendarDate(input: Date | string | DateValue): CalendarDate {
  * @example
  * asCalendarDateTime(someDate)
  */
-export function asCalendarDateTime(
-  input: Date | string | DateValue,
-): CalendarDateTime {
+export function asCalendarDateTime(input: Date | string | DateValue): CalendarDateTime {
   const dateValue = parseDateInput(input)
   if ("hour" in dateValue) return dateValue as CalendarDateTime
   return toCalendarDateTime(dateValue as CalendarDate)
@@ -390,19 +370,13 @@ export function asCalendarDateTime(
  * @example
  * asZonedDateTime(someDate, 'America/New_York')
  */
-export function asZonedDateTime(
-  input: Date | string | DateValue,
-  timeZone?: string,
-): ZonedDateTime {
+export function asZonedDateTime(input: Date | string | DateValue, timeZone?: string): ZonedDateTime {
   const dateValue = parseDateInput(input)
   const tz = timeZone ?? getLocalTimeZone()
   if ("timeZone" in dateValue) return dateValue as ZonedDateTime
 
   // Convert to CalendarDateTime first if needed
-  const dateTime =
-    "hour" in dateValue
-      ? (dateValue as CalendarDateTime)
-      : toCalendarDateTime(dateValue as CalendarDate)
+  const dateTime = "hour" in dateValue ? (dateValue as CalendarDateTime) : toCalendarDateTime(dateValue as CalendarDate)
 
   // Create ZonedDateTime manually
   return parseZonedDateTime(`${dateTime.toString()}[${tz}]`)
@@ -416,10 +390,7 @@ export function asZonedDateTime(
  * @example
  * isBefore(date1, date2)
  */
-export function isBefore(
-  input: Date | string | DateValue,
-  other: DateValue | Date | string,
-): boolean {
+export function isBefore(input: Date | string | DateValue, other: DateValue | Date | string): boolean {
   const dateValue = parseDateInput(input)
   const otherValue = parseDateInput(other)
   return dateValue.compare(otherValue) < 0
@@ -433,10 +404,7 @@ export function isBefore(
  * @example
  * isAfter(date1, date2)
  */
-export function isAfter(
-  input: Date | string | DateValue,
-  other: DateValue | Date | string,
-): boolean {
+export function isAfter(input: Date | string | DateValue, other: DateValue | Date | string): boolean {
   const dateValue = parseDateInput(input)
   const otherValue = parseDateInput(other)
   return dateValue.compare(otherValue) > 0
@@ -450,10 +418,7 @@ export function isAfter(
  * @example
  * isSame(date1, date2)
  */
-export function isSame(
-  input: Date | string | DateValue,
-  other: DateValue | Date | string,
-): boolean {
+export function isSame(input: Date | string | DateValue, other: DateValue | Date | string): boolean {
   const dateValue = parseDateInput(input)
   const otherValue = parseDateInput(other)
   return dateValue.compare(otherValue) === 0
@@ -522,13 +487,9 @@ export function isBetween(
   const endValue = parseDateInput(end)
 
   if (inclusive) {
-    return (
-      dateValue.compare(startValue) >= 0 && dateValue.compare(endValue) <= 0
-    )
+    return dateValue.compare(startValue) >= 0 && dateValue.compare(endValue) <= 0
   } else {
-    return (
-      dateValue.compare(startValue) > 0 && dateValue.compare(endValue) < 0
-    )
+    return dateValue.compare(startValue) > 0 && dateValue.compare(endValue) < 0
   }
 }
 
@@ -542,11 +503,7 @@ export function isBetween(
  * startOf(someDate, 'month')
  * startOf(someDate, 'week', 'en-US')
  */
-export function startOf(
-  input: Date | string | DateValue,
-  unit: "day" | "week" | "month" | "year",
-  locale = "en-US",
-): CalendarDate {
+export function startOf(input: Date | string | DateValue, unit: "day" | "week" | "month" | "year", locale = "en-US"): CalendarDate {
   const dateValue = parseDateInput(input)
   const calDate = toCalendarDate(dateValue)
 
@@ -574,11 +531,7 @@ export function startOf(
  * endOf(someDate, 'month')
  * endOf(someDate, 'week', 'en-US')
  */
-export function endOf(
-  input: Date | string | DateValue,
-  unit: "day" | "week" | "month" | "year",
-  locale = "en-US",
-): CalendarDate {
+export function endOf(input: Date | string | DateValue, unit: "day" | "week" | "month" | "year", locale = "en-US"): CalendarDate {
   const dateValue = parseDateInput(input)
   const calDate = toCalendarDate(dateValue)
 
@@ -654,9 +607,4 @@ export {
   getLocalTimeZone,
 }
 
-export type {
-  CalendarDate,
-  CalendarDateTime,
-  DateValue,
-  ZonedDateTime,
-}
+export type { CalendarDate, CalendarDateTime, DateValue, ZonedDateTime }
