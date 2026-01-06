@@ -54,8 +54,11 @@ function parseDateInput(input?: Date | string | DateValue): DateValue {
         return parseDate(datePart)
       }
     }
-    // Otherwise parse as datetime with timezone
-    return parseZonedDateTime(isoString)
+    // Convert JS Date to ZonedDateTime properly
+    // ISO string format from toISOString() is "2024-01-15T14:30:00.123Z"
+    // We need to convert it to the format parseZonedDateTime expects
+    const withTimezone = isoString.replace("Z", "+00:00[UTC]")
+    return parseZonedDateTime(withTimezone)
   }
 
   // String parsing
