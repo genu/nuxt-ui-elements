@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.22
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.21...v0.1.22)
+
+### 💅 Refactors
+
+- Remove unused 'after:leave' event from DialogAlert and DialogConfirm components ([7bd11c2](https://github.com/genu/nuxt-ui-elements/commit/7bd11c2))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.21
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.20...v0.1.21)
