@@ -12,7 +12,6 @@
   interface DialogAlertEmits {
     "update:open": [value: boolean]
     close: [value?: any]
-    "after:leave": []
   }
 
   interface DialogAlertProps {
@@ -69,9 +68,7 @@
       header: ui.header({ class: uiProps?.header }),
       body: ui.body({ class: uiProps?.body }),
       footer: ui.footer({ class: uiProps?.footer }),
-    }"
-    @close="emits('close', $event)"
-    @after:leave="emits('after:leave')">
+    }">
     <template #header>
       <div class="relative w-full flex flex-col items-center text-center gap-3">
         <UIcon v-if="icon" :name="icon" data-slot="icon" :class="ui.icon({ class: uiProps?.icon })" />

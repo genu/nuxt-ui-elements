@@ -13,7 +13,6 @@
   interface DialogConfirmEmits {
     "update:open": [value: boolean]
     close: [value?: any]
-    "after:leave": []
   }
 
   interface DialogConfirmProps {
@@ -147,9 +146,7 @@
       header: ui.header({ class: uiProps?.header }),
       body: ui.body({ class: uiProps?.body }),
       footer: ui.footer({ class: uiProps?.footer }),
-    }"
-    @close="emits('close', $event)"
-    @after:leave="emits('after:leave')">
+    }">
     <template #header>
       <div class="relative w-full flex items-start gap-3">
         <UIcon v-if="dialogIcon" :name="dialogIcon" data-slot="icon" :class="ui.icon({ class: uiProps?.icon })" />
