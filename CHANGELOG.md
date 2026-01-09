@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.24
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.23...v0.1.24)
+
+### 💅 Refactors
+
+- Update type imports and interfaces in Dialog components ([552640d](https://github.com/genu/nuxt-ui-elements/commit/552640d))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.23
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.22...v0.1.23)
