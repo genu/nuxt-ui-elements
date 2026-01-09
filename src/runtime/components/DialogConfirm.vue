@@ -1,9 +1,8 @@
-<!-- eslint-disable @typescript-eslint/no-empty-object-type -->
 <script lang="ts">
   import type { AppConfig } from "@nuxt/schema"
   import theme from "#build/ui-elements/dialog-confirm"
   import type { ButtonProps } from "@nuxt/ui"
-  import type { ComponentConfig } from "../types/tv"
+  import type { ComponentConfig } from "../types"
   import { computed, ref } from "vue"
   import { DialogTitle, DialogDescription } from "reka-ui"
   import { tv } from "../utils/tv"
@@ -15,17 +14,17 @@
     close: [value?: any]
   }
 
-  interface DialogConfirmProps {
+  export interface DialogConfirmProps {
     title?: string
     description?: string
     icon?: boolean
     confirmLabel?: string
     dismissLabel?: string
-    close?: boolean
     color?: DialogConfirm["variants"]["color"]
     variant?: DialogConfirm["variants"]["variant"]
-    onConfirm?: (() => void) | (() => Promise<void>)
-    onDismiss?: () => void
+    close?: boolean
+    onConfirm?: () => void | Promise<void>
+    onDismiss?: () => void | Promise<void>
     ui?: DialogConfirm["slots"]
   }
 </script>

@@ -1,8 +1,7 @@
-<!-- eslint-disable @typescript-eslint/no-empty-object-type -->
 <script lang="ts">
   import type { AppConfig } from "@nuxt/schema"
   import theme from "#build/ui-elements/dialog-alert"
-  import type { ComponentConfig } from "../types/tv"
+  import type { ComponentConfig } from "../types"
   import { computed } from "vue"
   import { DialogTitle, DialogDescription } from "reka-ui"
   import { tv } from "../utils/tv"
@@ -14,14 +13,14 @@
     close: [value?: any]
   }
 
-  interface DialogAlertProps {
+  export interface DialogAlertProps {
     title?: string
     description?: string
     icon?: string
     label?: string
     color?: DialogAlert["variants"]["color"]
     variant?: DialogAlert["variants"]["variant"]
-    onDismiss?: (() => void) | (() => Promise<void>)
+    onDismiss?: () => void | Promise<void>
     ui?: DialogAlert["slots"]
   }
 </script>
