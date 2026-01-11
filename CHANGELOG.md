@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.1.25
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.24...v0.1.25)
+
+### 🚀 Enhancements
+
+- **uploader:** Implement useUploader composable with file management and upload functionality ([5c859e1](https://github.com/genu/nuxt-ui-elements/commit/5c859e1))
+
+### 🩹 Fixes
+
+- Disable vue/html-self-closing rule in ESLint configuration ([5f08b3d](https://github.com/genu/nuxt-ui-elements/commit/5f08b3d))
+- Update formatting and improve readability in various files ([8191442](https://github.com/genu/nuxt-ui-elements/commit/8191442))
+
+### 📖 Documentation
+
+- Update README to enhance clarity and structure, add dialog component usage examples ([9914082](https://github.com/genu/nuxt-ui-elements/commit/9914082))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.24
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.23...v0.1.24)
