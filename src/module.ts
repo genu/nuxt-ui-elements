@@ -1,5 +1,8 @@
-import { defineNuxtModule, addImportsDir, createResolver } from "@nuxt/kit"
+import { defineNuxtModule, addImportsDir, addImports, createResolver } from "@nuxt/kit"
 import { addTemplates } from "./templates"
+
+// Export all types from runtime
+export type * from "./runtime/types"
 
 type Color = "primary" | "secondary" | "success" | "info" | "warning" | "error" | (string & {})
 
@@ -52,10 +55,20 @@ export default defineNuxtModule<ModuleOptions>({
     // Add CSS file with @source directives for Tailwind v4
     nuxt.options.css.push(resolver.resolve("./runtime/index.css"))
 
-    // Auto-import composables (useDialog)
+    // Basic composables
     addImportsDir(resolver.resolve("./runtime/composables"))
+    // Advanced composables
+    addImports([
+      {
+        name: "useUploader",
+        from: resolver.resolve("./runtime/composables/useUploader"),
+      },
+    ])
 
     // Add #std alias for standard utilities (tree-shakeable)
     nuxt.options.alias["#std"] = resolver.resolve("./runtime/utils/std")
+
+    // Add #uiElements alias for types and runtime
+    nuxt.options.alias["#ui-elements"] = resolver.resolve("./runtime")
   },
 })

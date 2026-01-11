@@ -8,7 +8,7 @@ export interface NavigationItem {
 export interface ComponentItem {
   name: string
   path: string
-  category: "overlays" | "backgrounds" | "buttons" | "animations" | "other"
+  category: "overlays" | "backgrounds" | "buttons" | "animations" | "composables" | "other"
 }
 
 export function useNavigation() {
@@ -16,6 +16,7 @@ export function useNavigation() {
   const components: ComponentItem[] = [
     { name: "Dialog", path: "/components/dialog", category: "overlays" },
     { name: "Dialog Alert", path: "/components/dialog-alert", category: "overlays" },
+    { name: "Uploader", path: "/components/uploader", category: "composables" },
   ]
 
   // Group components by category
@@ -46,6 +47,18 @@ export function useNavigation() {
         label: "Overlays",
         icon: "i-heroicons-rectangle-stack",
         children: componentsByCategory.value.overlays.map((c) => ({
+          label: c.name,
+          to: c.path,
+        })),
+      })
+    }
+
+    // Add Composables section
+    if (componentsByCategory.value.composables?.length) {
+      links.push({
+        label: "Composables",
+        icon: "i-heroicons-code-bracket",
+        children: componentsByCategory.value.composables.map((c) => ({
           label: c.name,
           to: c.path,
         })),
