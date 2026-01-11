@@ -236,7 +236,11 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400">Total Progress: {{ totalProgress }}%</p>
               </div>
               <div class="flex gap-2">
-                <UButton v-if="!config.autoProceed" color="primary" :disabled="files.every((f) => f.status !== 'waiting')" @click="startUpload">
+                <UButton
+                  v-if="!config.autoProceed"
+                  color="primary"
+                  :disabled="files.every((f) => f.status !== 'waiting')"
+                  @click="startUpload">
                   Upload All
                 </UButton>
                 <UButton color="error" variant="soft" @click="clearAllFiles"> Clear All </UButton>

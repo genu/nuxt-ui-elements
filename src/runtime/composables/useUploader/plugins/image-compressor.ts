@@ -164,7 +164,7 @@ export const PluginImageCompressor: PluginFn<ImageCompressorOptions> = (_, plugi
 
             // Store original size for comparison
             file.meta.originalSize = file.size
-            file.meta.compressionRatio = ((file.size - compressedBlob.size) / file.size * 100).toFixed(1)
+            file.meta.compressionRatio = (((file.size - compressedBlob.size) / file.size) * 100).toFixed(1)
 
             return {
               ...file,
