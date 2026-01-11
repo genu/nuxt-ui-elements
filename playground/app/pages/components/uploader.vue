@@ -273,7 +273,7 @@
 
                 <!-- Progress Bar -->
                 <div v-if="file.status === 'uploading' || file.status === 'complete'" class="mt-2">
-                  <UProgress :value="file.progress.percentage" />
+                  <UProgress :model-value="file.progress.percentage" />
                 </div>
 
                 <!-- Error Message -->
