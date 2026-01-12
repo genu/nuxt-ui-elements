@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.1.26
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.25...v0.1.26)
+
+### 🚀 Enhancements
+
+- Add @azure/storage-file-datalake as a devDependency ([96e6ca0](https://github.com/genu/nuxt-ui-elements/commit/96e6ca0))
+- Re-architect the plugin system ([2cf90e5](https://github.com/genu/nuxt-ui-elements/commit/2cf90e5))
+- Add Azure Data Lake storage plugin with upload and management capabilities ([596c9d6](https://github.com/genu/nuxt-ui-elements/commit/596c9d6))
+
+### 🩹 Fixes
+
+- **uploader:** Update UProgress binding to use model-value for progress percentage ([d21b3b5](https://github.com/genu/nuxt-ui-elements/commit/d21b3b5))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.25
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.24...v0.1.25)
