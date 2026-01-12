@@ -5,7 +5,7 @@ import { defineUploaderPlugin } from "../../types"
 type DataLakeDirectoryClient = typeof import("@azure/storage-file-datalake").DataLakeDirectoryClient
 type PathHttpHeaders = import("@azure/storage-file-datalake").PathHttpHeaders
 
-export interface AzureStorageOptions {
+export interface AzureDataLakeOptions {
   /**
    * Static SAS URL for Azure Data Lake Storage
    */
@@ -13,13 +13,13 @@ export interface AzureStorageOptions {
 
   /**
    * Function to dynamically fetch SAS URL
-   * Useful for refreshing tokens or getting them from an API
+   * Use this to handle token expiration/refreshing.
+   * If provided, it will be called before every file operation.
    */
   getSASUrl?: () => Promise<string>
 
   /**
    * Optional subdirectory path within the container
-   * Will be created if it doesn't exist
    * @example "uploads/images"
    */
   path?: string
@@ -33,6 +33,14 @@ export interface AzureStorageOptions {
    * Custom HTTP headers for uploaded files
    */
   pathHttpHeaders?: Omit<PathHttpHeaders, "contentType">
+
+  /**
+   * Automatically try to create the directory if it doesn't exist.
+   * Disable this if your SAS token only has 'Write' (Blob) permissions
+   * and not 'Create' (Directory) permissions.
+   * @default true
+   */
+  autoCreateDirectory?: boolean
 }
 
 export interface AzureUploadResult {
@@ -47,17 +55,40 @@ export interface AzureUploadResult {
   blobPath: string
 }
 
-export const PluginAzureStorage = defineUploaderPlugin<AzureStorageOptions>((options) => {
+export const PluginAzureDataLake = defineUploaderPlugin<AzureDataLakeOptions>((options) => {
   // Lazy import to avoid bundling Azure SDK unless this plugin is used
   let DataLakeDirectoryClient: DataLakeDirectoryClient
 
   const sasURL = ref(options.sasURL || "")
+  let refreshPromise: Promise<string> | null = null
+
+  // Cache to store directories we've already checked/created to avoid redundant API calls
+  const directoryCheckedCache = new Set<string>()
 
   // Initialize SAS URL if getSASUrl is provided
   if (options.getSASUrl && !options.sasURL) {
     options.getSASUrl().then((url) => {
       sasURL.value = url
     })
+  }
+
+  /**
+   * Check if the current SAS URL is expired or about to expire (within buffer)
+   */
+  const isTokenExpired = (urlStr: string, bufferMinutes = 5): boolean => {
+    if (!urlStr) return true
+    try {
+      const url = new URL(urlStr)
+      const expiryStr = url.searchParams.get("se") // Azure SAS "Signed Expiry"
+      if (!expiryStr) return true // No expiry? err on safe side
+
+      const expiry = new Date(expiryStr)
+      const now = new Date()
+      // Check if now + buffer > expiry
+      return now.getTime() + bufferMinutes * 60 * 1000 > expiry.getTime()
+    } catch {
+      return true
+    }
   }
 
   /**
@@ -70,6 +101,17 @@ export const PluginAzureStorage = defineUploaderPlugin<AzureStorageOptions>((opt
       DataLakeDirectoryClient = module.DataLakeDirectoryClient
     }
 
+    // Smart Refresh: Only fetch if empty or expired
+    if (options.getSASUrl && isTokenExpired(sasURL.value)) {
+      if (!refreshPromise) {
+        refreshPromise = options.getSASUrl().then((url) => {
+          refreshPromise = null
+          return url
+        })
+      }
+      sasURL.value = await refreshPromise
+    }
+
     let dir = new DataLakeDirectoryClient(sasURL.value)
 
     // Navigate to subdirectory if path is specified
@@ -77,13 +119,19 @@ export const PluginAzureStorage = defineUploaderPlugin<AzureStorageOptions>((opt
       const cleanPath = options.path.replace(/^\/+|\/+$/g, "") // trim leading/trailing slashes
       dir = dir.getSubdirectoryClient(cleanPath)
 
-      // Create directory if it doesn't exist
-      try {
-        await dir.createIfNotExists()
-      } catch (error) {
-        // Ignore if already exists
-        if (import.meta.dev) {
-          console.debug(`Azure directory already exists or couldn't be created: ${cleanPath}`, error)
+      // Only attempt creation if enabled (default true) AND not already checked
+      const shouldCreateDir = options.autoCreateDirectory ?? true
+
+      if (shouldCreateDir && !directoryCheckedCache.has(cleanPath)) {
+        // Create directory if it doesn't exist
+        try {
+          await dir.createIfNotExists()
+          directoryCheckedCache.add(cleanPath)
+        } catch (error) {
+          // Ignore if already exists
+          if (import.meta.dev) {
+            console.debug(`Azure directory already exists or couldn't be created: ${cleanPath}`, error)
+          }
         }
       }
     }
@@ -92,7 +140,7 @@ export const PluginAzureStorage = defineUploaderPlugin<AzureStorageOptions>((opt
   }
 
   return {
-    id: "azure-storage",
+    id: "azure-datalake-storage",
     hooks: {
       /**
        * Upload file to Azure Blob Storage

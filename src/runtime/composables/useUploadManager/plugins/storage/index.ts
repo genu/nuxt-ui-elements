@@ -8,7 +8,7 @@
  * If you need multiple storage destinations, create multiple uploader instances.
  */
 
-export { PluginAzureStorage, type AzureStorageOptions, type AzureUploadResult } from "./azure"
+export { PluginAzureDataLake, type AzureDataLakeOptions, type AzureUploadResult } from "./azure-datalake"
 
 // Future storage plugins will be exported here:
 // export { PluginS3Storage } from './s3'
