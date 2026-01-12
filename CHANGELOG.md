@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.28
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.27...v0.1.28)
+
+### 💅 Refactors
+
+- **upload-manager:** Simplify context and type definitions in useUploadManager" ([2cb0b53](https://github.com/genu/nuxt-ui-elements/commit/2cb0b53))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.27
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.26...v0.1.27)
