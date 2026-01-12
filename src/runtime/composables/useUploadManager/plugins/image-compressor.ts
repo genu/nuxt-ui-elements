@@ -1,4 +1,16 @@
-import type { PluginFn } from "../types"
+import type { UploadFile } from "../types"
+import { defineUploaderPlugin } from "../types"
+
+/**
+ * Events emitted by the image compressor plugin
+ * Note: These are automatically prefixed with "image-compressor:" by the plugin system
+ * e.g., "start" becomes "image-compressor:start"
+ */
+type ImageCompressorEvents = {
+  start: { file: UploadFile; originalSize: number }
+  complete: { file: UploadFile; originalSize: number; compressedSize: number; savedBytes: number }
+  skip: { file: UploadFile; reason: string }
+}
 
 interface ImageCompressorOptions {
   /**
@@ -33,34 +45,19 @@ interface ImageCompressorOptions {
   preserveMetadata?: boolean
 }
 
-/**
- * Compresses images before upload to reduce bandwidth and storage costs.
- * Particularly useful for social media scheduling where images are often large.
- *
- * @example
- * ```ts
- * const uploader = useUpload()
- * uploader.addPlugin(PluginImageCompressor, {
- *   maxWidth: 2048,
- *   quality: 0.85,
- *   outputFormat: 'webp'
- * })
- * ```
- */
-export const PluginImageCompressor: PluginFn<ImageCompressorOptions> = (_, pluginOptions) => {
+export const PluginImageCompressor = defineUploaderPlugin<ImageCompressorOptions, ImageCompressorEvents>((pluginOptions) => {
   const {
     maxWidth = 1920,
     maxHeight = 1920,
     quality = 0.85,
     outputFormat = "auto",
     minSizeToCompress = 100000, // 100KB
-    preserveMetadata = true,
   } = pluginOptions
 
   return {
     id: "image-compressor",
     hooks: {
-      process: async (file) => {
+      process: async (file, context) => {
         // Only process images
         if (!file.mimeType.startsWith("image/")) {
           return file
@@ -68,18 +65,27 @@ export const PluginImageCompressor: PluginFn<ImageCompressorOptions> = (_, plugi
 
         // Skip GIFs as they need special handling
         if (file.mimeType === "image/gif") {
+          context.emit("skip", { file, reason: "GIF format not supported" })
           return file
         }
 
         // Skip SVGs as they're already optimized
         if (file.mimeType === "image/svg+xml") {
+          context.emit("skip", { file, reason: "SVG already optimized" })
           return file
         }
 
         // Skip small files
         if (file.size < minSizeToCompress) {
+          context.emit("skip", {
+            file,
+            reason: `File size (${file.size} bytes) below minimum threshold`,
+          })
           return file
         }
+
+        // Emit compression start
+        context.emit("start", { file, originalSize: file.size })
 
         try {
           const sourceUrl = URL.createObjectURL(file.data)
@@ -95,6 +101,10 @@ export const PluginImageCompressor: PluginFn<ImageCompressorOptions> = (_, plugi
           const needsResize = image.width > maxWidth || image.height > maxHeight
           if (!needsResize && outputFormat === "auto") {
             URL.revokeObjectURL(sourceUrl)
+            context.emit("skip", {
+              file,
+              reason: "Image within size limits and format is auto",
+            })
             return file
           }
 
@@ -155,6 +165,16 @@ export const PluginImageCompressor: PluginFn<ImageCompressorOptions> = (_, plugi
 
           // Only use compressed version if it's actually smaller
           if (compressedBlob.size < file.size) {
+            const savedBytes = file.size - compressedBlob.size
+
+            // Emit compression complete event
+            context.emit("complete", {
+              file,
+              originalSize: file.size,
+              compressedSize: compressedBlob.size,
+              savedBytes,
+            })
+
             // Update file extension if format changed
             let newId = file.id
             if (outputFormat !== "auto" && outputFormat !== file.meta.extension) {
@@ -182,6 +202,10 @@ export const PluginImageCompressor: PluginFn<ImageCompressorOptions> = (_, plugi
           }
 
           // If compressed version is larger, keep original
+          context.emit("skip", {
+            file,
+            reason: "Compressed version larger than original",
+          })
           return file
         } catch (error) {
           // If compression fails, continue with original file
@@ -191,4 +215,4 @@ export const PluginImageCompressor: PluginFn<ImageCompressorOptions> = (_, plugi
       },
     },
   }
-}
+})

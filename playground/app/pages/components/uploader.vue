@@ -1,7 +1,16 @@
 <script setup lang="ts">
   import type { UploadFile } from "#ui-elements"
+  import {
+    PluginAzureStorage,
+    ValidatorMaxFiles,
+    ValidatorMaxfileSize,
+    ValidatorAllowedFileTypes,
+    PluginThumbnailGenerator,
+    PluginImageCompressor,
+  } from "#ui-elements"
 
-  const toast = useToast()
+  // Storage mode toggle
+  const useStoragePlugin = ref(false)
 
   // Configuration state
   const config = ref({
@@ -13,57 +22,132 @@
     autoProceed: false,
   })
 
-  // Create uploader with reactive config
-  const { files, totalProgress, addFiles, removeFile, clearFiles, upload, onUpload, on } = useUploader({
-    maxFiles: config.value.maxFiles || false,
-    maxFileSize: config.value.maxFileSize || false,
-    allowedFileTypes: config.value.allowedFileTypes.length > 0 ? config.value.allowedFileTypes : false,
-    thumbnails: config.value.thumbnails,
-    imageCompression: config.value.imageCompression,
-    autoProceed: config.value.autoProceed,
-  })
+  // Create uploader with all plugins explicitly defined
+  const createUploader = () => {
+    const plugins = []
 
-  // Configure upload handler
-  onUpload(async (file: UploadFile, onProgress: (progress: number) => void) => {
-    // Simulate upload with progress
-    return new Promise((resolve) => {
-      let progress = 0
-      const interval = setInterval(() => {
-        progress += 10
-        onProgress(progress)
+    // Validators
+    if (config.value.maxFiles) {
+      plugins.push(ValidatorMaxFiles({ maxFiles: config.value.maxFiles }))
+    }
 
-        if (progress >= 100) {
-          clearInterval(interval)
-          resolve(`https://example.com/uploads/${file.id}`)
-        }
-      }, 200)
+    if (config.value.maxFileSize) {
+      plugins.push(ValidatorMaxfileSize({ maxFileSize: config.value.maxFileSize }))
+    }
+
+    if (config.value.allowedFileTypes.length > 0) {
+      plugins.push(ValidatorAllowedFileTypes({ allowedFileTypes: config.value.allowedFileTypes }))
+    }
+
+    // Processors
+    if (config.value.thumbnails) {
+      plugins.push(
+        PluginThumbnailGenerator({
+          width: 128,
+          height: 128,
+          quality: 1,
+        }),
+      )
+    }
+
+    if (config.value.imageCompression) {
+      plugins.push(
+        PluginImageCompressor({
+          maxWidth: 1920,
+          maxHeight: 1920,
+          quality: 0.85,
+          outputFormat: "auto",
+          minSizeToCompress: 100000,
+          preserveMetadata: true,
+        }),
+      )
+    }
+
+    // Storage (optional)
+    if (useStoragePlugin.value) {
+      plugins.push(
+        PluginAzureStorage({
+          sasURL: "mock://azure-storage",
+          path: "uploads/playground",
+          metadata: { source: "playground" },
+        }),
+      )
+    }
+
+    return useUploadManager({
+      autoProceed: config.value.autoProceed,
+      plugins,
     })
+  }
+
+  // Initialize uploader
+  let uploader = createUploader()
+  let { files, totalProgress, addFiles, removeFile, clearFiles, upload, onUpload, on } = uploader
+
+  // Recreate uploader when storage mode changes
+  watch(useStoragePlugin, () => {
+    uploader = createUploader()
+    const newUploader = uploader
+    files = newUploader.files
+    totalProgress = newUploader.totalProgress
+    addFiles = newUploader.addFiles
+    removeFile = newUploader.removeFile
+    clearFiles = newUploader.clearFiles
+    upload = newUploader.upload
+    onUpload = newUploader.onUpload
+    on = newUploader.on
+
+    setupUploader()
   })
+
+  // Configure upload handler (only used when storage plugin is disabled)
+  const setupUploader = () => {
+    if (!useStoragePlugin.value) {
+      onUpload(async (file: UploadFile, onProgress: (progress: number) => void) => {
+        // Simulate upload with progress
+        return new Promise((resolve) => {
+          let progress = 0
+          const interval = setInterval(() => {
+            progress += 10
+            onProgress(progress)
+
+            if (progress >= 100) {
+              clearInterval(interval)
+              resolve(`https://example.com/uploads/${file.id}`)
+            }
+          }, 200)
+        })
+      })
+    }
+
+    setupEventListeners()
+  }
 
   // Setup event listeners
-  on("file:added", (file) => {
-    toast.add({
-      title: "File added",
-      description: `${file.name} (${formatFileSize(file.size)})`,
-      color: "primary",
+  const setupEventListeners = () => {
+    on("file:added", (file) => {
+      console.log(`File added: ${file.name} (${formatFileSize(file.size)})`)
     })
-  })
 
-  on("file:error", ({ file, error }) => {
-    toast.add({
-      title: "Upload error",
-      description: `${file.name}: ${error.message}`,
-      color: "error",
+    on("file:error", ({ file, error }) => {
+      console.log(`Error uploading ${file.name}: ${error.message}`)
     })
-  })
 
-  on("upload:complete", (files) => {
-    toast.add({
-      title: "Upload complete",
-      description: `${files.length} file(s) uploaded successfully`,
-      color: "success",
+    on("upload:complete", (files) => {
+      console.log("Upload complete:", files)
     })
-  })
+
+    // Image compression events
+    on("image-compressor:complete", (payload: any) => {
+      console.log("[Compression] Completed", payload)
+    })
+
+    on("image-compressor:skip", (payload: any) => {
+      console.log("[Compression] Skipped", payload)
+    })
+  }
+
+  setupUploader()
 
   // File input handler
   const fileInput = ref<HTMLInputElement>()
@@ -205,6 +289,15 @@
               <UCheckbox v-model="config.autoProceed" />
               <span class="text-sm font-medium">Auto Upload</span>
             </label>
+          </div>
+
+          <!-- Storage Plugin -->
+          <div class="pt-4 border-t dark:border-gray-700">
+            <label class="flex items-center gap-2">
+              <UCheckbox v-model="useStoragePlugin" />
+              <span class="text-sm font-medium">Use Azure Storage Plugin (Mock)</span>
+            </label>
+            <p class="text-xs text-gray-500 mt-1 ml-6">Demonstrates plugin-based storage adapters</p>
           </div>
         </div>
       </UCard>

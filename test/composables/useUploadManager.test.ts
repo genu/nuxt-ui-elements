@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { useUploader } from "../../src/runtime/composables/useUploader"
+import { useUploadManager } from "../../src/runtime/composables/useUploadManager"
 
-describe("useUploader", () => {
+describe("useUploadManager", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
   })
 
   it("initializes with default state", () => {
-    const { files, totalProgress, status } = useUploader()
+    const { files, totalProgress, status } = useUploadManager()
 
     expect(files.value).toEqual([])
     expect(totalProgress.value).toBe(0)
@@ -15,7 +15,7 @@ describe("useUploader", () => {
   })
 
   it("adds files correctly with generated IDs", async () => {
-    const { addFile, files } = useUploader()
+    const { addFile, files } = useUploadManager()
     const file = new File(["content"], "test.png", { type: "image/png" })
 
     await addFile(file)
@@ -29,7 +29,7 @@ describe("useUploader", () => {
   })
 
   it("removes files correctly", async () => {
-    const { addFile, removeFile, files } = useUploader()
+    const { addFile, removeFile, files } = useUploadManager()
     const file = new File(["content"], "test.png", { type: "image/png" })
     const addedFile = await addFile(file)
 
@@ -43,7 +43,7 @@ describe("useUploader", () => {
   })
 
   it("clears all files", async () => {
-    const { addFile, clearFiles, files } = useUploader()
+    const { addFile, clearFiles, files } = useUploadManager()
     await addFile(new File(["1"], "1.png", { type: "image/png" }))
     await addFile(new File(["2"], "2.png", { type: "image/png" }))
 
@@ -54,7 +54,7 @@ describe("useUploader", () => {
   })
 
   it("reorders files correctly", async () => {
-    const { addFile, reorderFile, files } = useUploader()
+    const { addFile, reorderFile, files } = useUploadManager()
     await addFile(new File(["1"], "1.png", { type: "image/png" })) // Index 0
     await addFile(new File(["2"], "2.png", { type: "image/png" })) // Index 1
 
@@ -67,7 +67,7 @@ describe("useUploader", () => {
   })
 
   it("handles successful upload flow", async () => {
-    const { addFile, upload, onUpload, files } = useUploader()
+    const { addFile, upload, onUpload, files } = useUploadManager()
     const file = new File(["content"], "test.png", { type: "image/png" })
     await addFile(file)
 
@@ -91,7 +91,7 @@ describe("useUploader", () => {
   })
 
   it("handles upload errors", async () => {
-    const { addFile, upload, onUpload, files } = useUploader()
+    const { addFile, upload, onUpload, files } = useUploadManager()
     const file = new File(["content"], "test.png", { type: "image/png" })
     await addFile(file)
 
@@ -108,7 +108,7 @@ describe("useUploader", () => {
   })
 
   it("calculates total progress correctly", async () => {
-    const { addFile, onUpload, upload, totalProgress } = useUploader()
+    const { addFile, onUpload, upload, totalProgress } = useUploadManager()
     await addFile(new File(["1"], "1.png", { type: "image/png" }))
     await addFile(new File(["2"], "2.png", { type: "image/png" }))
 
@@ -125,7 +125,7 @@ describe("useUploader", () => {
   })
 
   it("initializes existing remote files", async () => {
-    const { initializeExistingFiles, onGetRemoteFile, files } = useUploader()
+    const { initializeExistingFiles, onGetRemoteFile, files } = useUploadManager()
 
     const remoteInfo = {
       mimeType: "image/jpeg",

@@ -1,4 +1,4 @@
-import type { PluginFn } from "../types"
+import { defineUploaderPlugin } from "../types"
 
 interface ValidatorDuplicateFileOptions {
   /**
@@ -12,32 +12,19 @@ interface ValidatorDuplicateFileOptions {
   errorMessage?: string
 }
 
-/**
- * Prevents uploading duplicate files based on name, size, and last modified date.
- * Useful for preventing accidental double-uploads in social media scheduling.
- *
- * @example
- * ```ts
- * const uploader = useUpload()
- * uploader.addPlugin(ValidatorDuplicateFile, {
- *   allowDuplicates: false,
- *   errorMessage: 'This file has already been added'
- * })
- * ```
- */
-export const ValidatorDuplicateFile: PluginFn<ValidatorDuplicateFileOptions> = ({ files }, options) => {
+export const ValidatorDuplicateFile = defineUploaderPlugin<ValidatorDuplicateFileOptions>((options) => {
   const { allowDuplicates = false, errorMessage = "This file has already been added" } = options
 
   return {
     id: "validator-duplicate-file",
     hooks: {
-      validate: async (file) => {
+      validate: async (file, context) => {
         if (allowDuplicates) {
           return file
         }
 
         // Check for duplicates based on name, size, and lastModified
-        const isDuplicate = files.some((existingFile) => {
+        const isDuplicate = context.files.some((existingFile) => {
           const sameSize = existingFile.size === file.size
           const sameName = existingFile.name === file.name
 
@@ -58,4 +45,4 @@ export const ValidatorDuplicateFile: PluginFn<ValidatorDuplicateFileOptions> = (
       },
     },
   }
-}
+})

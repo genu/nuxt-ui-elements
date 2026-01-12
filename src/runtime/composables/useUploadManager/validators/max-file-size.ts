@@ -1,14 +1,14 @@
-import type { PluginFn } from "../types"
+import { defineUploaderPlugin } from "../types"
 
 interface ValidatorMaxfileSizeOptions {
   maxFileSize?: number
 }
 
-export const ValidatorMaxfileSize: PluginFn<ValidatorMaxfileSizeOptions> = (_, options) => {
+export const ValidatorMaxfileSize = defineUploaderPlugin<ValidatorMaxfileSizeOptions>((options) => {
   return {
     id: "validator-max-file-size",
     hooks: {
-      validate: async (file) => {
+      validate: async (file, _context) => {
         if (
           (options.maxFileSize && options.maxFileSize !== Infinity && file.size <= options.maxFileSize) ||
           (options.maxFileSize && options.maxFileSize === Infinity)
@@ -19,4 +19,4 @@ export const ValidatorMaxfileSize: PluginFn<ValidatorMaxfileSizeOptions> = (_, o
       },
     },
   }
-}
+})

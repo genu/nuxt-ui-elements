@@ -60,8 +60,8 @@ export default defineNuxtModule<ModuleOptions>({
     // Advanced composables
     addImports([
       {
-        name: "useUploader",
-        from: resolver.resolve("./runtime/composables/useUploader"),
+        name: "useUploadManager",
+        from: resolver.resolve("./runtime/composables/useUploadManager"),
       },
     ])
 

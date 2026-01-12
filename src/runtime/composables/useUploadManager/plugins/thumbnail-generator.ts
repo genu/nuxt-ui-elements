@@ -1,4 +1,4 @@
-import type { PluginFn } from "../types"
+import { defineUploaderPlugin } from "../types"
 
 interface ThumbnailGeneratorOptions {
   width?: number
@@ -6,11 +6,11 @@ interface ThumbnailGeneratorOptions {
   quality?: number
 }
 
-export const PluginThumbnailGenerator: PluginFn<ThumbnailGeneratorOptions> = (_options, pluginOptions) => {
+export const PluginThumbnailGenerator = defineUploaderPlugin<ThumbnailGeneratorOptions>((pluginOptions) => {
   return {
     id: "thumbnail-generator",
     hooks: {
-      process: async (file) => {
+      process: async (file, _context) => {
         const { width = 100, height = 100, quality = 0.7 } = pluginOptions
 
         const sourceUrl = file.isRemote ? file.remoteUrl! : URL.createObjectURL(file.data)
@@ -83,4 +83,4 @@ export const PluginThumbnailGenerator: PluginFn<ThumbnailGeneratorOptions> = (_o
       },
     },
   }
-}
+})
