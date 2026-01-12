@@ -1,5 +1,5 @@
 import mitt from "mitt"
-import { computed, ref } from "vue"
+import { computed, readonly, ref } from "vue"
 import type {
   UploaderEvents,
   UploadFile,
@@ -418,11 +418,11 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
 
         if (storagePlugin?.hooks.upload) {
           // Use storage plugin for upload
-          const context = {
+          const context: PluginContext & { onProgress: (progress: number) => void } = {
             files: files.value,
             options,
             onProgress,
-            emit: (event: any, payload: any) => {
+            emit: (event, payload) => {
               const prefixedEvent = `${storagePlugin.id}:${String(event)}` as any
               emitter.emit(prefixedEvent, payload)
             },
@@ -518,7 +518,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
 
   return {
     // State
-    files,
+    files: readonly(files),
     totalProgress,
 
     // Core Methods
