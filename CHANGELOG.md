@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.1.29
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.28...v0.1.29)
+
+### 🩹 Fixes
+
+- **dependencies:** Update vitest and coverage-v8 to latest versions ([9490aa4](https://github.com/genu/nuxt-ui-elements/commit/9490aa4))
+
+### 💅 Refactors
+
+- **azure-datalake:** Simplify imports and remove lazy loading of Azure SDK ([9940457](https://github.com/genu/nuxt-ui-elements/commit/9940457))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.28
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.27...v0.1.28)
