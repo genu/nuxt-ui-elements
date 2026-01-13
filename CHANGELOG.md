@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.32
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.31...v0.1.32)
+
+### 🚀 Enhancements
+
+- **upload-manager:** Enhance file handling with preview support and processing hooks ([69a408c](https://github.com/genu/nuxt-ui-elements/commit/69a408c))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.31
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.30...v0.1.31)
