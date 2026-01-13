@@ -65,7 +65,7 @@ type VideoCompressorEvents = {
   error: { file: any; error: Error }
 }
 
-export const PluginVideoCompressor = defineUploaderPlugin<VideoCompressorOptions, VideoCompressorEvents>((pluginOptions) => {
+export const PluginVideoCompressor = defineUploaderPlugin<VideoCompressorOptions, VideoCompressorEvents>((pluginOptions = {}) => {
   return {
     id: "video-compressor",
     hooks: {
@@ -107,10 +107,7 @@ export const PluginVideoCompressor = defineUploaderPlugin<VideoCompressorOptions
           context.emit("start", { file, originalSize: file.size })
 
           const inputUrl = URL.createObjectURL(file.data)
-          const ffmpeg = useFFMpeg({
-            inputUrl,
-            convertOptions: [],
-          })
+          const ffmpeg = useFFMpeg({ inputUrl })
 
           // Load FFmpeg core
           await ffmpeg.load()
