@@ -230,7 +230,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
 
         // Check if a storage plugin is available
         const storagePlugin = getStoragePlugin()
-        let remoteFileData: { mimeType: string; size: number; remoteUrl: string }
+        let remoteFileData: { mimeType: string; size: number; remoteUrl: string; preview?: string }
 
         if (storagePlugin?.hooks.getRemoteFile) {
           // Use storage plugin to get remote file
@@ -259,15 +259,12 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
           size: remoteFileData.size,
           mimeType: remoteFileData.mimeType,
           remoteUrl: remoteFileData.remoteUrl,
+          preview: remoteFileData.preview || file.preview || remoteFileData.remoteUrl, // Use preview from storage, passed-in value, or fallback to remoteUrl
           source: "storage", // File loaded from remote storage
         }
 
-        const processedFile = await runPluginStage("process", existingFile)
-
-        // If there was a processing error, skip this file
-        if (!processedFile) return null
-
-        return processedFile
+        // Remote files are already uploaded and processed - no need to run process hooks
+        return existingFile
       }),
     )
 
@@ -297,24 +294,23 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
       },
     }
 
-    // Before add (includes validation)
+    // Validate file before adding
     const validatedFile = await runPluginStage("validate", uploadFile)
     if (!validatedFile) return null
 
-    // After add hooks
-    const processedFile = await runPluginStage("process", validatedFile)
+    // Run preprocess hooks for immediate UI updates (thumbnails, previews)
+    const preprocessedFile = await runPluginStage("preprocess", validatedFile)
+    const fileToAdd = preprocessedFile || validatedFile
 
-    if (!processedFile) return null
-
-    // If we got here, all hooks passed
-    files.value.push(processedFile)
-    emitter.emit("file:added", processedFile)
+    // Add file - compression will happen before upload
+    files.value.push(fileToAdd)
+    emitter.emit("file:added", fileToAdd)
 
     if (options.autoProceed) {
       upload()
     }
 
-    return processedFile
+    return validatedFile
   }
 
   const addFiles = (newFiles: File[]) => {
@@ -585,12 +581,36 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
 
     for (const file of filesToUpload) {
       try {
+        // Process file (compression, etc.) before upload
+        const processedFile = await runPluginStage("process", file)
+        
+        // If processing failed, mark as error and skip
+        if (!processedFile) {
+          const error = {
+            message: "File processing failed",
+            details: {
+              fileName: file.name,
+              fileSize: file.size,
+              timestamp: new Date().toISOString(),
+            },
+          }
+          updateFile(file.id, { status: "error", error })
+          emitter.emit("file:error", { file, error } as { file: Readonly<UploadFile<TUploadResult>>; error: FileError })
+          continue
+        }
+        
+        // Update file with processed data
+        if (processedFile.id !== file.id) {
+          // If processing changed the file, update it in the list
+          files.value = files.value.map(f => f.id === file.id ? processedFile : f)
+        }
+        
         // Upload
-        updateFile(file.id, { status: "uploading" })
+        updateFile(processedFile.id, { status: "uploading" })
 
         const onProgress = (progress: number) => {
-          updateFile(file.id, { progress: { percentage: progress } })
-          emitter.emit("upload:progress", { file, progress } as {
+          updateFile(processedFile.id, { progress: { percentage: progress } })
+          emitter.emit("upload:progress", { file: processedFile, progress } as {
             file: Readonly<UploadFile<TUploadResult>>
             progress: number
           })
@@ -608,16 +628,21 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
             onProgress,
             emit: getPluginEmitFn(storagePlugin.id),
           }
-          uploadResult = await storagePlugin.hooks.upload(file, context)
+          uploadResult = await storagePlugin.hooks.upload(processedFile, context)
         } else {
           // Fall back to user-provided uploadFn
-          uploadResult = await uploadFn(file, onProgress)
+          uploadResult = await uploadFn(processedFile, onProgress)
         }
 
         // Extract URL from upload result and set as remoteUrl
         // Storage plugins are required to return { url: string, ...other }
         const remoteUrl = (uploadResult as any)?.url
-        updateFile(file.id, { status: "complete", uploadResult, remoteUrl })
+        
+        // Ensure preview is always set - fallback to remoteUrl if no preview exists
+        const currentFile = files.value.find(f => f.id === processedFile.id)
+        const preview = currentFile?.preview || remoteUrl
+        
+        updateFile(processedFile.id, { status: "complete", uploadResult, remoteUrl, preview })
       } catch (err) {
         const error = {
           message: err instanceof Error ? err.message : "Unknown upload error",
@@ -651,6 +676,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
       case "validate":
         await (hook as ValidationHook)(file!, context)
         return file!
+      case "preprocess":
       case "process":
       case "complete":
         if (!file) throw new Error("File is required for this hook type")
@@ -664,7 +690,10 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
   }
 
   // Replace the existing runPluginStage function
-  async function runPluginStage(stage: Exclude<PluginLifecycleStage, "upload">, file?: UploadFile) {
+  async function runPluginStage(
+    stage: Exclude<PluginLifecycleStage, "upload">, 
+    file?: UploadFile
+  ) {
     if (!options.plugins) return file
 
     let currentFile = file

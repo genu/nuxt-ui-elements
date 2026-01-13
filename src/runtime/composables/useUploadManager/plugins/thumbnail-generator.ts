@@ -10,7 +10,7 @@ export const PluginThumbnailGenerator = defineUploaderPlugin<ThumbnailGeneratorO
   return {
     id: "thumbnail-generator",
     hooks: {
-      process: async (file, _context) => {
+      preprocess: async (file, _context) => {
         const { width = 100, height = 100, quality = 0.7 } = pluginOptions
 
         // For remote files, use remoteUrl. For local files, create object URL
