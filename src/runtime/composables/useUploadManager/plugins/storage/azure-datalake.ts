@@ -1,9 +1,6 @@
 import { ref } from "vue"
+import { DataLakeDirectoryClient, type PathHttpHeaders } from "@azure/storage-file-datalake"
 import { defineUploaderPlugin } from "../../types"
-
-// Type-only imports to avoid bundling Azure SDK
-type DataLakeDirectoryClient = typeof import("@azure/storage-file-datalake").DataLakeDirectoryClient
-type PathHttpHeaders = import("@azure/storage-file-datalake").PathHttpHeaders
 
 export interface AzureDataLakeOptions {
   /**
@@ -56,9 +53,6 @@ export interface AzureUploadResult {
 }
 
 export const PluginAzureDataLake = defineUploaderPlugin<AzureDataLakeOptions>((options) => {
-  // Lazy import to avoid bundling Azure SDK unless this plugin is used
-  let DataLakeDirectoryClient: DataLakeDirectoryClient
-
   const sasURL = ref(options.sasURL || "")
   let refreshPromise: Promise<string> | null = null
 
@@ -95,12 +89,6 @@ export const PluginAzureDataLake = defineUploaderPlugin<AzureDataLakeOptions>((o
    * Get file client for a specific blob
    */
   const getFileClient = async (blobName: string) => {
-    // Lazy load Azure SDK
-    if (!DataLakeDirectoryClient) {
-      const module = await import("@azure/storage-file-datalake")
-      DataLakeDirectoryClient = module.DataLakeDirectoryClient
-    }
-
     // Smart Refresh: Only fetch if empty or expired
     if (options.getSASUrl && isTokenExpired(sasURL.value)) {
       if (!refreshPromise) {
