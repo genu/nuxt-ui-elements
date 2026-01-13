@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.31
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.30...v0.1.31)
+
+### 🩹 Fixes
+
+- **video-compressor:** Set default plugin options and simplify FFMpeg initialization ([0f48069](https://github.com/genu/nuxt-ui-elements/commit/0f48069))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.30
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.29...v0.1.30)
