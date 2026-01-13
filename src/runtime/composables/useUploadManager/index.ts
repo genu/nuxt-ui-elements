@@ -3,6 +3,8 @@ import { computed, readonly, ref } from "vue"
 import type {
   UploaderEvents,
   UploadFile,
+  LocalUploadFile,
+  RemoteUploadFile,
   UploadOptions,
   UploadStatus,
   PluginLifecycleStage,
@@ -59,9 +61,10 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
    * The emit function automatically prefixes events with the plugin ID:
    * - context.emit("skip", data) → emitter.emit("image-compressor:skip", data)
    */
-  const pluginEmitFunctions = new Map<string, PluginContext["emit"]>()
+  type EmitFn = <K extends string | number | symbol>(event: K, payload: any) => void
+  const pluginEmitFunctions = new Map<string, EmitFn>()
 
-  const getPluginEmitFn = (pluginId: string): PluginContext["emit"] => {
+  const getPluginEmitFn = (pluginId: string): EmitFn => {
     let emitFn = pluginEmitFunctions.get(pluginId)
     if (!emitFn) {
       emitFn = (event: any, payload: any) => {
@@ -245,17 +248,18 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
           remoteFileData = await getRemoteFileFn(file.id!)
         }
 
-        const existingFile: UploadFile = {
+        const existingFile: RemoteUploadFile = {
           ...file,
           id: file.id!,
           name: file.id!,
-          data: new Blob(),
+          data: null,
           status: "complete",
           progress: { percentage: 100 },
           meta: {},
           size: remoteFileData.size,
           mimeType: remoteFileData.mimeType,
           remoteUrl: remoteFileData.remoteUrl,
+          source: "storage", // File loaded from remote storage
         }
 
         const processedFile = await runPluginStage("process", existingFile)
@@ -277,7 +281,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
     const extension = getExtension(file.name)
 
-    const uploadFile: UploadFile = {
+    const uploadFile: LocalUploadFile = {
       id: `${id}.${extension}`,
       progress: {
         percentage: 0,
@@ -287,6 +291,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
       status: "waiting",
       mimeType: file.type,
       data: file,
+      source: "local",
       meta: {
         extension,
       },
@@ -317,25 +322,32 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
   }
 
   const removeFile = async (fileId: string) => {
-    const file = files.value.find((f) => f.id === fileId)
+    const file = getFile(fileId)
+
     if (!file) return
 
-    // Call storage plugin's remove hook if available
-    const storagePlugin = getStoragePlugin()
-    if (storagePlugin?.hooks.remove) {
-      try {
-        const context: PluginContext = {
-          files: files.value,
-          options,
-          emit: (event, payload) => {
-            const prefixedEvent = `${storagePlugin.id}:${String(event)}` as any
-            emitter.emit(prefixedEvent, payload)
-          },
+    // Only call storage plugin's remove hook if file has a remoteUrl
+    // remoteUrl indicates the file exists in remote storage and should be deleted
+    // This applies to both:
+    // - Local files that were uploaded (source: 'local', remoteUrl set after upload)
+    // - Remote files (source: 'storage' | 'instagram' | etc., remoteUrl set from initialization)
+    if (file.remoteUrl) {
+      const storagePlugin = getStoragePlugin()
+      if (storagePlugin?.hooks.remove) {
+        try {
+          const context: PluginContext = {
+            files: files.value,
+            options,
+            emit: (event, payload) => {
+              const prefixedEvent = `${storagePlugin.id}:${String(event)}` as any
+              emitter.emit(prefixedEvent, payload)
+            },
+          }
+          await storagePlugin.hooks.remove(file, context)
+        } catch (error) {
+          console.error(`Storage plugin remove error:`, error)
+          // Continue with local removal even if storage removal fails
         }
-        await storagePlugin.hooks.remove(file, context)
-      } catch (error) {
-        console.error(`Storage plugin remove error:`, error)
-        // Continue with local removal even if storage removal fails
       }
     }
 
@@ -363,6 +375,178 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
     })
 
     return allFiles
+  }
+
+  /**
+   * Get a File/Blob object for any file, regardless of source.
+   * For local files, returns the existing data.
+   * For remote files, fetches the file from the remote URL.
+   *
+   * ⚠️ WARNING: For large files (>100MB), this loads the entire file into memory.
+   * Consider using getFileURL() or getFileStream() for large files instead.
+   *
+   * Use this when you need to edit/process small files (image cropping, etc.)
+   *
+   * @example
+   * ```typescript
+   * // User wants to crop an image
+   * const blob = await getFileData(file.id)
+   * const croppedBlob = await cropImage(blob)
+   * await replaceFileData(file.id, croppedBlob)
+   * ```
+   */
+  const getFileData = async (fileId: string): Promise<Blob> => {
+    const file = getFile(fileId)
+
+    if (!file) {
+      throw new Error(`File not found: ${fileId}`)
+    }
+
+    // Log warning for large files
+    if (file.size > 100 * 1024 * 1024) { // 100MB
+      console.warn(
+        `getFileData: Loading large file (${(file.size / 1024 / 1024).toFixed(2)}MB) into memory. ` +
+        `Consider using getFileURL() or getFileStream() for better performance.`
+      )
+    }
+
+    // For local files, return the data directly
+    if (file.source === "local") {
+      return file.data
+    }
+
+    // For remote files, fetch from the URL
+    const response = await fetch(file.remoteUrl)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`)
+    }
+    return await response.blob()
+  }
+
+  /**
+   * Get an object URL for a file (memory efficient for large files).
+   * For local files, creates a temporary object URL.
+   * For remote files, returns the remote URL directly.
+   *
+   * ⚠️ IMPORTANT: For local files, caller must revoke the URL when done using URL.revokeObjectURL(url)
+   *
+   * Use this for displaying files or passing to external editors (videos, high-res images)
+   *
+   * @example
+   * ```typescript
+   * // Display a video in a player
+   * const videoUrl = await uploader.getFileURL(file.id)
+   * videoElement.src = videoUrl
+   *
+   * // Pass to external video editor
+   * const result = await videoEditor.edit(videoUrl)
+   *
+   * // Clean up (only needed for local files)
+   * if (file.source === 'local') {
+   *   URL.revokeObjectURL(videoUrl)
+   * }
+   * ```
+   */
+  const getFileURL = async (fileId: string): Promise<string> => {
+    const file = getFile(fileId)
+
+    if (!file) {
+      throw new Error(`File not found: ${fileId}`)
+    }
+
+    if (file.source === "local") {
+      // Create object URL (doesn't copy data, just creates a reference)
+      return URL.createObjectURL(file.data)
+    }
+
+    // For remote files, return the URL directly
+    return file.remoteUrl
+  }
+
+  /**
+   * Get a ReadableStream for a file (most memory efficient for large files).
+   * For local files, converts the Blob to a stream.
+   * For remote files, streams directly from the URL without loading into memory.
+   *
+   * Use this for processing large videos, raw images, or any file that doesn't fit in memory.
+   *
+   * @example
+   * ```typescript
+   * // Process a large video file with FFmpeg
+   * const stream = await uploader.getFileStream(file.id)
+   * const trimmedStream = await ffmpeg.trim(stream, startTime, endTime)
+   * const trimmedBlob = await new Response(trimmedStream).blob()
+   * await uploader.replaceFileData(file.id, trimmedBlob)
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Process file in chunks
+   * const stream = await uploader.getFileStream(file.id)
+   * const reader = stream.getReader()
+   * while (true) {
+   *   const { done, value } = await reader.read()
+   *   if (done) break
+   *   processChunk(value) // Process each chunk
+   * }
+   * ```
+   */
+  const getFileStream = async (fileId: string): Promise<ReadableStream<Uint8Array>> => {
+    const file = getFile(fileId)
+
+    if (!file) {
+      throw new Error(`File not found: ${fileId}`)
+    }
+
+    if (file.source === "local") {
+      // Convert Blob to stream (supported in modern browsers)
+      return file.data.stream()
+    }
+
+    // For remote files, fetch and return the stream (doesn't load into memory!)
+    const response = await fetch(file.remoteUrl)
+    if (!response.ok || !response.body) {
+      throw new Error(`Failed to fetch file stream: ${response.statusText}`)
+    }
+    return response.body
+  }
+
+  /**
+   * Replace a file's data with new content (e.g., after cropping/editing).
+   * This creates a new File/Blob and marks the file as needing re-upload.
+   *
+   * @example
+   * ```typescript
+   * // After user crops an image
+   * const croppedBlob = await cropImage(originalBlob)
+   * await replaceFileData(file.id, croppedBlob, 'cropped-image.jpg')
+   * // File is now marked as 'waiting' and needs to be re-uploaded
+   * ```
+   */
+  const replaceFileData = async (fileId: string, newData: Blob, newName?: string) => {
+    const file = getFile(fileId)
+
+    if (!file) {
+      throw new Error(`File not found: ${fileId}`)
+    }
+
+    // Convert to LocalUploadFile since we now have local data
+    const updatedFile: LocalUploadFile = {
+      ...file,
+      source: "local",
+      data: newData,
+      name: newName || file.name,
+      size: newData.size,
+      status: "waiting", // Mark as needing upload
+      progress: { percentage: 0 },
+      remoteUrl: undefined, // Clear old remote URL
+    }
+
+    // Update the file in the array
+    const index = files.value.findIndex((f) => f.id === fileId)
+    files.value[index] = updatedFile
+
+    emitter.emit("file:added", updatedFile as Readonly<UploadFile<TUploadResult>>)
   }
 
   const reorderFile = (oldIndex: number, newIndex: number) => {
@@ -418,14 +602,11 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
 
         if (storagePlugin?.hooks.upload) {
           // Use storage plugin for upload
-          const context: PluginContext & { onProgress: (progress: number) => void } = {
+          const context = {
             files: files.value,
             options,
             onProgress,
-            emit: (event, payload) => {
-              const prefixedEvent = `${storagePlugin.id}:${String(event)}` as any
-              emitter.emit(prefixedEvent, payload)
-            },
+            emit: getPluginEmitFn(storagePlugin.id),
           }
           uploadResult = await storagePlugin.hooks.upload(file, context)
         } else {
@@ -433,7 +614,10 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
           uploadResult = await uploadFn(file, onProgress)
         }
 
-        updateFile(file.id, { status: "complete", uploadResult })
+        // Extract URL from upload result and set as remoteUrl
+        // Storage plugins are required to return { url: string, ...other }
+        const remoteUrl = (uploadResult as any)?.url
+        updateFile(file.id, { status: "complete", uploadResult, remoteUrl })
       } catch (err) {
         const error = {
           message: err instanceof Error ? err.message : "Unknown upload error",
@@ -534,6 +718,12 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
     upload,
     reset,
     status,
+
+    // File Data Access (for editing/processing)
+    getFileData,
+    getFileURL,
+    getFileStream,
+    replaceFileData,
     updateFile,
     initializeExistingFiles,
 

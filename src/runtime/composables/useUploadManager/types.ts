@@ -18,21 +18,80 @@ export interface FileError {
   details?: unknown
 }
 
-export interface UploadFile<TUploadResult = any> {
+/**
+ * File source - indicates where the file originated from
+ *
+ * - 'local': File selected from user's device
+ * - 'storage': File loaded from remote storage (was previously uploaded)
+ * - Cloud picker sources: Files picked from cloud providers (future)
+ *   - 'instagram': Instagram picker
+ *   - 'dropbox': Dropbox picker
+ *   - 'google-drive': Google Drive picker
+ *   - 'onedrive': OneDrive picker
+ *   - ... add more as needed
+ */
+export type FileSource =
+  | 'local'
+  | 'storage'
+  | 'instagram'
+  | 'dropbox'
+  | 'google-drive'
+  | 'onedrive'
+
+/**
+ * Base properties shared by both local and remote upload files
+ */
+export interface BaseUploadFile<TUploadResult = any> {
   id: string
   name: string
   size: number
   mimeType: string
-  data: File | Blob
   status: FileStatus
   preview?: string
   progress: FileProgress
   error?: FileError
   uploadResult?: TUploadResult
-  isRemote?: boolean
-  remoteUrl?: string
   meta: Record<string, unknown>
 }
+
+/**
+ * Local upload file - originates from user's device
+ * Has local data (File/Blob) and may get a remoteUrl after upload
+ */
+export interface LocalUploadFile<TUploadResult = any> extends BaseUploadFile<TUploadResult> {
+  source: 'local'
+  data: File | Blob
+  remoteUrl?: string  // Set after successful upload
+}
+
+/**
+ * Remote upload file - originates from remote source (cloud pickers, etc.)
+ * Has remoteUrl but no local data
+ */
+export interface RemoteUploadFile<TUploadResult = any> extends BaseUploadFile<TUploadResult> {
+  source: Exclude<FileSource, 'local'>
+  data: null
+  remoteUrl: string
+}
+
+/**
+ * Upload file discriminated union
+ * Use file.source to narrow the type in your code:
+ *
+ * @example
+ * ```typescript
+ * if (file.source === 'local') {
+ *   // TypeScript knows: file is LocalUploadFile
+ *   URL.createObjectURL(file.data)
+ * } else {
+ *   // TypeScript knows: file is RemoteUploadFile
+ *   console.log(file.remoteUrl)
+ * }
+ * ```
+ */
+export type UploadFile<TUploadResult = any> =
+  | LocalUploadFile<TUploadResult>
+  | RemoteUploadFile<TUploadResult>
 
 // User callback types
 export type UploadFn<TUploadResult = any> = (
@@ -158,11 +217,26 @@ export type SetupHook<TPluginEvents extends Record<string, any> = Record<string,
 
 /**
  * Storage hooks for handling upload/download/deletion operations
+ *
+ * Storage plugins MUST return an object containing a `url` property.
+ * This URL will be set as the file's `remoteUrl` after successful upload.
+ *
+ * @example
+ * ```typescript
+ * upload: async (file, context) => {
+ *   // Upload logic...
+ *   return {
+ *     url: 'https://storage.example.com/file.jpg',  // Required
+ *     key: 'uploads/file.jpg',                      // Optional
+ *     etag: 'abc123'                                // Optional
+ *   }
+ * }
+ * ```
  */
 export type UploadHook<TUploadResult = any, TPluginEvents extends Record<string, any> = Record<string, never>> = (
   file: UploadFile<TUploadResult>,
   context: PluginContext<TPluginEvents> & { onProgress: (progress: number) => void },
-) => Promise<TUploadResult>
+) => Promise<TUploadResult & { url: string }>
 
 export type GetRemoteFileHook<TPluginEvents extends Record<string, any> = Record<string, never>> = (
   fileId: string,

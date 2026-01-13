@@ -63,6 +63,12 @@ export const PluginImageCompressor = defineUploaderPlugin<ImageCompressorOptions
           return file
         }
 
+        // Skip remote files - can't compress without local data
+        if (file.source !== 'local') {
+          context.emit("skip", { file, reason: "Remote file, no local data to compress" })
+          return file
+        }
+
         // Skip GIFs as they need special handling
         if (file.mimeType === "image/gif") {
           context.emit("skip", { file, reason: "GIF format not supported" })
@@ -88,6 +94,7 @@ export const PluginImageCompressor = defineUploaderPlugin<ImageCompressorOptions
         context.emit("start", { file, originalSize: file.size })
 
         try {
+          // Type narrowing: at this point, file.isRemote is false, so file.data is File | Blob
           const sourceUrl = URL.createObjectURL(file.data)
           const image = new Image()
           image.src = sourceUrl

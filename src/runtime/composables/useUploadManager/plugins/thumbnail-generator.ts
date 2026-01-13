@@ -13,7 +13,8 @@ export const PluginThumbnailGenerator = defineUploaderPlugin<ThumbnailGeneratorO
       process: async (file, _context) => {
         const { width = 100, height = 100, quality = 0.7 } = pluginOptions
 
-        const sourceUrl = file.isRemote ? file.remoteUrl! : URL.createObjectURL(file.data)
+        // For remote files, use remoteUrl. For local files, create object URL
+        const sourceUrl = file.source === 'local' ? URL.createObjectURL(file.data) : file.remoteUrl
 
         if (file.mimeType.startsWith("image/")) {
           const image = new Image()

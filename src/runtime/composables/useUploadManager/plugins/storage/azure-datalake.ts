@@ -134,6 +134,12 @@ export const PluginAzureDataLake = defineUploaderPlugin<AzureDataLakeOptions>((o
        * Upload file to Azure Blob Storage
        */
       async upload(file, context) {
+        // Remote files don't have local data - this shouldn't happen
+        // but add a guard just in case
+        if (file.source !== 'local' || file.data === null) {
+          throw new Error("Cannot upload remote file - no local data available")
+        }
+
         const fileClient = await getFileClient(file.id)
 
         await fileClient.upload(file.data, {

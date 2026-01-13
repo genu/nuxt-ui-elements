@@ -174,6 +174,7 @@ describe("useUploadManager", () => {
       status: "uploading",
       progress: { percentage: 0 },
       meta: {},
+      source: 'local',
     })
 
     const mockContext = {
