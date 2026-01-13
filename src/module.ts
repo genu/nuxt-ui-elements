@@ -57,6 +57,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     // Basic composables
     addImportsDir(resolver.resolve("./runtime/composables"))
+
     // Advanced composables
     addImports([
       {
