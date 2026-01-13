@@ -57,7 +57,7 @@
     "@nuxt/test-utils": "^3.23.0",
     "@types/culori": "^4.0.1",
     "@types/node": "latest",
-    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/coverage-v8": "^4.0.17",
     "changelogen": "^0.6.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "10.1.8",
@@ -65,7 +65,7 @@
     "nuxt": "^4.2.2",
     "prettier": "^3.7.4",
     "typescript": "~5.9.3",
-    "vitest": "^4.0.16",
+    "vitest": "^4.0.17",
     "vue-tsc": "^3.2.2"
   },
   "peerDependencies": {
