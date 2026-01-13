@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.1.30
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.29...v0.1.30)
+
+### 🚀 Enhancements
+
+- **video-compressor:** Add video compression plugin with customizable options ([7364622](https://github.com/genu/nuxt-ui-elements/commit/7364622))
+- **upload-manager:** Enhance file handling with source tracking and new file access methods ([bdbbd77](https://github.com/genu/nuxt-ui-elements/commit/bdbbd77))
+
+### 🩹 Fixes
+
+- **dependencies:** Add @ffmpeg/ffmpeg and @ffmpeg/util as optional dependencies ([0e124dc](https://github.com/genu/nuxt-ui-elements/commit/0e124dc))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.29
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.28...v0.1.29)
