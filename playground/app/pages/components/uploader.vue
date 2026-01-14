@@ -88,7 +88,7 @@
 
   // Initialize uploader
   let uploader = createUploader()
-  let { files, totalProgress, status, addFiles, removeFile, clearFiles, upload, onUpload, on } = uploader
+  let { files, totalProgress, addFiles, removeFile, clearFiles, upload, onUpload, on } = uploader
 
   // Recreate uploader when config changes
   watch([useStoragePlugin, () => config.value.thumbnails, () => config.value.imageCompression], () => {
@@ -96,7 +96,6 @@
     const newUploader = uploader
     files = newUploader.files
     totalProgress = newUploader.totalProgress
-    status = newUploader.status
     addFiles = newUploader.addFiles
     removeFile = newUploader.removeFile
     clearFiles = newUploader.clearFiles
@@ -355,7 +354,13 @@
               </div>
               <div>
                 <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Video Capture Time (s)</label>
-                <UInput v-model.number="config.videoCaptureTime" type="number" min="0" max="10" step="0.5" size="sm" />
+                <UInput
+v-model.number="config.videoCaptureTime"
+type="number"
+min="0"
+max="10"
+step="0.5"
+size="sm" />
               </div>
             </div>
           </div>

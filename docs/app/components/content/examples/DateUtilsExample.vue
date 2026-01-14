@@ -1,8 +1,6 @@
 <script setup lang="ts">
   import { format, add, subtract, relative, today, now, startOf, endOf } from "#std/date"
 
-  const currentDate = ref(format(today(), "YYYY-MM-DD"))
-
   const examples = computed(() => [
     {
       label: "Today",

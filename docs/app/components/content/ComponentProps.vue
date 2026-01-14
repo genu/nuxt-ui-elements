@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { upperFirst, camelCase, kebabCase } from "scule"
+  import { upperFirst, camelCase } from "scule"
   import type { ComponentMeta } from "vue-component-meta"
 
   const props = withDefaults(
@@ -8,6 +8,7 @@
       ignore?: string[]
     }>(),
     {
+      slug: "",
       ignore: () => [],
     },
   )

@@ -1,7 +1,6 @@
 <script setup lang="ts">
   const dialog = useDialog()
   const result = ref<string>("")
-  const isLoading = ref(false)
 
   async function showSyncConfirm() {
     result.value = ""

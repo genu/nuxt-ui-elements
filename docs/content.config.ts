@@ -1,13 +1,6 @@
 import { z } from "zod"
 import { defineCollection } from "@nuxt/content"
 
-const Image = z.object({
-  src: z.string(),
-  alt: z.string().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
-})
-
 const Button = z.object({
   label: z.string(),
   icon: z.string().optional(),

@@ -1,12 +1,13 @@
 <script setup lang="ts">
   import { upperFirst, camelCase } from "scule"
-  import type { ComponentMeta } from "vue-component-meta"
 
   const props = withDefaults(
     defineProps<{
       slug?: string
     }>(),
-    {},
+    {
+      slug: "",
+    },
   )
 
   const route = useRoute()

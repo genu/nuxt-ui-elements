@@ -42,14 +42,6 @@
     ...props.props,
   })
 
-  function getComponentProp(name: string) {
-    return componentProps[name]
-  }
-
-  function setComponentProp(name: string, value: any) {
-    componentProps[name] = value
-  }
-
   // Generate code for display
   const code = computed(() => {
     let code = ""
