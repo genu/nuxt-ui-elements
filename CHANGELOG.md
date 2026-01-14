@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.1.34
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.33...v0.1.34)
+
+### 🏡 Chore
+
+- Extract the upload manager to a separate module ([f22bf2a](https://github.com/genu/nuxt-ui-elements/commit/f22bf2a))
+- Update documentation ([59d62f7](https://github.com/genu/nuxt-ui-elements/commit/59d62f7))
+- Update eslint-plugin-prettier to version 5.5.5 and clean up pnpm-lock.yaml ([b215695](https://github.com/genu/nuxt-ui-elements/commit/b215695))
+- Lint/format ([a03994f](https://github.com/genu/nuxt-ui-elements/commit/a03994f))
+- Remove .claude/settings.local.json and update .gitignore ([5fec193](https://github.com/genu/nuxt-ui-elements/commit/5fec193))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.33
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.32...v0.1.33)
