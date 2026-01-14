@@ -12,6 +12,8 @@ links:
 
 The `slugify` utility converts strings to URL-friendly slugs. It's a re-export of the [@sindresorhus/slugify](https://github.com/sindresorhus/slugify) package by Sindre Sorhus.
 
+:component-example{name="SlugifyExample"}
+
 ## Usage
 
 ```ts

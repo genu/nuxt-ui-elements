@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@vueuse/nuxt",
     "nuxt-component-meta",
+    "./modules/component-example",
     (_, nuxt) => {
       nuxt.hook("components:dirs", (dirs) => {
         dirs.unshift({ path: resolve("./app/components/content/examples"), pathPrefix: false, prefix: "", global: true })

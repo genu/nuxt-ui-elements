@@ -12,92 +12,53 @@ links:
 
 The `useDialog` composable provides a simple API for showing alert and confirmation dialogs programmatically.
 
-```vue
-<script setup lang="ts">
-  const dialog = useDialog()
+```ts
+const dialog = useDialog()
 
-  // Show an alert
-  dialog.alert({
-    title: "Success!",
-    description: "Your changes have been saved.",
-    color: "success",
-  })
+// Show an alert
+dialog.alert({
+  title: 'Success!',
+  description: 'Your changes have been saved.',
+  color: 'success'
+})
 
-  // Show a confirmation
-  dialog.confirm({
-    title: "Delete Item?",
-    description: "This action cannot be undone.",
-    color: "error",
-  })
-</script>
+// Show a confirmation
+dialog.confirm({
+  title: 'Delete Item?',
+  description: 'This action cannot be undone.',
+  color: 'error'
+})
 ```
 
-### Alert
+## Alert
 
 The `alert` method displays an informational dialog with a single dismiss button.
 
-```vue
-<script setup lang="ts">
-  const dialog = useDialog()
+:component-example{name="DialogAlertExample"}
 
-  async function showSuccess() {
-    dialog.alert({
-      icon: "i-lucide-check-circle",
-      title: "Success!",
-      description: "Operation completed successfully.",
-      color: "success",
-      label: "Got it",
-    })
-  }
+### Colors
 
-  async function showError() {
-    dialog.alert({
-      icon: "i-lucide-alert-circle",
-      title: "Error",
-      description: "Something went wrong. Please try again.",
-      color: "error",
-    })
-  }
-</script>
+Use the `color` prop to change the alert color. Each color has a corresponding default icon.
 
-<template>
-  <div class="flex gap-2">
-    <UButton @click="showSuccess">Show Success</UButton>
-    <UButton @click="showError" color="error">Show Error</UButton>
-  </div>
-</template>
-```
+:component-example{name="DialogAlertColorsExample"}
 
-### Confirm
+## Confirm
 
 The `confirm` method displays a dialog with confirm and dismiss buttons. It supports async callbacks with automatic loading states.
 
-```vue
-<script setup lang="ts">
-  const dialog = useDialog()
+:component-example{name="DialogConfirmExample"}
 
-  async function confirmDelete() {
-    dialog.confirm({
-      title: "Delete Item?",
-      description: "This action cannot be undone.",
-      color: "error",
-      confirmLabel: "Delete",
-      dismissLabel: "Cancel",
-      onConfirm: async () => {
-        // This can be an async function
-        await deleteItem()
-      },
-      onDismiss: () => {
-        console.log("User cancelled")
-      },
-    })
-  }
-</script>
+### Async Confirmation
 
-<template>
-  <UButton color="error" @click="confirmDelete"> Delete Item </UButton>
-</template>
-```
+The confirm dialog automatically shows a loading state when `onConfirm` returns a Promise.
+
+:component-example{name="DialogConfirmAsyncExample"}
+
+### Delete Confirmation
+
+A common pattern for destructive actions with error color.
+
+:component-example{name="DialogConfirmDeleteExample"}
 
 ## API
 
@@ -134,51 +95,3 @@ The composable returns an object with two methods:
 | `close`        | `boolean`                                                     | `false`     | Show close button       |
 | `onConfirm`    | `() => void \| Promise<void>`                                 | `undefined` | Callback when confirmed |
 | `onDismiss`    | `() => void \| Promise<void>`                                 | `undefined` | Callback when dismissed |
-
-## Examples
-
-### Async Confirmation
-
-The confirm dialog automatically shows loading and success states when `onConfirm` returns a Promise:
-
-```vue
-<script setup lang="ts">
-  const dialog = useDialog()
-
-  async function handleSave() {
-    dialog.confirm({
-      title: "Save Changes?",
-      description: "Your changes will be saved to the server.",
-      color: "primary",
-      confirmLabel: "Save",
-      dismissLabel: "Cancel",
-      onConfirm: async () => {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        // Dialog will show success state, then close automatically
-      },
-    })
-  }
-</script>
-```
-
-### Different Colors
-
-Each color theme has a default icon:
-
-```vue
-<script setup lang="ts">
-  const dialog = useDialog()
-
-  const examples = [
-    { color: "primary", title: "Primary", description: "This is a primary dialog" },
-    { color: "success", title: "Success", description: "Operation completed" },
-    { color: "warning", title: "Warning", description: "Please review" },
-    { color: "error", title: "Error", description: "Something went wrong" },
-  ]
-
-  function showDialog(example: (typeof examples)[0]) {
-    dialog.alert(example)
-  }
-</script>
-```

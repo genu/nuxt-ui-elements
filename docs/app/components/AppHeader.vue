@@ -7,16 +7,12 @@
       to: "/docs/getting-started",
     },
     {
-      label: "Components",
-      to: "/docs/components",
-    },
-    {
       label: "Composables",
       to: "/docs/composables",
     },
     {
       label: "Utilities",
-      to: "/docs/utilities",
+      to: "/docs/standard-library",
     },
   ]
 

@@ -15,6 +15,8 @@ links:
 
 The date utilities provide a functional API for date manipulation, built on `@internationalized/date`. All functions are tree-shakeable and support multiple input formats.
 
+:component-example{name="DateUtilsExample"}
+
 ```ts
 import { add, format, today } from "#std/date"
 
@@ -128,6 +130,8 @@ endOf(today(), "year") // December 31st
 
 Format a date using Day.js-compatible tokens.
 
+:component-example{name="DateFormatExample"}
+
 ```ts
 import { format, today } from "#std/date"
 
@@ -173,6 +177,8 @@ format(today(), "MMMM D, YYYY", "de-DE") // "Januar 15, 2024"
 #### `relative(input, locale?)`
 
 Get a human-readable relative time string.
+
+:component-example{name="DateRelativeExample"}
 
 ```ts
 import { relative, subtract, add, today } from "#std/date"

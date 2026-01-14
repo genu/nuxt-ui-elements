@@ -24,7 +24,7 @@
   })
 
   const searchTerm = ref("")
-  const isSearchActive = computed(() => route.path.startsWith("/docs/components") || route.path.startsWith("/docs/composables"))
+  const isSearchActive = computed(() => route.path.startsWith("/docs/composables") || route.path.startsWith("/docs/standard-library"))
   const navigationKey = computed(() => `${route.path}-${searchTerm.value ? "filtered" : "unfiltered"}`)
 
   watch(

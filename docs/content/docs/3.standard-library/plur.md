@@ -12,6 +12,8 @@ links:
 
 The `plur` utility pluralizes words based on a count. It's a re-export of the [plur](https://github.com/sindresorhus/plur) package by Sindre Sorhus.
 
+:component-example{name="PlurExample"}
+
 ## Usage
 
 ```ts
