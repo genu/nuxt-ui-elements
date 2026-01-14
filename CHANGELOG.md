@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.1.33
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.32...v0.1.33)
+
+### 🚀 Enhancements
+
+- Add comprehensive tests for upload manager and validators ([5c48693](https://github.com/genu/nuxt-ui-elements/commit/5c48693))
+- Add documentation ([bfbbe15](https://github.com/genu/nuxt-ui-elements/commit/bfbbe15))
+
+### 🩹 Fixes
+
+- Formatting ([906dfde](https://github.com/genu/nuxt-ui-elements/commit/906dfde))
+- Lint ([29344c8](https://github.com/genu/nuxt-ui-elements/commit/29344c8))
+- Update ESLint rule for max attributes per line and format uploader component ([3f8c845](https://github.com/genu/nuxt-ui-elements/commit/3f8c845))
+
+### 💅 Refactors
+
+- Migrate uploader plugins to processing and storage plugins ([8cd0b99](https://github.com/genu/nuxt-ui-elements/commit/8cd0b99))
+- Lint fix ([fb9ad4e](https://github.com/genu/nuxt-ui-elements/commit/fb9ad4e))
+
+### 🏡 Chore
+
+- Update playground ([ff67ea7](https://github.com/genu/nuxt-ui-elements/commit/ff67ea7))
+- Lint and format ([3926613](https://github.com/genu/nuxt-ui-elements/commit/3926613))
+
+### ✅ Tests
+
+- Enhance image and thumbnail generator tests with original mock restoration ([f6b2932](https://github.com/genu/nuxt-ui-elements/commit/f6b2932))
+- Use real timers for Azure error handling test with retries ([db921b3](https://github.com/genu/nuxt-ui-elements/commit/db921b3))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.32
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.31...v0.1.32)
