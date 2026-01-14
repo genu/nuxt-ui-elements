@@ -1,6 +1,6 @@
 import { ref } from "vue"
 import { DataLakeDirectoryClient, type PathHttpHeaders } from "@azure/storage-file-datalake"
-import { defineUploaderPlugin } from "../../types"
+import { defineStoragePlugin } from "../../types"
 
 export interface AzureDataLakeOptions {
   /**
@@ -38,6 +38,19 @@ export interface AzureDataLakeOptions {
    * @default true
    */
   autoCreateDirectory?: boolean
+
+  /**
+   * Number of retry attempts for failed operations
+   * @default 3
+   */
+  retries?: number
+
+  /**
+   * Initial delay between retries in milliseconds
+   * Uses exponential backoff: delay * (2 ^ attempt)
+   * @default 1000 (1 second)
+   */
+  retryDelay?: number
 }
 
 export interface AzureUploadResult {
@@ -52,12 +65,58 @@ export interface AzureUploadResult {
   blobPath: string
 }
 
-export const PluginAzureDataLake = defineUploaderPlugin<AzureDataLakeOptions>((options) => {
+export const PluginAzureDataLake = defineStoragePlugin<AzureDataLakeOptions, AzureUploadResult>((options) => {
   const sasURL = ref(options.sasURL || "")
   let refreshPromise: Promise<string> | null = null
 
   // Cache to store directories we've already checked/created to avoid redundant API calls
   const directoryCheckedCache = new Set<string>()
+
+  // Retry configuration
+  const maxRetries = options.retries ?? 3
+  const initialRetryDelay = options.retryDelay ?? 1000
+
+  /**
+   * Retry an async operation with exponential backoff
+   */
+  async function withRetry<T>(
+    operation: () => Promise<T>,
+    operationName: string
+  ): Promise<T> {
+    let lastError: Error | undefined
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation()
+      } catch (error) {
+        lastError = error as Error
+
+        // Don't retry on last attempt
+        if (attempt === maxRetries) {
+          break
+        }
+
+        // Calculate exponential backoff delay
+        const delay = initialRetryDelay * Math.pow(2, attempt)
+
+        if (import.meta.dev) {
+          console.warn(
+            `[Azure Storage] ${operationName} failed (attempt ${attempt + 1}/${maxRetries + 1}). ` +
+            `Retrying in ${delay}ms...`,
+            error
+          )
+        }
+
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+    }
+
+    // All retries exhausted
+    throw new Error(
+      `[Azure Storage] ${operationName} failed after ${maxRetries + 1} attempts: ${lastError?.message}`
+    )
+  }
 
   // Initialize SAS URL if getSASUrl is provided
   if (options.getSASUrl && !options.sasURL) {
@@ -140,51 +199,57 @@ export const PluginAzureDataLake = defineUploaderPlugin<AzureDataLakeOptions>((o
           throw new Error("Cannot upload remote file - no local data available")
         }
 
-        const fileClient = await getFileClient(file.id)
+        return withRetry(async () => {
+          const fileClient = await getFileClient(file.id)
 
-        await fileClient.upload(file.data, {
-          metadata: {
-            ...options.metadata,
-            mimeType: file.mimeType,
-            size: String(file.size),
-            originalName: file.name,
-          },
-          pathHttpHeaders: {
-            ...options.pathHttpHeaders,
-            contentType: file.mimeType,
-          },
-          onProgress: ({ loadedBytes }: { loadedBytes: number }) => {
-            const uploadedPercentage = Math.round((loadedBytes / file.size) * 100)
-            context.onProgress(uploadedPercentage)
-          },
-        })
+          await fileClient.upload(file.data, {
+            metadata: {
+              ...options.metadata,
+              mimeType: file.mimeType,
+              size: String(file.size),
+              originalName: file.name,
+            },
+            pathHttpHeaders: {
+              ...options.pathHttpHeaders,
+              contentType: file.mimeType,
+            },
+            onProgress: ({ loadedBytes }: { loadedBytes: number }) => {
+              const uploadedPercentage = Math.round((loadedBytes / file.size) * 100)
+              context.onProgress(uploadedPercentage)
+            },
+          })
 
-        return {
-          url: fileClient.url,
-          blobPath: fileClient.name,
-        } satisfies AzureUploadResult
+          return {
+            url: fileClient.url,
+            blobPath: fileClient.name,
+          } satisfies AzureUploadResult
+        }, `Upload file "${file.name}"`)
       },
 
       /**
        * Get remote file metadata from Azure
        */
       async getRemoteFile(fileId, _context) {
-        const fileClient = await getFileClient(fileId)
-        const properties = await fileClient.getProperties()
+        return withRetry(async () => {
+          const fileClient = await getFileClient(fileId)
+          const properties = await fileClient.getProperties()
 
-        return {
-          size: properties.contentLength || 0,
-          mimeType: properties.contentType || "application/octet-stream",
-          remoteUrl: fileClient.url,
-        }
+          return {
+            size: properties.contentLength || 0,
+            mimeType: properties.contentType || "application/octet-stream",
+            remoteUrl: fileClient.url,
+          }
+        }, `Get remote file "${fileId}"`)
       },
 
       /**
        * Delete file from Azure Blob Storage
        */
       async remove(file, _context) {
-        const fileClient = await getFileClient(file.id)
-        await fileClient.deleteIfExists()
+        return withRetry(async () => {
+          const fileClient = await getFileClient(file.id)
+          await fileClient.deleteIfExists()
+        }, `Delete file "${file.name}"`)
       },
     },
   }

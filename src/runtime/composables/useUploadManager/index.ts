@@ -1,5 +1,5 @@
 import mitt from "mitt"
-import { computed, readonly, ref } from "vue"
+import { computed, onBeforeUnmount, readonly, ref } from "vue"
 import type {
   UploaderEvents,
   UploadFile,
@@ -16,9 +16,19 @@ import type {
   UploadFn,
   GetRemoteFileFn,
   Plugin as UploaderPlugin,
+  ProcessingPlugin,
+  StoragePlugin,
 } from "./types"
-import { ValidatorAllowedFileTypes, ValidatorMaxfileSize, ValidatorMaxFiles } from "./validators"
+import { ValidatorAllowedFileTypes, ValidatorMaxFileSize, ValidatorMaxFiles } from "./validators"
 import { PluginThumbnailGenerator, PluginImageCompressor } from "./plugins"
+import { createPluginContext, createFileError, cleanupObjectURLs } from "./utils"
+
+/**
+ * Type guard to check if a plugin is a storage plugin
+ */
+function isStoragePlugin(plugin: UploaderPlugin<any, any> | null): plugin is StoragePlugin<any, any> {
+  return plugin !== null && 'upload' in plugin.hooks
+}
 
 /**
  * Get file extension from filename
@@ -34,6 +44,7 @@ function getExtension(fullFileName: string): string {
 }
 
 const defaultOptions: UploadOptions = {
+  storage: undefined,
   plugins: [],
   maxFileSize: false,
   allowedFileTypes: false,
@@ -49,6 +60,9 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
   // Use any internally to avoid intersection type issues, but provide proper types on the return
   const emitter = mitt<any>()
   const status = ref<UploadStatus>("waiting")
+
+  // Track created object URLs for automatic cleanup
+  const createdObjectURLs = new Map<string, string>() // fileId -> objectURL
 
   /**
    * Performance optimization: Create emit functions once per plugin instead of on every hook call.
@@ -96,22 +110,29 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
    */
 
   /**
-   * Check if a plugin is a storage plugin (has upload/getRemoteFile/remove hooks)
+   * Get the active storage plugin
+   * Priority: options.storage > legacy plugins array with storage hooks
    */
-  const isStoragePlugin = (plugin: UploaderPlugin) => {
-    return !!(plugin.hooks.upload || plugin.hooks.getRemoteFile || plugin.hooks.remove)
-  }
+  const getStoragePlugin = (): StoragePlugin<any, any> | null => {
+    // First check new storage option
+    if (options.storage) {
+      return options.storage
+    }
 
-  /**
-   * Get the active storage plugin (last one registered)
-   */
-  const getStoragePlugin = () => {
+    // Backward compatibility: check plugins array for storage plugins (deprecated)
     if (!options.plugins) return null
 
-    // Find the last storage plugin (reverse search)
+    // Find storage plugin in legacy plugins array (has upload hook)
     for (let i = options.plugins.length - 1; i >= 0; i--) {
-      const plugin = options.plugins[i]
-      if (plugin && isStoragePlugin(plugin)) {
+      const plugin = options.plugins[i] || null
+      if (isStoragePlugin(plugin)) {
+        if (import.meta.dev) {
+          console.warn(
+            `[useUploadManager] Storage plugin "${plugin.id}" found in plugins array.\n` +
+            `This is deprecated. Use the 'storage' option instead:\n\n` +
+            `  useUploadManager({ storage: ${plugin.id}(...) })`
+          )
+        }
         return plugin
       }
     }
@@ -120,23 +141,25 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
   }
 
   const addPlugin = (plugin: UploaderPlugin<any, any>) => {
-    // Detect and warn about multiple storage plugins
-    if (isStoragePlugin(plugin)) {
-      const existingStorage = options.plugins?.find((p: any) => isStoragePlugin(p))
-
-      if (existingStorage && import.meta.dev) {
+    // Detect and warn about storage plugins being added via addPlugin (deprecated)
+    const hasUploadHook = 'upload' in plugin.hooks
+    if (hasUploadHook) {
+      if (import.meta.dev) {
         console.warn(
-          `[useUploadManager] Multiple storage plugins detected!\n\n` +
-            `You're trying to add "${plugin.id}" but "${existingStorage.id}" is already registered.\n` +
-            `The LAST storage plugin ("${plugin.id}") will be used for uploads.\n\n` +
-            `💡 If you need multiple storage destinations, create separate uploader instances:\n\n` +
-            `   const s3Uploader = useUploadManager({ plugins: [PluginS3Storage({ ... })] })\n` +
-            `   const azureUploader = useUploadManager({ plugins: [PluginAzureStorage({ ... })] })\n`,
+          `[useUploadManager] Storage plugin "${plugin.id}" should use the 'storage' option instead of 'plugins':\n\n` +
+            `  useUploadManager({\n` +
+            `    storage: ${plugin.id}({ ... }),  // ✓ Correct\n` +
+            `    plugins: [...]                    // Only for validators/processors\n` +
+            `  })\n`
         )
       }
     }
 
-    ;(options.plugins as any)?.push(plugin)
+    if (options.plugins) {
+      options.plugins.push(plugin as ProcessingPlugin<any, any>)
+    } else {
+      options.plugins = [plugin as ProcessingPlugin<any, any>]
+    }
   }
 
   /**
@@ -149,7 +172,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
   }
 
   if (options.maxFileSize !== false && options.maxFileSize !== undefined) {
-    addPlugin(ValidatorMaxfileSize({ maxFileSize: options.maxFileSize }))
+    addPlugin(ValidatorMaxFileSize({ maxFileSize: options.maxFileSize }))
   }
 
   if (options.allowedFileTypes !== false && options.allowedFileTypes !== undefined && options.allowedFileTypes.length > 0) {
@@ -161,8 +184,8 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
     const thumbOpts = options.thumbnails === true ? {} : options.thumbnails || {}
     addPlugin(
       PluginThumbnailGenerator({
-        width: thumbOpts.width ?? 128,
-        height: thumbOpts.height ?? 128,
+        maxWidth: thumbOpts.width ?? 128,
+        maxHeight: thumbOpts.height ?? 128,
         quality: thumbOpts.quality ?? 1,
       }),
     )
@@ -234,14 +257,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
 
         if (storagePlugin?.hooks.getRemoteFile) {
           // Use storage plugin to get remote file
-          const context: PluginContext = {
-            files: files.value,
-            options,
-            emit: (event, payload) => {
-              const prefixedEvent = `${storagePlugin.id}:${String(event)}` as any
-              emitter.emit(prefixedEvent, payload)
-            },
-          }
+          const context = createPluginContext(storagePlugin.id, files.value, options, emitter)
           remoteFileData = await storagePlugin.hooks.getRemoteFile(file.id!, context)
         } else {
           // Fall back to user-provided getRemoteFileFn
@@ -294,31 +310,52 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
       },
     }
 
-    // Validate file before adding
-    const validatedFile = await runPluginStage("validate", uploadFile)
-    if (!validatedFile) return null
+    try {
+      // Validate file before adding
+      const validatedFile = await runPluginStage("validate", uploadFile)
+      if (!validatedFile) {
+        throw new Error(`File validation failed for ${file.name}`)
+      }
 
-    // Run preprocess hooks for immediate UI updates (thumbnails, previews)
-    const preprocessedFile = await runPluginStage("preprocess", validatedFile)
-    const fileToAdd = preprocessedFile || validatedFile
+      // Run preprocess hooks for immediate UI updates (thumbnails, previews)
+      const preprocessedFile = await runPluginStage("preprocess", validatedFile)
+      const fileToAdd = preprocessedFile || validatedFile
 
-    // Add file - compression will happen before upload
-    files.value.push(fileToAdd)
-    emitter.emit("file:added", fileToAdd)
+      // Add file - compression will happen before upload
+      files.value.push(fileToAdd)
+      emitter.emit("file:added", fileToAdd)
 
-    if (options.autoProceed) {
-      upload()
+      if (options.autoProceed) {
+        upload()
+      }
+
+      return validatedFile
+    } catch (err) {
+      // Add file with error status so user can see what failed
+      const error = createFileError(uploadFile, err)
+
+      const fileWithError = { ...uploadFile, status: "error" as const, error }
+      files.value.push(fileWithError)
+      emitter.emit("file:error", { file: fileWithError, error })
+
+      throw err // Re-throw so caller knows validation failed
     }
-
-    return validatedFile
   }
 
-  const addFiles = (newFiles: File[]) => {
-    return Promise.all(newFiles.map((file) => addFile(file)))
+  const addFiles = async (newFiles: File[]) => {
+    // Use allSettled to handle validation failures gracefully
+    const results = await Promise.allSettled(newFiles.map((file) => addFile(file)))
+
+    // Return successfully added files
+    const addedFiles = results
+      .filter((r): r is PromiseFulfilledResult<UploadFile> => r.status === "fulfilled")
+      .map((r) => r.value)
+
+    return addedFiles
   }
 
   const removeFile = async (fileId: string) => {
-    const file = getFile(fileId)
+    const file = files.value.find((f) => f.id === fileId)
 
     if (!file) return
 
@@ -331,14 +368,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
       const storagePlugin = getStoragePlugin()
       if (storagePlugin?.hooks.remove) {
         try {
-          const context: PluginContext = {
-            files: files.value,
-            options,
-            emit: (event, payload) => {
-              const prefixedEvent = `${storagePlugin.id}:${String(event)}` as any
-              emitter.emit(prefixedEvent, payload)
-            },
-          }
+          const context = createPluginContext(storagePlugin.id, files.value, options, emitter)
           await storagePlugin.hooks.remove(file, context)
         } catch (error) {
           console.error(`Storage plugin remove error:`, error)
@@ -347,12 +377,21 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
       }
     }
 
+    // Clean up any object URLs we created for this file
+    cleanupObjectURLs(createdObjectURLs, file.id)
+
     files.value = files.value.filter((f) => f.id !== fileId)
     emitter.emit("file:removed", file as Readonly<UploadFile<TUploadResult>>)
   }
 
   const removeFiles = (fileIds: string[]) => {
     const removedFiles = files.value.filter((f) => fileIds.includes(f.id))
+
+    // Clean up object URLs for removed files
+    removedFiles.forEach((file) => {
+      cleanupObjectURLs(createdObjectURLs, file.id)
+    })
+
     files.value = files.value.filter((f) => !fileIds.includes(f.id))
 
     removedFiles.forEach((file) => {
@@ -364,6 +403,10 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
 
   const clearFiles = () => {
     const allFiles = [...files.value]
+
+    // Clean up all object URLs
+    cleanupObjectURLs(createdObjectURLs)
+
     files.value = []
 
     allFiles.forEach((file) => {
@@ -392,11 +435,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
    * ```
    */
   const getFileData = async (fileId: string): Promise<Blob> => {
-    const file = getFile(fileId)
-
-    if (!file) {
-      throw new Error(`File not found: ${fileId}`)
-    }
+    const file = getFile(fileId) // Now throws if not found
 
     // Log warning for large files
     if (file.size > 100 * 1024 * 1024) { // 100MB
@@ -419,40 +458,23 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
     return await response.blob()
   }
 
-  /**
-   * Get an object URL for a file (memory efficient for large files).
-   * For local files, creates a temporary object URL.
-   * For remote files, returns the remote URL directly.
-   *
-   * ⚠️ IMPORTANT: For local files, caller must revoke the URL when done using URL.revokeObjectURL(url)
-   *
-   * Use this for displaying files or passing to external editors (videos, high-res images)
-   *
-   * @example
-   * ```typescript
-   * // Display a video in a player
-   * const videoUrl = await uploader.getFileURL(file.id)
-   * videoElement.src = videoUrl
-   *
-   * // Pass to external video editor
-   * const result = await videoEditor.edit(videoUrl)
-   *
-   * // Clean up (only needed for local files)
-   * if (file.source === 'local') {
-   *   URL.revokeObjectURL(videoUrl)
-   * }
-   * ```
-   */
   const getFileURL = async (fileId: string): Promise<string> => {
-    const file = getFile(fileId)
-
-    if (!file) {
-      throw new Error(`File not found: ${fileId}`)
-    }
+    const file = getFile(fileId) // Now throws if not found
 
     if (file.source === "local") {
+      // Check if we already created an object URL for this file
+      const existingURL = createdObjectURLs.get(file.id)
+      if (existingURL) {
+        return existingURL
+      }
+
       // Create object URL (doesn't copy data, just creates a reference)
-      return URL.createObjectURL(file.data)
+      const objectURL = URL.createObjectURL(file.data)
+
+      // Track it for cleanup
+      createdObjectURLs.set(file.id, objectURL)
+
+      return objectURL
     }
 
     // For remote files, return the URL directly
@@ -488,11 +510,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
    * ```
    */
   const getFileStream = async (fileId: string): Promise<ReadableStream<Uint8Array>> => {
-    const file = getFile(fileId)
-
-    if (!file) {
-      throw new Error(`File not found: ${fileId}`)
-    }
+    const file = getFile(fileId) // Now throws if not found
 
     if (file.source === "local") {
       // Convert Blob to stream (supported in modern browsers)
@@ -511,20 +529,38 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
    * Replace a file's data with new content (e.g., after cropping/editing).
    * This creates a new File/Blob and marks the file as needing re-upload.
    *
+   * @param fileId - The ID of the file to replace
+   * @param newData - The new file data (Blob or File)
+   * @param newName - Optional new filename
+   * @param shouldAutoUpload - Whether to auto-upload after replacing (defaults to autoProceed setting)
+   *
    * @example
    * ```typescript
-   * // After user crops an image
+   * // After user crops an image - auto-upload if autoProceed is enabled
    * const croppedBlob = await cropImage(originalBlob)
    * await replaceFileData(file.id, croppedBlob, 'cropped-image.jpg')
-   * // File is now marked as 'waiting' and needs to be re-uploaded
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Batch editing - prevent auto-upload until all edits are done
+   * for (const fileId of selectedFiles) {
+   *   const edited = await editFile(fileId)
+   *   await replaceFileData(fileId, edited, undefined, false) // Don't upload yet
+   * }
+   * await upload() // Upload all at once
    * ```
    */
-  const replaceFileData = async (fileId: string, newData: Blob, newName?: string) => {
-    const file = getFile(fileId)
+  const replaceFileData = async (
+    fileId: string,
+    newData: Blob,
+    newName?: string,
+    shouldAutoUpload?: boolean
+  ) => {
+    const file = getFile(fileId) // Now throws if not found
 
-    if (!file) {
-      throw new Error(`File not found: ${fileId}`)
-    }
+    // Cleanup cached object URL to prevent stale thumbnail display
+    cleanupObjectURLs(createdObjectURLs, fileId)
 
     // Convert to LocalUploadFile since we now have local data
     const updatedFile: LocalUploadFile = {
@@ -536,13 +572,31 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
       status: "waiting", // Mark as needing upload
       progress: { percentage: 0 },
       remoteUrl: undefined, // Clear old remote URL
+      meta: {}, // Clear old metadata (thumbnails, dimensions, etc.)
     }
+
+    // Re-run preprocess hooks to regenerate thumbnails/previews with new data
+    const preprocessedFile = await runPluginStage("preprocess", updatedFile)
+    const finalFile = preprocessedFile || updatedFile
 
     // Update the file in the array
     const index = files.value.findIndex((f) => f.id === fileId)
-    files.value[index] = updatedFile
+    if (index === -1) {
+      throw new Error(`File not found: ${fileId}`)
+    }
+    files.value[index] = finalFile
 
-    emitter.emit("file:added", updatedFile as Readonly<UploadFile<TUploadResult>>)
+    // Emit events
+    emitter.emit("file:replaced", finalFile as Readonly<UploadFile<TUploadResult>>)
+    emitter.emit("file:added", finalFile as Readonly<UploadFile<TUploadResult>>) // For backwards compatibility
+
+    // Auto-upload if requested (respects autoProceed setting by default)
+    const shouldUpload = shouldAutoUpload ?? options.autoProceed
+    if (shouldUpload) {
+      upload()
+    }
+
+    return finalFile
   }
 
   const reorderFile = (oldIndex: number, newIndex: number) => {
@@ -571,7 +625,11 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
   }
 
   const getFile = (fileId: string) => {
-    return files.value.find((f) => f.id === fileId)
+    const file = files.value.find((f) => f.id === fileId)
+    if (!file) {
+      throw new Error(`File not found: ${fileId}`)
+    }
+    return file
   }
 
   const upload = async () => {
@@ -586,14 +644,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
         
         // If processing failed, mark as error and skip
         if (!processedFile) {
-          const error = {
-            message: "File processing failed",
-            details: {
-              fileName: file.name,
-              fileSize: file.size,
-              timestamp: new Date().toISOString(),
-            },
-          }
+          const error = createFileError(file, new Error("File processing failed"))
           updateFile(file.id, { status: "error", error })
           emitter.emit("file:error", { file, error } as { file: Readonly<UploadFile<TUploadResult>>; error: FileError })
           continue
@@ -619,6 +670,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
         // Check if a storage plugin is available
         const storagePlugin = getStoragePlugin()
         let uploadResult: TUploadResult
+        let remoteUrl: string | undefined
 
         if (storagePlugin?.hooks.upload) {
           // Use storage plugin for upload
@@ -628,15 +680,16 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
             onProgress,
             emit: getPluginEmitFn(storagePlugin.id),
           }
-          uploadResult = await storagePlugin.hooks.upload(processedFile, context)
+          const result = await storagePlugin.hooks.upload(processedFile, context)
+          uploadResult = result
+          // Storage plugins are required to return { url: string, ...other }
+          remoteUrl = result.url
         } else {
           // Fall back to user-provided uploadFn
           uploadResult = await uploadFn(processedFile, onProgress)
+          // Legacy uploadFn may return string URL directly or object with url
+          remoteUrl = typeof uploadResult === 'string' ? uploadResult : undefined
         }
-
-        // Extract URL from upload result and set as remoteUrl
-        // Storage plugins are required to return { url: string, ...other }
-        const remoteUrl = (uploadResult as any)?.url
         
         // Ensure preview is always set - fallback to remoteUrl if no preview exists
         const currentFile = files.value.find(f => f.id === processedFile.id)
@@ -644,14 +697,7 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
         
         updateFile(processedFile.id, { status: "complete", uploadResult, remoteUrl, preview })
       } catch (err) {
-        const error = {
-          message: err instanceof Error ? err.message : "Unknown upload error",
-          details: {
-            fileName: file.name,
-            fileSize: file.size,
-            timestamp: new Date().toISOString(),
-          },
-        }
+        const error = createFileError(file, err)
         updateFile(file.id, { status: "error", error })
         emitter.emit("file:error", { file, error } as { file: Readonly<UploadFile<TUploadResult>>; error: FileError })
       }
@@ -662,8 +708,19 @@ export const useUploadManager = <TUploadResult = any>(_options: UploadOptions = 
   }
 
   const reset = () => {
+    // Clean up all object URLs
+    cleanupObjectURLs(createdObjectURLs)
+
     files.value = []
   }
+
+  // Clean up object URLs when component unmounts
+  onBeforeUnmount(() => {
+    createdObjectURLs.forEach((url) => {
+      URL.revokeObjectURL(url)
+    })
+    createdObjectURLs.clear()
+  })
 
   // Add this helper function before runPluginStage
   const callPluginHook = async (

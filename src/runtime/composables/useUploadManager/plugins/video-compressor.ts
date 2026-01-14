@@ -1,6 +1,6 @@
-import { defineUploaderPlugin } from "../types"
+import { defineProcessingPlugin } from "../types"
 import { useFFMpeg } from "../../useFFMpeg"
-import { watchEffect } from "vue"
+import { watch } from "vue"
 
 interface VideoCompressorOptions {
   /**
@@ -65,7 +65,7 @@ type VideoCompressorEvents = {
   error: { file: any; error: Error }
 }
 
-export const PluginVideoCompressor = defineUploaderPlugin<VideoCompressorOptions, VideoCompressorEvents>((pluginOptions = {}) => {
+export const PluginVideoCompressor = defineProcessingPlugin<VideoCompressorOptions, VideoCompressorEvents>((pluginOptions = {}) => {
   return {
     id: "video-compressor",
     hooks: {
@@ -102,20 +102,27 @@ export const PluginVideoCompressor = defineUploaderPlugin<VideoCompressorOptions
           return file
         }
 
+        // Declare variables outside try block for cleanup in finally
+        let inputUrl: string | undefined
+        let stopProgressWatch: (() => void) | undefined
+
         try {
           // Emit start event
           context.emit("start", { file, originalSize: file.size })
 
-          const inputUrl = URL.createObjectURL(file.data)
+          inputUrl = URL.createObjectURL(file.data)
           const ffmpeg = useFFMpeg({ inputUrl })
 
           // Load FFmpeg core
           await ffmpeg.load()
 
-          // Listen to progress updates
-          watchEffect(() => {
-            context.emit("progress", { file, percentage: Math.round(ffmpeg.progress.value * 100) })
-          })
+          // Listen to progress updates using watch with manual cleanup
+          stopProgressWatch = watch(
+            () => ffmpeg.progress.value,
+            (progress) => {
+              context.emit("progress", { file, percentage: Math.round(progress * 100) })
+            }
+          )
 
           // Build FFmpeg command options
           const convertOptions = ["-c:v", codec]
@@ -189,6 +196,14 @@ export const PluginVideoCompressor = defineUploaderPlugin<VideoCompressorOptions
 
           // Return original file on error
           return file
+        } finally {
+          // Clean up progress watcher to prevent memory leaks
+          stopProgressWatch?.()
+
+          // Clean up object URL
+          if (inputUrl) {
+            URL.revokeObjectURL(inputUrl)
+          }
         }
       },
     },

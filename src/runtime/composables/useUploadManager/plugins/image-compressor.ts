@@ -1,5 +1,6 @@
 import type { UploadFile } from "../types"
-import { defineUploaderPlugin } from "../types"
+import { defineProcessingPlugin } from "../types"
+import { calculateThumbnailDimensions } from "../utils"
 
 /**
  * Events emitted by the image compressor plugin
@@ -45,7 +46,7 @@ interface ImageCompressorOptions {
   preserveMetadata?: boolean
 }
 
-export const PluginImageCompressor = defineUploaderPlugin<ImageCompressorOptions, ImageCompressorEvents>((pluginOptions) => {
+export const PluginImageCompressor = defineProcessingPlugin<ImageCompressorOptions, ImageCompressorEvents>((pluginOptions) => {
   const {
     maxWidth = 1920,
     maxHeight = 1920,

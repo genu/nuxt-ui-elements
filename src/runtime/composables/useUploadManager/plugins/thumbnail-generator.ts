@@ -1,83 +1,72 @@
-import { defineUploaderPlugin } from "../types"
+import { defineProcessingPlugin } from "../types"
+import { calculateThumbnailDimensions } from "../utils"
 
 interface ThumbnailGeneratorOptions {
-  width?: number
-  height?: number
+  maxWidth?: number
+  maxHeight?: number
   quality?: number
+  videoCaptureTime?: number
 }
 
-export const PluginThumbnailGenerator = defineUploaderPlugin<ThumbnailGeneratorOptions>((pluginOptions) => {
+export const PluginThumbnailGenerator = defineProcessingPlugin<ThumbnailGeneratorOptions>((pluginOptions) => {
   return {
     id: "thumbnail-generator",
     hooks: {
-      preprocess: async (file, _context) => {
-        const { width = 100, height = 100, quality = 0.7 } = pluginOptions
+      preprocess: async (file, context) => {
+        const {
+          maxWidth = 200,
+          maxHeight = 200,
+          quality = 0.7,
+          videoCaptureTime = 1,
+        } = pluginOptions
 
-        // For remote files, use remoteUrl. For local files, create object URL
-        const sourceUrl = file.source === 'local' ? URL.createObjectURL(file.data) : file.remoteUrl
+        // Skip non-image and non-video files
+        if (!file.mimeType.startsWith("image/") && !file.mimeType.startsWith("video/")) {
+          return file
+        }
 
-        if (file.mimeType.startsWith("image/")) {
-          const image = new Image()
-          image.crossOrigin = "anonymous" // Required for remote images
-          image.src = sourceUrl
+        // Skip GIFs (animated, would only show first frame)
+        if (file.mimeType === "image/gif") {
+          return file
+        }
 
-          await new Promise((resolve) => {
-            image.onload = resolve
-          })
+        // Skip SVGs (vector graphics, don't need thumbnails)
+        if (file.mimeType === "image/svg+xml") {
+          return file
+        }
 
-          const aspectRatio = image.width / image.height
-          let targetWidth = width
-          let targetHeight = height
+        // Skip remote files without local data
+        if (file.source !== "local" || !file.data) {
+          return file
+        }
 
-          if (aspectRatio > 1) {
-            targetHeight = width / aspectRatio
-          } else {
-            targetWidth = height * aspectRatio
+        // Create object URL for local file
+        const sourceUrl = URL.createObjectURL(file.data)
+
+        try {
+          if (file.mimeType.startsWith("image/")) {
+            const thumbnailUrl = await generateImageThumbnail(
+              sourceUrl,
+              maxWidth,
+              maxHeight,
+              quality
+            )
+            file.meta.thumbnail = thumbnailUrl
+          } else if (file.mimeType.startsWith("video/")) {
+            const thumbnailUrl = await generateVideoThumbnail(
+              sourceUrl,
+              maxWidth,
+              maxHeight,
+              quality,
+              videoCaptureTime
+            )
+            file.meta.thumbnail = thumbnailUrl
           }
-
-          const canvas = document.createElement("canvas")
-          canvas.width = targetWidth
-          canvas.height = targetHeight
-
-          const ctx = canvas.getContext("2d")
-          if (ctx) {
-            ctx.drawImage(image, 0, 0, targetWidth, targetHeight)
-            const thumbnailPreviewUrl = canvas.toDataURL("image/jpeg", quality)
-            file.preview = thumbnailPreviewUrl
-          }
-        } else if (file.mimeType.startsWith("video/")) {
-          const video = document.createElement("video")
-          video.src = sourceUrl
-          video.crossOrigin = "anonymous" // Required for remote videos
-          video.currentTime = 1 // Seek to 1 second to avoid black frames
-
-          await new Promise((resolve) => {
-            video.onloadeddata = () => {
-              video.onseeked = resolve
-              video.currentTime = 1
-            }
-          })
-
-          const aspectRatio = video.videoWidth / video.videoHeight
-          let targetWidth = width
-          let targetHeight = height
-
-          if (aspectRatio > 1) {
-            targetHeight = width / aspectRatio
-          } else {
-            targetWidth = height * aspectRatio
-          }
-
-          const canvas = document.createElement("canvas")
-          canvas.width = targetWidth
-          canvas.height = targetHeight
-
-          const ctx = canvas.getContext("2d")
-          if (ctx) {
-            ctx.drawImage(video, 0, 0, targetWidth, targetHeight)
-            const thumbnailPreviewUrl = canvas.toDataURL("image/jpeg", quality)
-            file.preview = thumbnailPreviewUrl
-          }
+        } catch (error) {
+          console.warn(`[ThumbnailGenerator] Failed for ${file.name}:`, error)
+        } finally {
+          // Always clean up the object URL
+          URL.revokeObjectURL(sourceUrl)
         }
 
         return file
@@ -85,3 +74,99 @@ export const PluginThumbnailGenerator = defineUploaderPlugin<ThumbnailGeneratorO
     },
   }
 })
+
+async function generateImageThumbnail(
+  sourceUrl: string,
+  maxWidth: number,
+  maxHeight: number,
+  quality: number
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+
+    image.onload = () => {
+      try {
+        const { width, height } = calculateThumbnailDimensions(
+          image.width,
+          image.height,
+          maxWidth,
+          maxHeight
+        )
+
+        const canvas = document.createElement("canvas")
+        canvas.width = width
+        canvas.height = height
+
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          throw new Error("Failed to get canvas context")
+        }
+
+        ctx.drawImage(image, 0, 0, width, height)
+        const thumbnailUrl = canvas.toDataURL("image/jpeg", quality)
+        resolve(thumbnailUrl)
+      } catch (error) {
+        reject(error)
+      }
+    }
+
+    image.onerror = () => {
+      reject(new Error("Failed to load image"))
+    }
+
+    image.src = sourceUrl
+  })
+}
+
+async function generateVideoThumbnail(
+  sourceUrl: string,
+  maxWidth: number,
+  maxHeight: number,
+  quality: number,
+  captureTime: number
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video")
+    video.preload = "metadata" // Only load metadata, not video data
+    video.muted = true // Mute to avoid audio playback
+
+    video.onloadedmetadata = () => {
+      // Use captureTime or 10% of duration, whichever is smaller
+      const seekTime = Math.min(captureTime, video.duration * 0.1)
+      video.currentTime = seekTime
+    }
+
+    video.onseeked = () => {
+      try {
+        const { width, height } = calculateThumbnailDimensions(
+          video.videoWidth,
+          video.videoHeight,
+          maxWidth,
+          maxHeight
+        )
+
+        const canvas = document.createElement("canvas")
+        canvas.width = width
+        canvas.height = height
+
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          throw new Error("Failed to get canvas context")
+        }
+
+        ctx.drawImage(video, 0, 0, width, height)
+        const thumbnailUrl = canvas.toDataURL("image/jpeg", quality)
+        resolve(thumbnailUrl)
+      } catch (error) {
+        reject(error)
+      }
+    }
+
+    video.onerror = () => {
+      reject(new Error("Failed to load video"))
+    }
+
+    video.src = sourceUrl
+  })
+}
+

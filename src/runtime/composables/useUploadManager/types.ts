@@ -196,9 +196,39 @@ export type GetRemoteFileFn = (fileId: string) => Promise<MinimumRemoteFileAttri
 // Configuration
 export interface UploadOptions {
   /**
-   * Custom plugins to add (in addition to built-in plugins)
+   * Storage plugin for uploading files (only one storage plugin can be active)
+   *
+   * Storage plugins handle the actual upload, download, and deletion of files
+   * from remote storage (Azure, S3, GCS, etc.)
+   *
+   * @example
+   * ```typescript
+   * storage: PluginAzureDataLake({
+   *   sasURL: 'https://...',
+   *   path: 'uploads'
+   * })
+   * ```
    */
-  plugins?: Plugin<any, any>[]
+  storage?: StoragePlugin<any, any>
+
+  /**
+   * Processing and validation plugins (validators, compressors, etc.)
+   *
+   * These plugins run during the file lifecycle:
+   * - validate: Check file before adding
+   * - preprocess: Generate thumbnails/previews immediately
+   * - process: Compress/transform before upload
+   * - complete: Post-upload processing
+   *
+   * @example
+   * ```typescript
+   * plugins: [
+   *   ValidatorMaxFiles({ maxFiles: 10 }),
+   *   PluginImageCompressor({ quality: 0.8 })
+   * ]
+   * ```
+   */
+  plugins?: ProcessingPlugin<any, any>[]
 
   /**
    * Validate maximum number of files
@@ -268,6 +298,7 @@ export interface ImageCompressionOptions {
 type CoreUploaderEvents<TUploadResult = any> = {
   "file:added": Readonly<UploadFile<TUploadResult>>
   "file:removed": Readonly<UploadFile<TUploadResult>>
+  "file:replaced": Readonly<UploadFile<TUploadResult>>
   "file:processing": Readonly<UploadFile<TUploadResult>>
   "file:error": { file: Readonly<UploadFile<TUploadResult>>; error: FileError }
   "upload:start": Array<Readonly<UploadFile<TUploadResult>>>
@@ -342,6 +373,28 @@ export type RemoveHook<TPluginEvents extends Record<string, any> = Record<string
 
 export type PluginLifecycleStage = "validate" | "preprocess" | "process" | "upload" | "complete"
 
+/**
+ * Processing plugin hooks (validators, compressors, thumbnail generators)
+ */
+export type ProcessingPluginHooks<TPluginEvents extends Record<string, any> = Record<string, never>> = {
+  validate?: ValidationHook<TPluginEvents>
+  preprocess?: ProcessingHook<TPluginEvents>
+  process?: ProcessingHook<TPluginEvents>
+  complete?: ProcessingHook<TPluginEvents>
+}
+
+/**
+ * Storage plugin hooks (upload, download, delete from remote storage)
+ */
+export type StoragePluginHooks<TUploadResult = any, TPluginEvents extends Record<string, any> = Record<string, never>> = {
+  upload: UploadHook<TUploadResult, TPluginEvents>
+  getRemoteFile?: GetRemoteFileHook<TPluginEvents>
+  remove?: RemoveHook<TPluginEvents>
+}
+
+/**
+ * All possible plugin hooks (for internal use)
+ */
 export type PluginHooks<TUploadResult = any, TPluginEvents extends Record<string, any> = Record<string, never>> = {
   validate?: ValidationHook<TPluginEvents>
   preprocess?: ProcessingHook<TPluginEvents>
@@ -352,6 +405,34 @@ export type PluginHooks<TUploadResult = any, TPluginEvents extends Record<string
   complete?: ProcessingHook<TPluginEvents>
 }
 
+/**
+ * Processing plugin (validators, compressors, thumbnail generators)
+ *
+ * These plugins transform or validate files without handling storage.
+ */
+export interface ProcessingPlugin<TUploadResult = any, TPluginEvents extends Record<string, any> = Record<string, never>> {
+  id: string
+  hooks: ProcessingPluginHooks<TPluginEvents>
+  options?: UploadOptions
+  events?: TPluginEvents
+}
+
+/**
+ * Storage plugin (Azure, S3, GCS, etc.)
+ *
+ * Storage plugins handle uploading, downloading, and deleting files from remote storage.
+ * Only one storage plugin can be active at a time.
+ */
+export interface StoragePlugin<TUploadResult = any, TPluginEvents extends Record<string, any> = Record<string, never>> {
+  id: string
+  hooks: StoragePluginHooks<TUploadResult, TPluginEvents>
+  options?: UploadOptions
+  events?: TPluginEvents
+}
+
+/**
+ * Base plugin interface (for internal use - supports both types)
+ */
 export interface Plugin<TUploadResult = any, TPluginEvents extends Record<string, any> = Record<string, never>> {
   id: string
   hooks: PluginHooks<TUploadResult, TPluginEvents>
@@ -360,8 +441,69 @@ export interface Plugin<TUploadResult = any, TPluginEvents extends Record<string
 }
 
 /**
+ * Define a processing plugin (validators, compressors, thumbnail generators)
+ *
+ * @example Validator
+ * ```typescript
+ * export const ValidatorMaxFiles = defineProcessingPlugin<ValidatorOptions>((options) => ({
+ *   id: 'validator-max-files',
+ *   hooks: {
+ *     validate: async (file, context) => {
+ *       if (context.files.length >= options.maxFiles) {
+ *         throw { message: 'Too many files' }
+ *       }
+ *       return file
+ *     }
+ *   }
+ * }))
+ * ```
+ */
+export function defineProcessingPlugin<TPluginOptions = unknown, TPluginEvents extends Record<string, any> = Record<string, never>>(
+  factory: (options: TPluginOptions) => ProcessingPlugin<any, TPluginEvents>,
+): (options: TPluginOptions) => ProcessingPlugin<any, TPluginEvents> {
+  return factory
+}
+
+/**
+ * Define a storage plugin (Azure, S3, GCS, etc.)
+ *
+ * Storage plugins MUST implement the `upload` hook and should return an object with a `url` property.
+ *
+ * @example Azure Storage
+ * ```typescript
+ * export const PluginAzureDataLake = defineStoragePlugin<AzureOptions, AzureEvents>((options) => ({
+ *   id: 'azure-datalake-storage',
+ *   hooks: {
+ *     upload: async (file, context) => {
+ *       const fileClient = await getFileClient(file.id)
+ *       await fileClient.upload(file.data, { onProgress: context.onProgress })
+ *       return { url: fileClient.url, blobPath: fileClient.name }
+ *     },
+ *     getRemoteFile: async (fileId, context) => {
+ *       // ... fetch file metadata ...
+ *     },
+ *     remove: async (file, context) => {
+ *       // ... delete file ...
+ *     }
+ *   }
+ * }))
+ * ```
+ */
+export function defineStoragePlugin<
+  TPluginOptions = unknown,
+  TUploadResult = any,
+  TPluginEvents extends Record<string, any> = Record<string, never>
+>(
+  factory: (options: TPluginOptions) => StoragePlugin<TUploadResult, TPluginEvents>,
+): (options: TPluginOptions) => StoragePlugin<TUploadResult, TPluginEvents> {
+  return factory
+}
+
+/**
  * Define an uploader plugin with type safety, context access, and custom events.
  * This is the universal plugin factory for all plugin types (storage, validators, processors).
+ *
+ * @deprecated Use defineProcessingPlugin or defineStoragePlugin instead for better type safety
  *
  * Hooks receive context as a parameter, making it clear when context is available.
  * Context includes current files, options, and an emit function for custom events.
