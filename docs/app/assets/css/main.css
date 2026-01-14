@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Custom styles for documentation */
+.prose {
+  @apply max-w-none;
+}
+
+.prose code:not(pre code) {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.prose pre {
+  @apply !bg-elevated;
+}

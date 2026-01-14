@@ -1,0 +1,57 @@
+title: Nuxt UI Elements
+description: A collection of beautiful, animated UI components designed to work seamlessly on top of Nuxt UI.
+
+hero:
+  title: Beautiful UI Components for <span class="text-primary">Nuxt</span>
+  description: A growing collection of elegant, animated components that extend Nuxt UI's capabilities. Fully typed, auto-imported, and ready to use.
+  links:
+    - label: Get Started
+      icon: i-lucide-arrow-right
+      to: /docs/getting-started
+      trailingIcon: i-lucide-arrow-right
+    - label: View on GitHub
+      icon: i-simple-icons-github
+      to: https://github.com/your-username/nuxt-ui-elements
+      target: _blank
+      color: neutral
+      variant: outline
+
+features:
+  - title: TypeScript First
+    description: Full type safety with comprehensive TypeScript interfaces and auto-completion support.
+    icon: i-lucide-file-code
+    to: /docs/getting-started
+  - title: Auto-Import
+    description: Components and composables are automatically available without manual imports.
+    icon: i-lucide-wand-2
+    to: /docs/components
+  - title: Dark Mode Support
+    description: Automatic theme switching compatible with Nuxt UI's color mode system.
+    icon: i-lucide-moon
+    to: /docs/getting-started
+  - title: Dialog System
+    description: Powerful alert and confirm dialogs with async support and customizable styling.
+    icon: i-lucide-message-square
+    to: /docs/composables/use-dialog
+  - title: Upload Manager
+    description: Comprehensive file upload management with plugins for compression, thumbnails, and more.
+    icon: i-lucide-upload
+    to: /docs/composables/use-upload-manager
+  - title: Date Utilities
+    description: Tree-shakeable date manipulation functions built on @internationalized/date.
+    icon: i-lucide-calendar
+    to: /docs/utilities/date
+
+sections:
+  - title: Built on Nuxt UI
+    description: Nuxt UI Elements is designed to complement and extend Nuxt UI, not replace it.
+    features:
+      - title: Seamless Integration
+        description: Works perfectly alongside your existing Nuxt UI components.
+        icon: i-lucide-puzzle
+      - title: Consistent Design
+        description: Follows Nuxt UI's design patterns and conventions.
+        icon: i-lucide-palette
+      - title: Color Mode Integration
+        description: Automatically detects and uses Nuxt UI's color mode when available.
+        icon: i-lucide-sun-moon
