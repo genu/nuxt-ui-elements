@@ -598,6 +598,9 @@ describe("useUploadManager", () => {
     })
 
     it("should handle Azure errors gracefully with retries", async () => {
+      // Use real timers for this test since we need async operations to complete
+      vi.useRealTimers()
+
       const plugin = PluginAzureDataLake({
         sasURL: "https://example.com/sas",
         retries: 2,
@@ -616,6 +619,6 @@ describe("useUploadManager", () => {
 
       // Verify it attempted retries (1 initial + 2 retries = 3 total attempts)
       expect(AzureMocks.mockUpload).toHaveBeenCalledTimes(3)
-    }, 10000) // 10 second timeout for retries
+    })
   })
 })
