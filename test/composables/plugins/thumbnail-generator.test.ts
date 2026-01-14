@@ -83,11 +83,7 @@ describe("PluginThumbnailGenerator", () => {
 
       await plugin.hooks.preprocess!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        "image/jpeg",
-        0.6
-      )
+      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.6)
     })
 
     it("uses default quality of 0.7", async () => {
@@ -98,11 +94,7 @@ describe("PluginThumbnailGenerator", () => {
 
       await plugin.hooks.preprocess!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        "image/jpeg",
-        0.7
-      )
+      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.7)
     })
 
     it("preserves aspect ratio for landscape images", async () => {
@@ -342,10 +334,7 @@ describe("PluginThumbnailGenerator", () => {
 
       expect(result).toBe(file)
       expect(result.meta.thumbnail).toBeUndefined()
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Thumbnail generation failed"),
-        expect.any(Error)
-      )
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Thumbnail generation failed"), expect.any(Error))
 
       consoleSpy.mockRestore()
     })

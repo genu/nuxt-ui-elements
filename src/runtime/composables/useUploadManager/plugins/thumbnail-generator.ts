@@ -13,12 +13,7 @@ export const PluginThumbnailGenerator = defineProcessingPlugin<ThumbnailGenerato
     id: "thumbnail-generator",
     hooks: {
       preprocess: async (file, context) => {
-        const {
-          maxWidth = 200,
-          maxHeight = 200,
-          quality = 0.7,
-          videoCaptureTime = 1,
-        } = pluginOptions
+        const { maxWidth = 200, maxHeight = 200, quality = 0.7, videoCaptureTime = 1 } = pluginOptions
 
         // Skip non-image and non-video files
         if (!file.mimeType.startsWith("image/") && !file.mimeType.startsWith("video/")) {
@@ -45,21 +40,10 @@ export const PluginThumbnailGenerator = defineProcessingPlugin<ThumbnailGenerato
 
         try {
           if (file.mimeType.startsWith("image/")) {
-            const thumbnailUrl = await generateImageThumbnail(
-              sourceUrl,
-              maxWidth,
-              maxHeight,
-              quality
-            )
+            const thumbnailUrl = await generateImageThumbnail(sourceUrl, maxWidth, maxHeight, quality)
             file.meta.thumbnail = thumbnailUrl
           } else if (file.mimeType.startsWith("video/")) {
-            const thumbnailUrl = await generateVideoThumbnail(
-              sourceUrl,
-              maxWidth,
-              maxHeight,
-              quality,
-              videoCaptureTime
-            )
+            const thumbnailUrl = await generateVideoThumbnail(sourceUrl, maxWidth, maxHeight, quality, videoCaptureTime)
             file.meta.thumbnail = thumbnailUrl
           }
         } catch (error) {
@@ -75,23 +59,13 @@ export const PluginThumbnailGenerator = defineProcessingPlugin<ThumbnailGenerato
   }
 })
 
-async function generateImageThumbnail(
-  sourceUrl: string,
-  maxWidth: number,
-  maxHeight: number,
-  quality: number
-): Promise<string> {
+async function generateImageThumbnail(sourceUrl: string, maxWidth: number, maxHeight: number, quality: number): Promise<string> {
   return new Promise((resolve, reject) => {
     const image = new Image()
 
     image.onload = () => {
       try {
-        const { width, height } = calculateThumbnailDimensions(
-          image.width,
-          image.height,
-          maxWidth,
-          maxHeight
-        )
+        const { width, height } = calculateThumbnailDimensions(image.width, image.height, maxWidth, maxHeight)
 
         const canvas = document.createElement("canvas")
         canvas.width = width
@@ -123,7 +97,7 @@ async function generateVideoThumbnail(
   maxWidth: number,
   maxHeight: number,
   quality: number,
-  captureTime: number
+  captureTime: number,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video")
@@ -138,12 +112,7 @@ async function generateVideoThumbnail(
 
     video.onseeked = () => {
       try {
-        const { width, height } = calculateThumbnailDimensions(
-          video.videoWidth,
-          video.videoHeight,
-          maxWidth,
-          maxHeight
-        )
+        const { width, height } = calculateThumbnailDimensions(video.videoWidth, video.videoHeight, maxWidth, maxHeight)
 
         const canvas = document.createElement("canvas")
         canvas.width = width
@@ -169,4 +138,3 @@ async function generateVideoThumbnail(
     video.src = sourceUrl
   })
 }
-

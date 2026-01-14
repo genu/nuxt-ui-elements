@@ -1,28 +1,28 @@
 <script setup lang="ts">
-const colorMode = useColorMode()
+  const colorMode = useColorMode()
 
-const links = [
-  {
-    label: 'Docs',
-    to: '/docs/getting-started'
-  },
-  {
-    label: 'Components',
-    to: '/docs/components'
-  },
-  {
-    label: 'Composables',
-    to: '/docs/composables'
-  },
-  {
-    label: 'Utilities',
-    to: '/docs/utilities'
+  const links = [
+    {
+      label: "Docs",
+      to: "/docs/getting-started",
+    },
+    {
+      label: "Components",
+      to: "/docs/components",
+    },
+    {
+      label: "Composables",
+      to: "/docs/composables",
+    },
+    {
+      label: "Utilities",
+      to: "/docs/utilities",
+    },
+  ]
+
+  function toggleColorMode() {
+    colorMode.preference = colorMode.value === "dark" ? "light" : "dark"
   }
-]
-
-function toggleColorMode() {
-  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
-}
 </script>
 
 <template>
@@ -43,16 +43,14 @@ function toggleColorMode() {
         icon="i-simple-icons-github"
         color="neutral"
         variant="ghost"
-        aria-label="GitHub"
-      />
+        aria-label="GitHub" />
 
       <UButton
         :icon="colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'"
         color="neutral"
         variant="ghost"
         aria-label="Toggle color mode"
-        @click="toggleColorMode"
-      />
+        @click="toggleColorMode" />
     </template>
   </UHeader>
 </template>

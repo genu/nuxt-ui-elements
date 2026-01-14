@@ -1,6 +1,6 @@
-import type { ComponentMeta } from 'vue-component-meta'
+import type { ComponentMeta } from "vue-component-meta"
 
-const useComponentsMetaState = () => useState<Record<string, any>>('component-meta-state', () => ({}))
+const useComponentsMetaState = () => useState<Record<string, any>>("component-meta-state", () => ({}))
 
 export async function fetchComponentMeta(name: string): Promise<{ meta: ComponentMeta } | null> {
   const state = useComponentsMetaState()
@@ -17,17 +17,19 @@ export async function fetchComponentMeta(name: string): Promise<{ meta: Componen
   if (import.meta.server) {
     const event = useRequestEvent()
     event?.node.res.setHeader(
-      'x-nitro-prerender',
-      [event?.node.res.getHeader('x-nitro-prerender'), `/api/component-meta/${name}.json`].filter(Boolean).join(',')
+      "x-nitro-prerender",
+      [event?.node.res.getHeader("x-nitro-prerender"), `/api/component-meta/${name}.json`].filter(Boolean).join(","),
     )
   }
 
   // Store promise to avoid multiple calls
-  state.value[name] = $fetch(`/api/component-meta/${name}.json`).then((meta) => {
-    state.value[name] = meta
-  }).catch(() => {
-    state.value[name] = null
-  })
+  state.value[name] = $fetch(`/api/component-meta/${name}.json`)
+    .then((meta) => {
+      state.value[name] = meta
+    })
+    .catch(() => {
+      state.value[name] = null
+    })
 
   await state.value[name]
   return state.value[name]

@@ -99,32 +99,16 @@ describe("ValidatorAllowedFileTypes", () => {
   describe("Common MIME Types", () => {
     it("validates common image formats", async () => {
       const plugin = ValidatorAllowedFileTypes({
-        allowedFileTypes: [
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-          "image/webp",
-          "image/svg+xml",
-        ],
+        allowedFileTypes: ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"],
       })
 
       const context = createMockContext()
 
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "image/jpeg" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "image/png" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "image/gif" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "image/webp" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "image/svg+xml" }), context)
-      ).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "image/jpeg" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "image/png" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "image/gif" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "image/webp" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "image/svg+xml" }), context)).toBeDefined()
     })
 
     it("validates common video formats", async () => {
@@ -134,18 +118,10 @@ describe("ValidatorAllowedFileTypes", () => {
 
       const context = createMockContext()
 
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "video/mp4" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "video/webm" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "video/ogg" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "video/quicktime" }), context)
-      ).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "video/mp4" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "video/webm" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "video/ogg" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "video/quicktime" }), context)).toBeDefined()
     })
 
     it("validates common document formats", async () => {
@@ -160,23 +136,17 @@ describe("ValidatorAllowedFileTypes", () => {
 
       const context = createMockContext()
 
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "application/pdf" }), context)
-      ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "application/msword" }), context)
-      ).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "application/pdf" }), context)).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "application/msword" }), context)).toBeDefined()
       expect(
         await plugin.hooks.validate!(
           createMockFile({
             mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           }),
-          context
-        )
+          context,
+        ),
       ).toBeDefined()
-      expect(
-        await plugin.hooks.validate!(createMockFile({ mimeType: "text/plain" }), context)
-      ).toBeDefined()
+      expect(await plugin.hooks.validate!(createMockFile({ mimeType: "text/plain" }), context)).toBeDefined()
     })
 
     it("rejects disallowed formats", async () => {
@@ -186,15 +156,11 @@ describe("ValidatorAllowedFileTypes", () => {
 
       const context = createMockContext()
 
-      await expect(
-        plugin.hooks.validate!(createMockFile({ mimeType: "application/pdf" }), context)
-      ).rejects.toEqual({
+      await expect(plugin.hooks.validate!(createMockFile({ mimeType: "application/pdf" }), context)).rejects.toEqual({
         message: "File type application/pdf is not allowed",
       })
 
-      await expect(
-        plugin.hooks.validate!(createMockFile({ mimeType: "video/mp4" }), context)
-      ).rejects.toEqual({
+      await expect(plugin.hooks.validate!(createMockFile({ mimeType: "video/mp4" }), context)).rejects.toEqual({
         message: "File type video/mp4 is not allowed",
       })
     })

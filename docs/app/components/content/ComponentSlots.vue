@@ -1,24 +1,27 @@
 <script setup lang="ts">
-import { upperFirst, camelCase } from 'scule'
-import type { ComponentMeta } from 'vue-component-meta'
+  import { upperFirst, camelCase } from "scule"
+  import type { ComponentMeta } from "vue-component-meta"
 
-const props = withDefaults(defineProps<{
-  slug?: string
-}>(), {})
+  const props = withDefaults(
+    defineProps<{
+      slug?: string
+    }>(),
+    {},
+  )
 
-const route = useRoute()
+  const route = useRoute()
 
-const camelName = camelCase(props.slug ?? route.path.split('/').pop() ?? '')
-const componentName = `UE${upperFirst(camelName)}`
+  const camelName = camelCase(props.slug ?? route.path.split("/").pop() ?? "")
+  const componentName = `UE${upperFirst(camelName)}`
 
-const meta = await fetchComponentMeta(componentName as any)
+  const meta = await fetchComponentMeta(componentName as any)
 
-const metaSlots = computed(() => {
-  if (!meta?.meta?.slots?.length) {
-    return []
-  }
-  return meta.meta.slots
-})
+  const metaSlots = computed(() => {
+    if (!meta?.meta?.slots?.length) {
+      return []
+    }
+    return meta.meta.slots
+  })
 </script>
 
 <template>
@@ -45,7 +48,5 @@ const metaSlots = computed(() => {
       </table>
     </div>
   </div>
-  <div v-else class="my-5 text-muted italic">
-    No slots available for this component.
-  </div>
+  <div v-else class="my-5 text-muted italic">No slots available for this component.</div>
 </template>

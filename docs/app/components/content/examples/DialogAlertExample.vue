@@ -1,26 +1,26 @@
 <script setup lang="ts">
-const dialog = useDialog()
+  const dialog = useDialog()
 
-const colors = ['primary', 'success', 'warning', 'error', 'info', 'neutral'] as const
-const selectedColor = ref<typeof colors[number]>('primary')
+  const colors = ["primary", "success", "warning", "error", "info", "neutral"] as const
+  const selectedColor = ref<(typeof colors)[number]>("primary")
 
-const colorIcons: Record<typeof colors[number], string> = {
-  primary: 'i-lucide-info',
-  success: 'i-lucide-check-circle',
-  warning: 'i-lucide-alert-triangle',
-  error: 'i-lucide-x-circle',
-  info: 'i-lucide-info',
-  neutral: 'i-lucide-message-circle'
-}
+  const colorIcons: Record<(typeof colors)[number], string> = {
+    primary: "i-lucide-info",
+    success: "i-lucide-check-circle",
+    warning: "i-lucide-alert-triangle",
+    error: "i-lucide-x-circle",
+    info: "i-lucide-info",
+    neutral: "i-lucide-message-circle",
+  }
 
-function showAlert() {
-  dialog.alert({
-    icon: colorIcons[selectedColor.value],
-    title: `${selectedColor.value.charAt(0).toUpperCase() + selectedColor.value.slice(1)} Alert`,
-    description: `This is a ${selectedColor.value} alert dialog example.`,
-    color: selectedColor.value
-  })
-}
+  function showAlert() {
+    dialog.alert({
+      icon: colorIcons[selectedColor.value],
+      title: `${selectedColor.value.charAt(0).toUpperCase() + selectedColor.value.slice(1)} Alert`,
+      description: `This is a ${selectedColor.value} alert dialog example.`,
+      color: selectedColor.value,
+    })
+  }
 </script>
 
 <template>
@@ -32,14 +32,11 @@ function showAlert() {
         :color="color"
         :variant="selectedColor === color ? 'solid' : 'outline'"
         size="sm"
-        @click="selectedColor = color"
-      >
+        @click="selectedColor = color">
         {{ color }}
       </UButton>
     </div>
 
-    <UButton @click="showAlert">
-      Show {{ selectedColor }} Alert
-    </UButton>
+    <UButton @click="showAlert"> Show {{ selectedColor }} Alert </UButton>
   </div>
 </template>

@@ -79,10 +79,7 @@ export const PluginAzureDataLake = defineStoragePlugin<AzureDataLakeOptions, Azu
   /**
    * Retry an async operation with exponential backoff
    */
-  async function withRetry<T>(
-    operation: () => Promise<T>,
-    operationName: string
-  ): Promise<T> {
+  async function withRetry<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
     let lastError: Error | undefined
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -101,21 +98,18 @@ export const PluginAzureDataLake = defineStoragePlugin<AzureDataLakeOptions, Azu
 
         if (import.meta.dev) {
           console.warn(
-            `[Azure Storage] ${operationName} failed (attempt ${attempt + 1}/${maxRetries + 1}). ` +
-            `Retrying in ${delay}ms...`,
-            error
+            `[Azure Storage] ${operationName} failed (attempt ${attempt + 1}/${maxRetries + 1}). ` + `Retrying in ${delay}ms...`,
+            error,
           )
         }
 
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, delay))
+        await new Promise((resolve) => setTimeout(resolve, delay))
       }
     }
 
     // All retries exhausted
-    throw new Error(
-      `[Azure Storage] ${operationName} failed after ${maxRetries + 1} attempts: ${lastError?.message}`
-    )
+    throw new Error(`[Azure Storage] ${operationName} failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
   }
 
   // Initialize SAS URL if getSASUrl is provided
@@ -195,7 +189,7 @@ export const PluginAzureDataLake = defineStoragePlugin<AzureDataLakeOptions, Azu
       async upload(file, context) {
         // Remote files don't have local data - this shouldn't happen
         // but add a guard just in case
-        if (file.source !== 'local' || file.data === null) {
+        if (file.source !== "local" || file.data === null) {
           throw new Error("Cannot upload remote file - no local data available")
         }
 

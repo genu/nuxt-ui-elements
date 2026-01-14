@@ -1,48 +1,51 @@
 <script setup lang="ts">
-import { kebabCase } from 'scule'
-import type { ContentNavigationItem } from '@nuxt/content'
+  import { kebabCase } from "scule"
+  import type { ContentNavigationItem } from "@nuxt/content"
 
-const route = useRoute()
+  const route = useRoute()
 
-definePageMeta({
-  layout: 'docs'
-})
+  definePageMeta({
+    layout: "docs",
+  })
 
-const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection('docs').path(route.path).first())
+  const { data: page } = await useAsyncData(kebabCase(route.path), () => queryCollection("docs").path(route.path).first())
 
-if (!page.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Page not found', fatal: true })
-}
+  if (!page.value) {
+    throw createError({ statusCode: 404, statusMessage: "Page not found", fatal: true })
+  }
 
-const navigation = inject<Ref<ContentNavigationItem[]>>('navigation')
+  const navigation = inject<Ref<ContentNavigationItem[]>>("navigation")
 
-const { findSurround, findBreadcrumb } = useNavigation(navigation!)
+  const { findSurround, findBreadcrumb } = useNavigation(navigation!)
 
-const breadcrumb = computed(() => findBreadcrumb(page.value?.path as string))
-const surround = computed(() => findSurround(page.value?.path as string))
+  const breadcrumb = computed(() => findBreadcrumb(page.value?.path as string))
+  const surround = computed(() => findSurround(page.value?.path as string))
 
-const title = page.value?.navigation?.title || page.value?.title
-const description = page.value?.description
+  const title = page.value?.navigation?.title || page.value?.title
+  const description = page.value?.description
 
-useSeoMeta({
-  titleTemplate: '%s - Nuxt UI Elements',
-  title,
-  ogTitle: `${title} - Nuxt UI Elements`,
-  description,
-  ogDescription: description
-})
+  useSeoMeta({
+    titleTemplate: "%s - Nuxt UI Elements",
+    title,
+    ogTitle: `${title} - Nuxt UI Elements`,
+    description,
+    ogDescription: description,
+  })
 
-const communityLinks = computed(() => [{
-  icon: 'i-lucide-file-pen',
-  label: 'Edit this page',
-  to: `https://github.com/your-username/nuxt-ui-elements/edit/main/docs/content/${page?.value?.stem}.md`,
-  target: '_blank'
-}, {
-  icon: 'i-lucide-star',
-  label: 'Star on GitHub',
-  to: `https://github.com/your-username/nuxt-ui-elements`,
-  target: '_blank'
-}])
+  const communityLinks = computed(() => [
+    {
+      icon: "i-lucide-file-pen",
+      label: "Edit this page",
+      to: `https://github.com/your-username/nuxt-ui-elements/edit/main/docs/content/${page?.value?.stem}.md`,
+      target: "_blank",
+    },
+    {
+      icon: "i-lucide-star",
+      label: "Star on GitHub",
+      to: `https://github.com/your-username/nuxt-ui-elements`,
+      target: "_blank",
+    },
+  ])
 </script>
 
 <template>
@@ -63,8 +66,7 @@ const communityLinks = computed(() => [{
           color="neutral"
           variant="outline"
           :target="link.to?.startsWith('http') ? '_blank' : undefined"
-          v-bind="link"
-        />
+          v-bind="link" />
       </template>
     </UPageHeader>
 
@@ -73,7 +75,7 @@ const communityLinks = computed(() => [{
 
       <USeparator v-if="surround?.filter(Boolean).length" />
 
-      <UContentSurround :surround="(surround as any)" />
+      <UContentSurround :surround="surround as any" />
     </UPageBody>
 
     <template v-if="page?.body?.toc?.links?.length" #right>

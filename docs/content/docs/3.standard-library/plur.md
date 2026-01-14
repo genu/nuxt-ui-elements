@@ -15,41 +15,41 @@ The `plur` utility pluralizes words based on a count. It's a re-export of the [p
 ## Usage
 
 ```ts
-import std from '#std'
+import std from "#std"
 
-std.plur('unicorn', 1) // 'unicorn'
-std.plur('unicorn', 2) // 'unicorns'
-std.plur('puppy', 2)   // 'puppies'
-std.plur('box', 2)     // 'boxes'
+std.plur("unicorn", 1) // 'unicorn'
+std.plur("unicorn", 2) // 'unicorns'
+std.plur("puppy", 2) // 'puppies'
+std.plur("box", 2) // 'boxes'
 ```
 
 ## API
 
 ### `plur(word, count, plural?)`
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `word` | `string` | The word to pluralize |
-| `count` | `number` | The count to determine singular/plural |
-| `plural` | `string` | Optional custom plural form |
+| Parameter | Type     | Description                            |
+| --------- | -------- | -------------------------------------- |
+| `word`    | `string` | The word to pluralize                  |
+| `count`   | `number` | The count to determine singular/plural |
+| `plural`  | `string` | Optional custom plural form            |
 
 ### Examples
 
 ```ts
-import std from '#std'
+import std from "#std"
 
 // Basic usage
-std.plur('file', 0)  // 'files'
-std.plur('file', 1)  // 'file'
-std.plur('file', 5)  // 'files'
+std.plur("file", 0) // 'files'
+std.plur("file", 1) // 'file'
+std.plur("file", 5) // 'files'
 
 // Irregular plurals are handled automatically
-std.plur('child', 2)  // 'children'
-std.plur('person', 2) // 'people'
-std.plur('goose', 2)  // 'geese'
+std.plur("child", 2) // 'children'
+std.plur("person", 2) // 'people'
+std.plur("goose", 2) // 'geese'
 
 // Custom plural form
-std.plur('pokemon', 2, 'pokemon') // 'pokemon'
+std.plur("pokemon", 2, "pokemon") // 'pokemon'
 ```
 
 ## Common Use Cases
@@ -57,10 +57,10 @@ std.plur('pokemon', 2, 'pokemon') // 'pokemon'
 ### Display counts with labels
 
 ```ts
-import std from '#std'
+import std from "#std"
 
 const fileCount = 5
-const message = `${fileCount} ${std.plur('file', fileCount)} selected`
+const message = `${fileCount} ${std.plur("file", fileCount)} selected`
 // "5 files selected"
 ```
 
@@ -68,12 +68,12 @@ const message = `${fileCount} ${std.plur('file', fileCount)} selected`
 
 ```vue
 <script setup>
-import std from '#std'
+  import std from "#std"
 
-const items = ref([])
+  const items = ref([])
 </script>
 
 <template>
-  <p>{{ items.length }} {{ std.plur('item', items.length) }} in cart</p>
+  <p>{{ items.length }} {{ std.plur("item", items.length) }} in cart</p>
 </template>
 ```

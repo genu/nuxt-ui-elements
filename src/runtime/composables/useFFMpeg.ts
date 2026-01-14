@@ -61,7 +61,7 @@ export const useFFMpeg = (options: FFMPegOptions) => {
 
   const getModifiedVideo = async () => {
     const data = await ffmpeg.readFile("output.mp4")
-    
+
     // FFmpeg WASM's FileData can be either a string or Uint8Array.
     // For binary files like MP4, it returns Uint8Array.
     // The issue: ffmpeg.wasm may return a Uint8Array backed by SharedArrayBuffer,
@@ -69,7 +69,7 @@ export const useFFMpeg = (options: FFMPegOptions) => {
     // Solution: Create a fresh ArrayBuffer copy and populate it with the data,
     // then explicitly type it as Uint8Array<ArrayBuffer> to satisfy TypeScript's strict checks.
     let bytes: Uint8Array<ArrayBuffer>
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       bytes = new TextEncoder().encode(data) as Uint8Array<ArrayBuffer>
     } else {
       // Create a new ArrayBuffer (regular, not Shared) and copy data into it
@@ -77,7 +77,7 @@ export const useFFMpeg = (options: FFMPegOptions) => {
       new Uint8Array(buffer).set(data)
       bytes = new Uint8Array(buffer) as Uint8Array<ArrayBuffer>
     }
-    
+
     const updatedFile = new File([bytes], "output.mp4", { type: "video/mp4" })
 
     return updatedFile

@@ -65,7 +65,7 @@ export const PluginImageCompressor = defineProcessingPlugin<ImageCompressorOptio
         }
 
         // Skip remote files - can't compress without local data
-        if (file.source !== 'local') {
+        if (file.source !== "local") {
           context.emit("skip", { file, reason: "Remote file, no local data to compress" })
           return file
         }

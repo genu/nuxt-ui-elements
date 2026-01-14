@@ -1,11 +1,11 @@
 <script setup lang="ts">
-const props = defineProps<{
-  name: string
-  class?: string
-}>()
+  const props = defineProps<{
+    name: string
+    class?: string
+  }>()
 
-// The example component should be registered globally via the nuxt.config.ts hook
-const component = resolveComponent(props.name)
+  // The example component should be registered globally via the nuxt.config.ts hook
+  const component = resolveComponent(props.name)
 </script>
 
 <template>

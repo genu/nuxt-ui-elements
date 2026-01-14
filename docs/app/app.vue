@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { ContentNavigationItem } from '@nuxt/content'
+  import type { ContentNavigationItem } from "@nuxt/content"
 
-const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('docs'))
+  const { data: navigation } = await useAsyncData("navigation", () => queryCollectionNavigation("docs"))
 
-provide<Ref<ContentNavigationItem[]>>('navigation', navigation as Ref<ContentNavigationItem[]>)
+  provide<Ref<ContentNavigationItem[]>>("navigation", navigation as Ref<ContentNavigationItem[]>)
 </script>
 
 <template>

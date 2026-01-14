@@ -156,11 +156,7 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        "image/png",
-        0.85
-      )
+      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/png", 0.85)
     })
 
     it("converts to JPEG when outputFormat is jpeg", async () => {
@@ -172,11 +168,7 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        "image/jpeg",
-        0.85
-      )
+      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.85)
     })
 
     it("converts to WebP when outputFormat is webp", async () => {
@@ -188,11 +180,7 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        "image/webp",
-        0.85
-      )
+      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/webp", 0.85)
     })
   })
 
@@ -206,11 +194,7 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.any(String),
-        0.5
-      )
+      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), expect.any(String), 0.5)
     })
 
     it("uses default quality of 0.85", async () => {
@@ -220,11 +204,7 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.any(String),
-        0.85
-      )
+      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), expect.any(String), 0.85)
     })
   })
 
@@ -302,10 +282,7 @@ describe("PluginImageCompressor", () => {
       const result = await plugin.hooks.process!(file, context)
 
       expect(result).toBe(file)
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Image compression failed"),
-        expect.any(Error)
-      )
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Image compression failed"), expect.any(Error))
 
       consoleSpy.mockRestore()
     })

@@ -14,20 +14,20 @@ The `useUploadManager` composable provides a powerful, plugin-based system for m
 
 ```vue
 <script setup lang="ts">
-const uploader = useUploadManager({
-  maxFiles: 5,
-  maxFileSize: 10 * 1024 * 1024, // 10MB
-  allowedFileTypes: ['image/*', 'video/*'],
-  thumbnails: true,
-  imageCompression: true
-})
+  const uploader = useUploadManager({
+    maxFiles: 5,
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    allowedFileTypes: ["image/*", "video/*"],
+    thumbnails: true,
+    imageCompression: true,
+  })
 
-const handleFileSelect = async (event: Event) => {
-  const input = event.target as HTMLInputElement
-  if (input.files) {
-    await uploader.addFiles(Array.from(input.files))
+  const handleFileSelect = async (event: Event) => {
+    const input = event.target as HTMLInputElement
+    if (input.files) {
+      await uploader.addFiles(Array.from(input.files))
+    }
   }
-}
 </script>
 
 <template>
@@ -47,23 +47,23 @@ const handleFileSelect = async (event: Event) => {
 
 ## Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `storage` | `StoragePlugin` | `undefined` | Storage plugin for uploading files |
-| `plugins` | `ProcessingPlugin[]` | `[]` | Additional processing plugins |
-| `maxFiles` | `number \| false` | `false` | Maximum number of files allowed |
-| `maxFileSize` | `number \| false` | `false` | Maximum file size in bytes |
-| `allowedFileTypes` | `string[] \| false` | `false` | Allowed MIME types (supports wildcards) |
-| `thumbnails` | `boolean \| ThumbnailOptions` | `false` | Enable thumbnail generation |
-| `imageCompression` | `boolean \| CompressionOptions` | `false` | Enable image compression |
-| `autoProceed` | `boolean` | `false` | Automatically start upload after adding files |
+| Option             | Type                            | Default     | Description                                   |
+| ------------------ | ------------------------------- | ----------- | --------------------------------------------- |
+| `storage`          | `StoragePlugin`                 | `undefined` | Storage plugin for uploading files            |
+| `plugins`          | `ProcessingPlugin[]`            | `[]`        | Additional processing plugins                 |
+| `maxFiles`         | `number \| false`               | `false`     | Maximum number of files allowed               |
+| `maxFileSize`      | `number \| false`               | `false`     | Maximum file size in bytes                    |
+| `allowedFileTypes` | `string[] \| false`             | `false`     | Allowed MIME types (supports wildcards)       |
+| `thumbnails`       | `boolean \| ThumbnailOptions`   | `false`     | Enable thumbnail generation                   |
+| `imageCompression` | `boolean \| CompressionOptions` | `false`     | Enable image compression                      |
+| `autoProceed`      | `boolean`                       | `false`     | Automatically start upload after adding files |
 
 ### Thumbnail Options
 
 ```ts
 interface ThumbnailOptions {
-  width?: number   // Default: 128
-  height?: number  // Default: 128
+  width?: number // Default: 128
+  height?: number // Default: 128
   quality?: number // Default: 1
 }
 ```
@@ -72,42 +72,42 @@ interface ThumbnailOptions {
 
 ```ts
 interface CompressionOptions {
-  maxWidth?: number        // Default: 1920
-  maxHeight?: number       // Default: 1920
-  quality?: number         // Default: 0.85
-  outputFormat?: 'auto' | 'jpeg' | 'png' | 'webp'
-  minSizeToCompress?: number  // Default: 100KB
-  preserveMetadata?: boolean  // Default: true
+  maxWidth?: number // Default: 1920
+  maxHeight?: number // Default: 1920
+  quality?: number // Default: 0.85
+  outputFormat?: "auto" | "jpeg" | "png" | "webp"
+  minSizeToCompress?: number // Default: 100KB
+  preserveMetadata?: boolean // Default: true
 }
 ```
 
 ## Returns
 
-| Property/Method | Type | Description |
-|-----------------|------|-------------|
-| `files` | `Ref<UploadFile[]>` | Reactive array of files (readonly) |
-| `totalProgress` | `ComputedRef<number>` | Overall upload progress (0-100) |
-| `status` | `Ref<UploadStatus>` | Current upload status |
-| `addFile` | `(file: File) => Promise<UploadFile>` | Add a single file |
-| `addFiles` | `(files: File[]) => Promise<UploadFile[]>` | Add multiple files |
-| `removeFile` | `(fileId: string) => Promise<void>` | Remove a file by ID |
-| `removeFiles` | `(fileIds: string[]) => void` | Remove multiple files |
-| `clearFiles` | `() => void` | Remove all files |
-| `reorderFile` | `(oldIndex, newIndex) => void` | Reorder files |
-| `getFile` | `(fileId: string) => UploadFile` | Get a file by ID |
-| `upload` | `() => Promise<void>` | Start uploading |
-| `reset` | `() => void` | Reset to initial state |
-| `on` | `(event, handler) => void` | Subscribe to events |
+| Property/Method | Type                                       | Description                        |
+| --------------- | ------------------------------------------ | ---------------------------------- |
+| `files`         | `Ref<UploadFile[]>`                        | Reactive array of files (readonly) |
+| `totalProgress` | `ComputedRef<number>`                      | Overall upload progress (0-100)    |
+| `status`        | `Ref<UploadStatus>`                        | Current upload status              |
+| `addFile`       | `(file: File) => Promise<UploadFile>`      | Add a single file                  |
+| `addFiles`      | `(files: File[]) => Promise<UploadFile[]>` | Add multiple files                 |
+| `removeFile`    | `(fileId: string) => Promise<void>`        | Remove a file by ID                |
+| `removeFiles`   | `(fileIds: string[]) => void`              | Remove multiple files              |
+| `clearFiles`    | `() => void`                               | Remove all files                   |
+| `reorderFile`   | `(oldIndex, newIndex) => void`             | Reorder files                      |
+| `getFile`       | `(fileId: string) => UploadFile`           | Get a file by ID                   |
+| `upload`        | `() => Promise<void>`                      | Start uploading                    |
+| `reset`         | `() => void`                               | Reset to initial state             |
+| `on`            | `(event, handler) => void`                 | Subscribe to events                |
 
 ### File Data Access Methods
 
-| Method | Description |
-|--------|-------------|
-| `getFileData(fileId)` | Get file data as Blob (loads into memory) |
-| `getFileURL(fileId)` | Get object URL for file (memory efficient) |
-| `getFileStream(fileId)` | Get file as ReadableStream (most efficient) |
-| `replaceFileData(fileId, newData)` | Replace file data (for editing) |
-| `initializeExistingFiles(files)` | Load existing files from storage |
+| Method                             | Description                                 |
+| ---------------------------------- | ------------------------------------------- |
+| `getFileData(fileId)`              | Get file data as Blob (loads into memory)   |
+| `getFileURL(fileId)`               | Get object URL for file (memory efficient)  |
+| `getFileStream(fileId)`            | Get file as ReadableStream (most efficient) |
+| `replaceFileData(fileId, newData)` | Replace file data (for editing)             |
+| `initializeExistingFiles(files)`   | Load existing files from storage            |
 
 ## File Object
 
@@ -119,13 +119,13 @@ interface UploadFile {
   name: string
   size: number
   mimeType: string
-  status: 'waiting' | 'preprocessing' | 'uploading' | 'postprocessing' | 'complete' | 'error'
+  status: "waiting" | "preprocessing" | "uploading" | "postprocessing" | "complete" | "error"
   progress: { percentage: number }
-  preview?: string        // Thumbnail or preview URL
-  remoteUrl?: string      // URL after upload
-  uploadResult?: any      // Result from storage plugin
-  error?: FileError       // Error details if status is 'error'
-  source: 'local' | 'storage' | string
+  preview?: string // Thumbnail or preview URL
+  remoteUrl?: string // URL after upload
+  uploadResult?: any // Result from storage plugin
+  error?: FileError // Error details if status is 'error'
+  source: "local" | "storage" | string
   meta: Record<string, any>
 }
 ```
@@ -138,20 +138,20 @@ Subscribe to events using the `on` method:
 const uploader = useUploadManager()
 
 // Core events
-uploader.on('file:added', (file) => console.log('Added:', file.name))
-uploader.on('file:removed', (file) => console.log('Removed:', file.name))
-uploader.on('file:error', ({ file, error }) => console.error(error))
-uploader.on('file:replaced', (file) => console.log('Replaced:', file.name))
+uploader.on("file:added", (file) => console.log("Added:", file.name))
+uploader.on("file:removed", (file) => console.log("Removed:", file.name))
+uploader.on("file:error", ({ file, error }) => console.error(error))
+uploader.on("file:replaced", (file) => console.log("Replaced:", file.name))
 
-uploader.on('upload:start', (files) => console.log('Starting upload...'))
-uploader.on('upload:progress', ({ file, progress }) => console.log(`${progress}%`))
-uploader.on('upload:complete', (files) => console.log('Upload complete!'))
+uploader.on("upload:start", (files) => console.log("Starting upload..."))
+uploader.on("upload:progress", ({ file, progress }) => console.log(`${progress}%`))
+uploader.on("upload:complete", (files) => console.log("Upload complete!"))
 
-uploader.on('files:reorder', ({ oldIndex, newIndex }) => console.log('Reordered'))
+uploader.on("files:reorder", ({ oldIndex, newIndex }) => console.log("Reordered"))
 
 // Plugin-specific events (prefixed with plugin ID)
-uploader.on('thumbnail-generator:generated', (data) => console.log('Thumbnail ready'))
-uploader.on('image-compressor:compressed', (data) => console.log('Image compressed'))
+uploader.on("thumbnail-generator:generated", (data) => console.log("Thumbnail ready"))
+uploader.on("image-compressor:compressed", (data) => console.log("Image compressed"))
 ```
 
 ## Plugins
@@ -174,13 +174,13 @@ Validators are automatically added based on options:
 Storage plugins handle the actual upload to your backend:
 
 ```ts
-import { PluginAzureDataLake } from 'nuxt-ui-elements/runtime/composables/useUploadManager/plugins'
+import { PluginAzureDataLake } from "nuxt-ui-elements/runtime/composables/useUploadManager/plugins"
 
 const uploader = useUploadManager({
   storage: PluginAzureDataLake({
-    accountName: 'your-account',
-    fileSystemName: 'your-container'
-  })
+    accountName: "your-account",
+    fileSystemName: "your-container",
+  }),
 })
 ```
 
@@ -190,22 +190,22 @@ const uploader = useUploadManager({
 
 ```vue
 <script setup lang="ts">
-const uploader = useUploadManager({
-  maxFiles: 10,
-  maxFileSize: 5 * 1024 * 1024, // 5MB
-  allowedFileTypes: ['image/*']
-})
+  const uploader = useUploadManager({
+    maxFiles: 10,
+    maxFileSize: 5 * 1024 * 1024, // 5MB
+    allowedFileTypes: ["image/*"],
+  })
 
-const onFileChange = async (e: Event) => {
-  const input = e.target as HTMLInputElement
-  if (input.files?.length) {
-    await uploader.addFiles(Array.from(input.files))
+  const onFileChange = async (e: Event) => {
+    const input = e.target as HTMLInputElement
+    if (input.files?.length) {
+      await uploader.addFiles(Array.from(input.files))
+    }
   }
-}
 
-const startUpload = () => {
-  uploader.upload()
-}
+  const startUpload = () => {
+    uploader.upload()
+  }
 </script>
 
 <template>
@@ -223,9 +223,7 @@ const startUpload = () => {
     </div>
 
     <p>Total Progress: {{ uploader.totalProgress }}%</p>
-    <button @click="startUpload" :disabled="!uploader.files.length">
-      Upload All
-    </button>
+    <button @click="startUpload" :disabled="!uploader.files.length">Upload All</button>
   </div>
 </template>
 ```
@@ -245,7 +243,7 @@ async function cropImage(fileId: string, cropArea: CropArea) {
   const croppedBlob = await applyCrop(blob, cropArea)
 
   // Replace with cropped version (will regenerate thumbnail)
-  await uploader.replaceFileData(fileId, croppedBlob, 'cropped-image.jpg')
+  await uploader.replaceFileData(fileId, croppedBlob, "cropped-image.jpg")
 }
 ```
 
@@ -258,11 +256,11 @@ const uploader = useUploadManager()
 
 uploader.onUpload(async (file, onProgress) => {
   const formData = new FormData()
-  formData.append('file', file.data as Blob)
+  formData.append("file", file.data as Blob)
 
-  const response = await fetch('/api/upload', {
-    method: 'POST',
-    body: formData
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
   })
 
   const result = await response.json()
@@ -274,16 +272,16 @@ uploader.onUpload(async (file, onProgress) => {
 
 ```vue
 <script setup lang="ts">
-const uploader = useUploadManager()
-const isDragging = ref(false)
+  const uploader = useUploadManager()
+  const isDragging = ref(false)
 
-const handleDrop = async (e: DragEvent) => {
-  isDragging.value = false
-  const files = e.dataTransfer?.files
-  if (files?.length) {
-    await uploader.addFiles(Array.from(files))
+  const handleDrop = async (e: DragEvent) => {
+    isDragging.value = false
+    const files = e.dataTransfer?.files
+    if (files?.length) {
+      await uploader.addFiles(Array.from(files))
+    }
   }
-}
 </script>
 
 <template>
@@ -292,8 +290,7 @@ const handleDrop = async (e: DragEvent) => {
     @dragleave="isDragging = false"
     @drop.prevent="handleDrop"
     :class="{ 'bg-primary/10': isDragging }"
-    class="border-2 border-dashed p-8 text-center"
-  >
+    class="border-2 border-dashed p-8 text-center">
     Drop files here
   </div>
 </template>

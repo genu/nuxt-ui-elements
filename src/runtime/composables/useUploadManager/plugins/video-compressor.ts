@@ -121,7 +121,7 @@ export const PluginVideoCompressor = defineProcessingPlugin<VideoCompressorOptio
             () => ffmpeg.progress.value,
             (progress) => {
               context.emit("progress", { file, percentage: Math.round(progress * 100) })
-            }
+            },
           )
 
           // Build FFmpeg command options

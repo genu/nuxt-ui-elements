@@ -1,14 +1,11 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <UFooter>
     <template #left>
       <span class="text-muted text-sm">
         Built with
-        <NuxtLink to="https://ui.nuxt.com" target="_blank" class="text-primary hover:underline">
-          Nuxt UI
-        </NuxtLink>
+        <NuxtLink to="https://ui.nuxt.com" target="_blank" class="text-primary hover:underline"> Nuxt UI </NuxtLink>
       </span>
     </template>
 
@@ -20,8 +17,7 @@
         color="neutral"
         variant="ghost"
         size="sm"
-        aria-label="GitHub"
-      />
+        aria-label="GitHub" />
     </template>
   </UFooter>
 </template>

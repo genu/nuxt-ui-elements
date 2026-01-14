@@ -17,9 +17,7 @@ describe("ValidatorMaxFiles", () => {
   })
 
   const createMockContext = (fileCount: number = 0): PluginContext => ({
-    files: Array.from({ length: fileCount }, (_, i) =>
-      createMockFile({ id: `file-${i}`, name: `file-${i}.jpg` })
-    ),
+    files: Array.from({ length: fileCount }, (_, i) => createMockFile({ id: `file-${i}`, name: `file-${i}.jpg` })),
     options: {},
     emit: vi.fn(),
   })
@@ -290,10 +288,7 @@ describe("ValidatorMaxFiles", () => {
 
       // Context with actual file objects
       const context = {
-        files: [
-          createMockFile({ id: "1", name: "file1.jpg" }),
-          createMockFile({ id: "2", name: "file2.jpg" }),
-        ],
+        files: [createMockFile({ id: "1", name: "file1.jpg" }), createMockFile({ id: "2", name: "file2.jpg" })],
         options: {},
         emit: vi.fn(),
       }
@@ -312,10 +307,7 @@ describe("ValidatorMaxFiles", () => {
 
       // Context with actual files that reach limit
       const context = {
-        files: [
-          createMockFile({ id: "1", name: "file1.jpg" }),
-          createMockFile({ id: "2", name: "file2.jpg" }),
-        ],
+        files: [createMockFile({ id: "1", name: "file1.jpg" }), createMockFile({ id: "2", name: "file2.jpg" })],
         options: {},
         emit: vi.fn(),
       }

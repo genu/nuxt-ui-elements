@@ -331,10 +331,12 @@ describe("useUploadManager", () => {
       await addFile(file)
 
       expect(handler).toHaveBeenCalledTimes(1)
-      expect(handler).toHaveBeenCalledWith(expect.objectContaining({
-        name: "test.txt",
-        status: "waiting",
-      }))
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "test.txt",
+          status: "waiting",
+        }),
+      )
     })
 
     it("emits file:removed event when file is removed", async () => {
@@ -386,7 +388,7 @@ describe("useUploadManager", () => {
       status: "uploading",
       progress: { percentage: 0 },
       meta: {},
-      source: 'local',
+      source: "local",
     })
 
     const mockContext = {
@@ -595,29 +597,25 @@ describe("useUploadManager", () => {
       })
     })
 
-    it(
-      "should handle Azure errors gracefully with retries",
-      async () => {
-        const plugin = PluginAzureDataLake({
-          sasURL: "https://example.com/sas",
-          retries: 2,
-          retryDelay: 10, // Short delay for testing
-        })
-        const { upload } = plugin.hooks
+    it("should handle Azure errors gracefully with retries", async () => {
+      const plugin = PluginAzureDataLake({
+        sasURL: "https://example.com/sas",
+        retries: 2,
+        retryDelay: 10, // Short delay for testing
+      })
+      const { upload } = plugin.hooks
 
-        const error = new Error("Azure Error")
-        // Mock to fail all retry attempts
-        AzureMocks.mockUpload.mockRejectedValue(error)
+      const error = new Error("Azure Error")
+      // Mock to fail all retry attempts
+      AzureMocks.mockUpload.mockRejectedValue(error)
 
-        if (!upload) throw new Error("Upload hook not defined")
+      if (!upload) throw new Error("Upload hook not defined")
 
-        // With retries, the error message will be wrapped
-        await expect(upload(createMockFile(), mockContext)).rejects.toThrow(/failed after \d+ attempts/)
+      // With retries, the error message will be wrapped
+      await expect(upload(createMockFile(), mockContext)).rejects.toThrow(/failed after \d+ attempts/)
 
-        // Verify it attempted retries (1 initial + 2 retries = 3 total attempts)
-        expect(AzureMocks.mockUpload).toHaveBeenCalledTimes(3)
-      },
-      10000
-    ) // 10 second timeout for retries
+      // Verify it attempted retries (1 initial + 2 retries = 3 total attempts)
+      expect(AzureMocks.mockUpload).toHaveBeenCalledTimes(3)
+    }, 10000) // 10 second timeout for retries
   })
 })

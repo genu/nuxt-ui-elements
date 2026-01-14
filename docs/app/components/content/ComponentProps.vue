@@ -1,41 +1,47 @@
 <script setup lang="ts">
-import { upperFirst, camelCase, kebabCase } from 'scule'
-import type { ComponentMeta } from 'vue-component-meta'
+  import { upperFirst, camelCase, kebabCase } from "scule"
+  import type { ComponentMeta } from "vue-component-meta"
 
-const props = withDefaults(defineProps<{
-  slug?: string
-  ignore?: string[]
-}>(), {
-  ignore: () => []
-})
+  const props = withDefaults(
+    defineProps<{
+      slug?: string
+      ignore?: string[]
+    }>(),
+    {
+      ignore: () => [],
+    },
+  )
 
-const route = useRoute()
+  const route = useRoute()
 
-const camelName = camelCase(props.slug ?? route.path.split('/').pop() ?? '')
-const componentName = `UE${upperFirst(camelName)}`
+  const camelName = camelCase(props.slug ?? route.path.split("/").pop() ?? "")
+  const componentName = `UE${upperFirst(camelName)}`
 
-const meta = await fetchComponentMeta(componentName as any)
+  const meta = await fetchComponentMeta(componentName as any)
 
-const metaProps: ComputedRef<ComponentMeta['props']> = computed(() => {
-  if (!meta?.meta?.props?.length) {
-    return []
-  }
-
-  return meta.meta.props.filter((prop) => {
-    return !props.ignore?.includes(prop.name)
-  }).map((prop) => {
-    if (prop.default) {
-      prop.default = prop.default.replace(' as never', '').replace(/^"(.*)"$/, '\'$1\'')
+  const metaProps: ComputedRef<ComponentMeta["props"]> = computed(() => {
+    if (!meta?.meta?.props?.length) {
+      return []
     }
 
-    return prop
-  }).sort((a, b) => {
-    // Put 'ui' prop at the end
-    if (a.name === 'ui') return 1
-    if (b.name === 'ui') return -1
-    return 0
+    return meta.meta.props
+      .filter((prop) => {
+        return !props.ignore?.includes(prop.name)
+      })
+      .map((prop) => {
+        if (prop.default) {
+          prop.default = prop.default.replace(" as never", "").replace(/^"(.*)"$/, "'$1'")
+        }
+
+        return prop
+      })
+      .sort((a, b) => {
+        // Put 'ui' prop at the end
+        if (a.name === "ui") return 1
+        if (b.name === "ui") return -1
+        return 0
+      })
   })
-})
 </script>
 
 <template>
@@ -67,7 +73,5 @@ const metaProps: ComputedRef<ComponentMeta['props']> = computed(() => {
       </table>
     </div>
   </div>
-  <div v-else class="my-5 text-muted italic">
-    No props available for this component.
-  </div>
+  <div v-else class="my-5 text-muted italic">No props available for this component.</div>
 </template>

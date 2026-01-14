@@ -428,14 +428,27 @@
 
           <!-- File List -->
           <div class="space-y-3">
-            <div v-for="file in files" :key="file.id" class="flex items-start gap-4 p-3 border dark:border-gray-700 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
+            <div
+              v-for="file in files"
+              :key="file.id"
+              class="flex items-start gap-4 p-3 border dark:border-gray-700 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
               <!-- Thumbnail -->
               <div class="shrink-0">
-                <img v-if="file.meta.thumbnail" :src="file.meta.thumbnail" class="w-20 h-20 object-cover rounded border dark:border-gray-700" :alt="file.name" />
-                <div v-else-if="file.mimeType.startsWith('image/') || file.mimeType.startsWith('video/')" class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center border dark:border-gray-700">
-                  <UIcon :name="file.mimeType.startsWith('video/') ? 'i-heroicons-film' : 'i-heroicons-photo'" class="w-10 h-10 text-gray-400" />
+                <img
+                  v-if="file.meta.thumbnail"
+                  :src="file.meta.thumbnail"
+                  class="w-20 h-20 object-cover rounded border dark:border-gray-700"
+                  :alt="file.name" />
+                <div
+                  v-else-if="file.mimeType.startsWith('image/') || file.mimeType.startsWith('video/')"
+                  class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center border dark:border-gray-700">
+                  <UIcon
+                    :name="file.mimeType.startsWith('video/') ? 'i-heroicons-film' : 'i-heroicons-photo'"
+                    class="w-10 h-10 text-gray-400" />
                 </div>
-                <div v-else class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center border dark:border-gray-700">
+                <div
+                  v-else
+                  class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center border dark:border-gray-700">
                   <UIcon name="i-heroicons-document" class="w-10 h-10 text-gray-400" />
                 </div>
               </div>
@@ -445,9 +458,7 @@
                 <div class="flex items-start justify-between gap-2 mb-1">
                   <div class="flex-1 min-w-0">
                     <p class="font-medium truncate">{{ file.name }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                      {{ formatFileSize(file.size) }} • {{ file.mimeType }}
-                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatFileSize(file.size) }} • {{ file.mimeType }}</p>
                   </div>
                   <UBadge :color="getStatusColor(file.status)" :icon="getStatusIcon(file.status)">
                     {{ file.status }}

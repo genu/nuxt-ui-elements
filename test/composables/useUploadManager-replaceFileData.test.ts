@@ -312,9 +312,7 @@ describe("useUploadManager - replaceFileData", () => {
 
     const newBlob = new Blob(["new"], { type: "text/plain" })
 
-    await expect(
-      uploader.replaceFileData("non-existent-id", newBlob)
-    ).rejects.toThrow("File not found")
+    await expect(uploader.replaceFileData("non-existent-id", newBlob)).rejects.toThrow("File not found")
   })
 
   it("should convert remote file to local file", async () => {
@@ -329,9 +327,11 @@ describe("useUploadManager - replaceFileData", () => {
     onGetRemoteFile(mockGetRemoteFile)
 
     // Add a remote file with ID
-    await initializeExistingFiles([{
-      id: "remote-file-123",
-    }])
+    await initializeExistingFiles([
+      {
+        id: "remote-file-123",
+      },
+    ])
 
     expect(files.value).toHaveLength(1)
     const fileId = files.value[0].id
