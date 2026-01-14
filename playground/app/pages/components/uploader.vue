@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import type { UploadFile } from "#ui-elements"
   import {
-    PluginAzureStorage,
+    PluginAzureDataLake,
     ValidatorMaxFiles,
-    ValidatorMaxfileSize,
+    ValidatorMaxFileSize,
     ValidatorAllowedFileTypes,
     PluginThumbnailGenerator,
     PluginImageCompressor,
@@ -15,43 +15,48 @@
   // Configuration state
   const config = ref({
     maxFiles: 5,
-    maxFileSize: 5 * 1024 * 1024, // 5MB
-    allowedFileTypes: ["image/jpeg", "image/png", "image/webp"],
+    maxFileSize: 100 * 1024 * 1024, // 100MB (to support videos)
+    allowedFileTypes: ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm"],
     thumbnails: true,
     imageCompression: false,
     autoProceed: false,
+    thumbnailMaxWidth: 200,
+    thumbnailMaxHeight: 200,
+    videoCaptureTime: 1,
   })
 
-  // Create uploader with all plugins explicitly defined
+  // Create uploader with new storage/processing plugin separation
   const createUploader = () => {
-    const plugins = []
+    const processingPlugins = []
 
     // Validators
     if (config.value.maxFiles) {
-      plugins.push(ValidatorMaxFiles({ maxFiles: config.value.maxFiles }))
+      processingPlugins.push(ValidatorMaxFiles({ maxFiles: config.value.maxFiles }))
     }
 
     if (config.value.maxFileSize) {
-      plugins.push(ValidatorMaxfileSize({ maxFileSize: config.value.maxFileSize }))
+      processingPlugins.push(ValidatorMaxFileSize({ maxFileSize: config.value.maxFileSize }))
     }
 
     if (config.value.allowedFileTypes.length > 0) {
-      plugins.push(ValidatorAllowedFileTypes({ allowedFileTypes: config.value.allowedFileTypes }))
+      processingPlugins.push(ValidatorAllowedFileTypes({ allowedFileTypes: config.value.allowedFileTypes }))
     }
 
-    // Processors
+    // Thumbnails (with improved API)
     if (config.value.thumbnails) {
-      plugins.push(
+      processingPlugins.push(
         PluginThumbnailGenerator({
-          width: 128,
-          height: 128,
-          quality: 1,
+          maxWidth: config.value.thumbnailMaxWidth,
+          maxHeight: config.value.thumbnailMaxHeight,
+          quality: 0.7,
+          videoCaptureTime: config.value.videoCaptureTime,
         }),
       )
     }
 
+    // Image Compression
     if (config.value.imageCompression) {
-      plugins.push(
+      processingPlugins.push(
         PluginImageCompressor({
           maxWidth: 1920,
           maxHeight: 1920,
@@ -63,33 +68,35 @@
       )
     }
 
-    // Storage (optional)
-    if (useStoragePlugin.value) {
-      plugins.push(
-        PluginAzureStorage({
+    // Storage plugin (NEW: separate from processing plugins)
+    const storagePlugin = useStoragePlugin.value
+      ? PluginAzureDataLake({
           sasURL: "mock://azure-storage",
           path: "uploads/playground",
           metadata: { source: "playground" },
-        }),
-      )
-    }
+          retries: 3,
+          retryDelay: 1000,
+        })
+      : undefined
 
     return useUploadManager({
       autoProceed: config.value.autoProceed,
-      plugins,
+      storage: storagePlugin, // NEW: separate storage option
+      plugins: processingPlugins,
     })
   }
 
   // Initialize uploader
   let uploader = createUploader()
-  let { files, totalProgress, addFiles, removeFile, clearFiles, upload, onUpload, on } = uploader
+  let { files, totalProgress, status, addFiles, removeFile, clearFiles, upload, onUpload, on } = uploader
 
-  // Recreate uploader when storage mode changes
-  watch(useStoragePlugin, () => {
+  // Recreate uploader when config changes
+  watch([useStoragePlugin, () => config.value.thumbnails, () => config.value.imageCompression], () => {
     uploader = createUploader()
     const newUploader = uploader
     files = newUploader.files
     totalProgress = newUploader.totalProgress
+    status = newUploader.status
     addFiles = newUploader.addFiles
     removeFile = newUploader.removeFile
     clearFiles = newUploader.clearFiles
@@ -113,7 +120,7 @@
 
             if (progress >= 100) {
               clearInterval(interval)
-              resolve(`https://example.com/uploads/${file.id}`)
+              resolve({ url: `https://example.com/uploads/${file.id}` })
             }
           }, 200)
         })
@@ -123,27 +130,53 @@
     setupEventListeners()
   }
 
+  // Get toast for notifications
+  const toast = useToast()
+
   // Setup event listeners
   const setupEventListeners = () => {
     on("file:added", (file) => {
-      console.log(`File added: ${file.name} (${formatFileSize(file.size)})`)
+      console.log(`✅ File added: ${file.name} (${formatFileSize(file.size)})`)
+      if (file.meta.thumbnail) {
+        console.log(`📸 Thumbnail generated for ${file.name}`)
+      }
+    })
+
+    on("file:removed", (file) => {
+      console.log(`🗑️ File removed: ${file.name}`)
     })
 
     on("file:error", ({ file, error }) => {
-      console.log(`Error uploading ${file.name}: ${error.message}`)
+      console.error(`❌ Error with ${file.name}:`, error.message)
+
+      // Show toast notification for validation errors
+      toast.add({
+        title: "File Error",
+        description: `${file.name}: ${error.message}`,
+        color: "error",
+        timeout: 5000,
+      })
+    })
+
+    on("upload:start", () => {
+      console.log("🚀 Upload started")
     })
 
     on("upload:complete", (files) => {
-      console.log("Upload complete:", files)
+      console.log("✨ Upload complete:", files.length, "files")
     })
 
     // Image compression events
+    on("image-compressor:start", (payload: any) => {
+      console.log("[Compression] Started for", payload.file.name)
+    })
+
     on("image-compressor:complete", (payload: any) => {
-      console.log("[Compression] Completed", payload)
+      console.log("[Compression] ✅ Completed", payload.file.name, payload.compressionRatio + "% saved")
     })
 
     on("image-compressor:skip", (payload: any) => {
-      console.log("[Compression] Skipped", payload)
+      console.log("[Compression] ⏭️ Skipped", payload.file.name, "-", payload.reason)
     })
   }
 
@@ -155,8 +188,29 @@
   const handleFileSelect = async (event: Event) => {
     const input = event.target as HTMLInputElement
     if (input.files) {
-      await addFiles(Array.from(input.files))
+      const fileCount = input.files.length
+      const addedFiles = await addFiles(Array.from(input.files))
+
+      // Show summary toast
+      const failedCount = fileCount - addedFiles.length
+      if (failedCount === 0 && addedFiles.length > 0) {
+        toast.add({
+          title: "Files Added",
+          description: `Successfully added ${addedFiles.length} file${addedFiles.length > 1 ? "s" : ""}`,
+          color: "success",
+          timeout: 3000,
+        })
+      } else if (failedCount > 0 && addedFiles.length > 0) {
+        toast.add({
+          title: "Partial Success",
+          description: `Added ${addedFiles.length} file${addedFiles.length > 1 ? "s" : ""}, ${failedCount} failed`,
+          color: "warning",
+          timeout: 3000,
+        })
+      }
     }
+    // Reset input to allow selecting the same file again
+    if (input) input.value = ""
   }
 
   const triggerFileSelect = () => {
@@ -187,9 +241,25 @@
     }
   }
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "waiting":
+        return "i-heroicons-clock"
+      case "uploading":
+        return "i-heroicons-arrow-up-tray"
+      case "complete":
+        return "i-heroicons-check-circle"
+      case "error":
+        return "i-heroicons-x-circle"
+      default:
+        return "i-heroicons-document"
+    }
+  }
+
   const getCompressionInfo = (file: UploadFile) => {
     if (file.meta.compressed && typeof file.meta.compressionRatio === "number") {
-      return `Compressed: ${file.meta.compressionRatio}% saved`
+      const saved = file.meta.compressionRatio
+      return `Compressed: ${saved}% smaller`
     }
     return null
   }
@@ -208,14 +278,15 @@
 
   // Available file types for testing
   const fileTypePresets = [
-    { label: "Images", value: ["image/jpeg", "image/png", "image/webp"] },
+    { label: "Images Only", value: ["image/jpeg", "image/png", "image/webp"] },
     { label: "Images + GIF", value: ["image/jpeg", "image/png", "image/webp", "image/gif"] },
-    { label: "Documents", value: ["application/pdf", "application/msword"] },
-    { label: "Videos", value: ["video/mp4", "video/webm"] },
+    { label: "Images + Videos", value: ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm"] },
+    { label: "Videos Only", value: ["video/mp4", "video/webm", "video/quicktime"] },
+    { label: "Documents", value: ["application/pdf", "application/msword", "text/plain"] },
     { label: "All Files", value: [] },
   ]
 
-  const selectedPreset = ref(0)
+  const selectedPreset = ref(2) // Images + Videos by default
   const applyPreset = (index: number) => {
     selectedPreset.value = index
     const preset = fileTypePresets[index]
@@ -268,11 +339,25 @@
           </div>
 
           <!-- Thumbnails -->
-          <div>
+          <div class="space-y-2">
             <label class="flex items-center gap-2">
               <UCheckbox v-model="config.thumbnails" />
               <span class="text-sm font-medium">Generate Thumbnails</span>
             </label>
+            <div v-if="config.thumbnails" class="ml-6 space-y-2">
+              <div>
+                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Max Width (px)</label>
+                <UInput v-model.number="config.thumbnailMaxWidth" type="number" min="50" max="500" size="sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Max Height (px)</label>
+                <UInput v-model.number="config.thumbnailMaxHeight" type="number" min="50" max="500" size="sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Video Capture Time (s)</label>
+                <UInput v-model.number="config.videoCaptureTime" type="number" min="0" max="10" step="0.5" size="sm" />
+              </div>
+            </div>
           </div>
 
           <!-- Image Compression -->
@@ -343,12 +428,15 @@
 
           <!-- File List -->
           <div class="space-y-3">
-            <div v-for="file in files" :key="file.id" class="flex items-start gap-4 p-3 border dark:border-gray-700 rounded-lg">
+            <div v-for="file in files" :key="file.id" class="flex items-start gap-4 p-3 border dark:border-gray-700 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
               <!-- Thumbnail -->
               <div class="shrink-0">
-                <img v-if="file.preview" :src="file.preview" class="w-16 h-16 object-cover rounded" :alt="file.name" />
-                <div v-else class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
-                  <UIcon name="i-heroicons-document" class="w-8 h-8 text-gray-400" />
+                <img v-if="file.meta.thumbnail" :src="file.meta.thumbnail" class="w-20 h-20 object-cover rounded border dark:border-gray-700" :alt="file.name" />
+                <div v-else-if="file.mimeType.startsWith('image/') || file.mimeType.startsWith('video/')" class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center border dark:border-gray-700">
+                  <UIcon :name="file.mimeType.startsWith('video/') ? 'i-heroicons-film' : 'i-heroicons-photo'" class="w-10 h-10 text-gray-400" />
+                </div>
+                <div v-else class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center border dark:border-gray-700">
+                  <UIcon name="i-heroicons-document" class="w-10 h-10 text-gray-400" />
                 </div>
               </div>
 
@@ -357,16 +445,28 @@
                 <div class="flex items-start justify-between gap-2 mb-1">
                   <div class="flex-1 min-w-0">
                     <p class="font-medium truncate">{{ file.name }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatFileSize(file.size) }} • {{ file.mimeType }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      {{ formatFileSize(file.size) }} • {{ file.mimeType }}
+                    </p>
                   </div>
-                  <UBadge :color="getStatusColor(file.status)">
+                  <UBadge :color="getStatusColor(file.status)" :icon="getStatusIcon(file.status)">
                     {{ file.status }}
                   </UBadge>
                 </div>
 
                 <!-- Progress Bar -->
-                <div v-if="file.status === 'uploading' || file.status === 'complete'" class="mt-2">
+                <div v-if="file.status === 'uploading'" class="mt-2">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">{{ file.progress.percentage }}%</span>
+                  </div>
                   <UProgress :model-value="file.progress.percentage" />
+                </div>
+
+                <div v-else-if="file.status === 'complete'" class="mt-2">
+                  <div class="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                    <UIcon name="i-heroicons-check-circle" class="w-4 h-4" />
+                    <span>Upload complete</span>
+                  </div>
                 </div>
 
                 <!-- Error Message -->
@@ -375,8 +475,15 @@
                 </div>
 
                 <!-- Meta Info -->
-                <div v-if="getCompressionInfo(file)" class="mt-2 text-xs text-gray-500">
-                  <span>{{ getCompressionInfo(file) }}</span>
+                <div v-if="file.meta.thumbnail || getCompressionInfo(file)" class="mt-2 flex gap-3 text-xs text-gray-500">
+                  <span v-if="file.meta.thumbnail" class="flex items-center gap-1">
+                    <UIcon name="i-heroicons-photo" class="w-3 h-3" />
+                    Thumbnail generated
+                  </span>
+                  <span v-if="getCompressionInfo(file)" class="flex items-center gap-1">
+                    <UIcon name="i-heroicons-archive-box-arrow-down" class="w-3 h-3" />
+                    {{ getCompressionInfo(file) }}
+                  </span>
                 </div>
               </div>
 
