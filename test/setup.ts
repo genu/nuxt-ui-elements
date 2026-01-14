@@ -109,18 +109,21 @@ if (!global.URL.revokeObjectURL) {
   global.URL.revokeObjectURL = vi.fn()
 }
 
-// Mock document.createElement
+// Mock document.createElement - dynamically uses current global classes
 if (!global.document) {
   global.document = {
     createElement(tagName: string) {
       if (tagName === "canvas") {
-        return new MockHTMLCanvasElement()
+        // Use the current global.HTMLCanvasElement (allows tests to override)
+        return new (global.HTMLCanvasElement as any)()
       }
       if (tagName === "img") {
-        return new MockImage()
+        // Use the current global.Image (allows tests to override)
+        return new (global.Image as any)()
       }
       if (tagName === "video") {
-        return new MockHTMLVideoElement()
+        // Use the current global.HTMLVideoElement (allows tests to override)
+        return new (global.HTMLVideoElement as any)()
       }
       return {}
     },

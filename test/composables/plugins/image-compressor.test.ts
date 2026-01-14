@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
+import { describe, it, expect, beforeEach, beforeAll, vi } from "vitest"
 import { PluginImageCompressor } from "../../../src/runtime/composables/useUploadManager/plugins/image-compressor"
 import type { LocalUploadFile, UploadFile, PluginContext } from "../../../src/runtime/composables/useUploadManager/types"
 
@@ -10,9 +10,23 @@ type ImageCompressorEvents = {
 }
 
 describe("PluginImageCompressor", () => {
+  // Store original mocks to restore after each test
+  let originalImage: typeof global.Image
+  let originalHTMLCanvasElement: typeof global.HTMLCanvasElement
+
+  beforeAll(() => {
+    originalImage = global.Image
+    originalHTMLCanvasElement = global.HTMLCanvasElement
+  })
+
   // Reset mocks before each test (global mocks are set up in test/setup.ts)
   beforeEach(() => {
+    vi.restoreAllMocks()
     vi.clearAllMocks()
+
+    // Restore original mocks (in case they were overridden in a test)
+    global.Image = originalImage
+    global.HTMLCanvasElement = originalHTMLCanvasElement
   })
 
   const createMockFile = (overrides?: Partial<LocalUploadFile>): LocalUploadFile => ({
@@ -148,6 +162,53 @@ describe("PluginImageCompressor", () => {
 
   describe("Output Format", () => {
     it("preserves original format when outputFormat is auto", async () => {
+      let capturedMimeType: string | undefined
+      let capturedQuality: number | undefined
+
+      // Create a large image mock that needs resizing (so compression runs)
+      global.Image = class MockLargeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        src = ""
+        width = 3000 // Larger than default maxWidth of 1920
+        height = 2000
+
+        constructor() {
+          setTimeout(() => {
+            if (this.onload) this.onload()
+          }, 0)
+        }
+      } as any
+
+      // Create a canvas mock that captures the toBlob arguments
+      class MockCanvasWithCapture {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number) {
+          capturedMimeType = type
+          capturedQuality = quality
+          const blob = new Blob(["compressed"], { type: type || "image/png" })
+          // Make it smaller than original to pass compression check
+          Object.defineProperty(blob, "size", { value: 50000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/png;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasWithCapture as any
+
       const plugin = PluginImageCompressor({
         outputFormat: "auto",
       })
@@ -156,10 +217,39 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/png", 0.85)
+      expect(capturedMimeType).toBe("image/png")
+      expect(capturedQuality).toBe(0.85)
     })
 
     it("converts to JPEG when outputFormat is jpeg", async () => {
+      let capturedMimeType: string | undefined
+
+      class MockCanvasWithCapture {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number) {
+          capturedMimeType = type
+          const blob = new Blob(["compressed"], { type: type || "image/jpeg" })
+          Object.defineProperty(blob, "size", { value: 50000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/jpeg;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasWithCapture as any
+
       const plugin = PluginImageCompressor({
         outputFormat: "jpeg",
       })
@@ -168,10 +258,38 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.85)
+      expect(capturedMimeType).toBe("image/jpeg")
     })
 
     it("converts to WebP when outputFormat is webp", async () => {
+      let capturedMimeType: string | undefined
+
+      class MockCanvasWithCapture {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number) {
+          capturedMimeType = type
+          const blob = new Blob(["compressed"], { type: type || "image/webp" })
+          Object.defineProperty(blob, "size", { value: 50000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/webp;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasWithCapture as any
+
       const plugin = PluginImageCompressor({
         outputFormat: "webp",
       })
@@ -180,12 +298,55 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/webp", 0.85)
+      expect(capturedMimeType).toBe("image/webp")
     })
   })
 
   describe("Quality Settings", () => {
     it("uses custom quality setting", async () => {
+      let capturedQuality: number | undefined
+
+      // Create a large image mock that needs resizing
+      global.Image = class MockLargeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        src = ""
+        width = 3000
+        height = 2000
+
+        constructor() {
+          setTimeout(() => {
+            if (this.onload) this.onload()
+          }, 0)
+        }
+      } as any
+
+      class MockCanvasWithCapture {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number) {
+          capturedQuality = quality
+          const blob = new Blob(["compressed"], { type: type || "image/jpeg" })
+          Object.defineProperty(blob, "size", { value: 50000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/jpeg;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasWithCapture as any
+
       const plugin = PluginImageCompressor({
         quality: 0.5,
       })
@@ -194,17 +355,60 @@ describe("PluginImageCompressor", () => {
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), expect.any(String), 0.5)
+      expect(capturedQuality).toBe(0.5)
     })
 
     it("uses default quality of 0.85", async () => {
+      let capturedQuality: number | undefined
+
+      // Create a large image mock that needs resizing
+      global.Image = class MockLargeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        src = ""
+        width = 3000
+        height = 2000
+
+        constructor() {
+          setTimeout(() => {
+            if (this.onload) this.onload()
+          }, 0)
+        }
+      } as any
+
+      class MockCanvasWithCapture {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number) {
+          capturedQuality = quality
+          const blob = new Blob(["compressed"], { type: type || "image/jpeg" })
+          Object.defineProperty(blob, "size", { value: 50000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/jpeg;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasWithCapture as any
+
       const plugin = PluginImageCompressor({})
       const file = createMockFile()
       const context = createMockContext()
 
       await plugin.hooks.process!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), expect.any(String), 0.85)
+      expect(capturedQuality).toBe(0.85)
     })
   })
 
@@ -223,16 +427,50 @@ describe("PluginImageCompressor", () => {
     })
 
     it("emits complete event when compression succeeds", async () => {
+      // Create a large image mock that needs resizing
+      global.Image = class MockLargeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        src = ""
+        width = 3000
+        height = 2000
+
+        constructor() {
+          setTimeout(() => {
+            if (this.onload) this.onload()
+          }, 0)
+        }
+      } as any
+
+      // Create a canvas mock that returns smaller blob
+      class MockCanvasSmaller {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string) {
+          const blob = new Blob(["compressed"], { type: type || "image/jpeg" })
+          Object.defineProperty(blob, "size", { value: 100000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/jpeg;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasSmaller as any
+
       const plugin = PluginImageCompressor({})
       const file = createMockFile({ size: 300000 })
       const context = createMockContext()
-
-      // Mock toBlob to return smaller blob
-      global.HTMLCanvasElement.prototype.toBlob = vi.fn((callback) => {
-        const blob = new Blob(["compressed"], { type: "image/jpeg" })
-        Object.defineProperty(blob, "size", { value: 100000 })
-        callback(blob)
-      })
 
       await plugin.hooks.process!(file, context)
 
@@ -245,16 +483,50 @@ describe("PluginImageCompressor", () => {
     })
 
     it("emits skip event when compressed version is larger", async () => {
+      // Create a large image mock that needs resizing
+      global.Image = class MockLargeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        src = ""
+        width = 3000
+        height = 2000
+
+        constructor() {
+          setTimeout(() => {
+            if (this.onload) this.onload()
+          }, 0)
+        }
+      } as any
+
+      // Create a canvas mock that returns larger blob
+      class MockCanvasLarger {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string) {
+          const blob = new Blob(["compressed"], { type: type || "image/jpeg" })
+          Object.defineProperty(blob, "size", { value: 150000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/jpeg;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasLarger as any
+
       const plugin = PluginImageCompressor({})
       const file = createMockFile({ size: 100000 })
       const context = createMockContext()
-
-      // Mock toBlob to return larger blob
-      global.HTMLCanvasElement.prototype.toBlob = vi.fn((callback) => {
-        const blob = new Blob(["compressed"], { type: "image/jpeg" })
-        Object.defineProperty(blob, "size", { value: 150000 })
-        callback(blob)
-      })
 
       const result = await plugin.hooks.process!(file, context)
 
@@ -268,14 +540,48 @@ describe("PluginImageCompressor", () => {
 
   describe("Error Handling", () => {
     it("returns original file on compression error", async () => {
+      // Create a large image mock that needs resizing
+      global.Image = class MockLargeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        src = ""
+        width = 3000
+        height = 2000
+
+        constructor() {
+          setTimeout(() => {
+            if (this.onload) this.onload()
+          }, 0)
+        }
+      } as any
+
+      // Create a canvas mock that fails toBlob
+      class MockCanvasFail {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void) {
+          setTimeout(() => callback(null), 0)
+        }
+
+        toDataURL() {
+          return "data:image/jpeg;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasFail as any
+
       const plugin = PluginImageCompressor({})
       const file = createMockFile()
       const context = createMockContext()
-
-      // Mock toBlob to fail
-      global.HTMLCanvasElement.prototype.toBlob = vi.fn((callback) => {
-        callback(null)
-      })
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
 
@@ -318,16 +624,50 @@ describe("PluginImageCompressor", () => {
 
   describe("Metadata Preservation", () => {
     it("stores compression metadata in file.meta", async () => {
+      // Create a large image mock that needs resizing
+      global.Image = class MockLargeImage {
+        onload: (() => void) | null = null
+        onerror: (() => void) | null = null
+        src = ""
+        width = 3000
+        height = 2000
+
+        constructor() {
+          setTimeout(() => {
+            if (this.onload) this.onload()
+          }, 0)
+        }
+      } as any
+
+      // Create a canvas mock that returns smaller blob
+      class MockCanvasSmaller {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toBlob(callback: (blob: Blob | null) => void, type?: string) {
+          const blob = new Blob(["compressed"], { type: type || "image/jpeg" })
+          Object.defineProperty(blob, "size", { value: 100000 })
+          setTimeout(() => callback(blob), 0)
+        }
+
+        toDataURL() {
+          return "data:image/jpeg;base64,mock"
+        }
+      }
+
+      global.HTMLCanvasElement = MockCanvasSmaller as any
+
       const plugin = PluginImageCompressor({})
       const file = createMockFile({ size: 300000 })
       const context = createMockContext()
-
-      // Mock toBlob to return smaller blob
-      global.HTMLCanvasElement.prototype.toBlob = vi.fn((callback) => {
-        const blob = new Blob(["compressed"], { type: "image/jpeg" })
-        Object.defineProperty(blob, "size", { value: 100000 })
-        callback(blob)
-      })
 
       const result = await plugin.hooks.process!(file, context)
 

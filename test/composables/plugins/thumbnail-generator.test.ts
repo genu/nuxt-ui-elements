@@ -1,11 +1,28 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
+import { describe, it, expect, beforeEach, beforeAll, vi } from "vitest"
 import { PluginThumbnailGenerator } from "../../../src/runtime/composables/useUploadManager/plugins/thumbnail-generator"
 import type { LocalUploadFile, RemoteUploadFile, PluginContext } from "../../../src/runtime/composables/useUploadManager/types"
 
 describe("PluginThumbnailGenerator", () => {
+  // Store original mocks to restore after each test
+  let originalImage: typeof global.Image
+  let originalHTMLCanvasElement: typeof global.HTMLCanvasElement
+  let originalHTMLVideoElement: typeof global.HTMLVideoElement
+
+  beforeAll(() => {
+    originalImage = global.Image
+    originalHTMLCanvasElement = global.HTMLCanvasElement
+    originalHTMLVideoElement = global.HTMLVideoElement
+  })
+
   // Reset mocks before each test (global mocks are set up in test/setup.ts)
   beforeEach(() => {
+    vi.restoreAllMocks()
     vi.clearAllMocks()
+
+    // Restore original mocks (in case they were overridden in a test)
+    global.Image = originalImage
+    global.HTMLCanvasElement = originalHTMLCanvasElement
+    global.HTMLVideoElement = originalHTMLVideoElement
   })
 
   const createMockFile = (overrides?: Partial<LocalUploadFile>): LocalUploadFile => ({
@@ -67,13 +84,16 @@ describe("PluginThumbnailGenerator", () => {
       const file = createMockFile()
       const context = createMockContext()
 
-      await plugin.hooks.preprocess!(file, context)
+      const result = await plugin.hooks.preprocess!(file, context)
 
-      // Canvas.toBlob should have been called (thumbnail generation happened)
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalled()
+      // Thumbnail should be generated
+      expect(result.meta.thumbnail).toBeDefined()
+      expect(result.meta.thumbnail).toMatch(/^data:/)
     })
 
     it("uses custom quality setting", async () => {
+      const toDataURLSpy = vi.spyOn(global.HTMLCanvasElement.prototype, "toDataURL")
+
       const plugin = PluginThumbnailGenerator({
         quality: 0.6,
       })
@@ -83,10 +103,12 @@ describe("PluginThumbnailGenerator", () => {
 
       await plugin.hooks.preprocess!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.6)
+      expect(toDataURLSpy).toHaveBeenCalledWith("image/jpeg", 0.6)
     })
 
     it("uses default quality of 0.7", async () => {
+      const toDataURLSpy = vi.spyOn(global.HTMLCanvasElement.prototype, "toDataURL")
+
       const plugin = PluginThumbnailGenerator({})
 
       const file = createMockFile()
@@ -94,7 +116,7 @@ describe("PluginThumbnailGenerator", () => {
 
       await plugin.hooks.preprocess!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalledWith(expect.any(Function), "image/jpeg", 0.7)
+      expect(toDataURLSpy).toHaveBeenCalledWith("image/jpeg", 0.7)
     })
 
     it("preserves aspect ratio for landscape images", async () => {
@@ -184,15 +206,34 @@ describe("PluginThumbnailGenerator", () => {
         onloadedmetadata: (() => void) | null = null
         onseeked: (() => void) | null = null
         onerror: (() => void) | null = null
-        src = ""
+        private _src = ""
+        private _currentTime = 0
         videoWidth = 1920
         videoHeight = 1080
         duration = 10
-        currentTime = 0
+        preload = ""
+        muted = false
 
-        constructor() {
+        get src() {
+          return this._src
+        }
+
+        set src(value: string) {
+          this._src = value
           setTimeout(() => {
             if (this.onloadedmetadata) this.onloadedmetadata()
+          }, 0)
+        }
+
+        get currentTime() {
+          return this._currentTime
+        }
+
+        set currentTime(value: number) {
+          capturedTime = value
+          this._currentTime = value
+          setTimeout(() => {
+            if (this.onseeked) this.onseeked()
           }, 0)
         }
 
@@ -201,14 +242,6 @@ describe("PluginThumbnailGenerator", () => {
         }
 
         pause() {}
-
-        set _currentTime(value: number) {
-          capturedTime = value
-          this.currentTime = value
-          setTimeout(() => {
-            if (this.onseeked) this.onseeked()
-          }, 0)
-        }
       } as any
 
       const file = createMockFile({
@@ -220,7 +253,8 @@ describe("PluginThumbnailGenerator", () => {
 
       await plugin.hooks.preprocess!(file, context)
 
-      // Video currentTime should have been set to capture time
+      // Video currentTime should have been set to capture time (or 10% of duration, whichever is smaller)
+      // With duration=10 and captureTime=5, it should use min(5, 10*0.1) = 1
       expect(capturedTime).toBeLessThanOrEqual(5)
     })
 
@@ -234,9 +268,11 @@ describe("PluginThumbnailGenerator", () => {
       })
       const context = createMockContext()
 
-      await plugin.hooks.preprocess!(file, context)
+      const result = await plugin.hooks.preprocess!(file, context)
 
-      expect(global.HTMLCanvasElement.prototype.toBlob).toHaveBeenCalled()
+      // Thumbnail should be generated for video
+      expect(result.meta.thumbnail).toBeDefined()
+      expect(result.meta.thumbnail).toMatch(/^data:/)
     })
   })
 
@@ -320,10 +356,27 @@ describe("PluginThumbnailGenerator", () => {
     it("returns original file on thumbnail generation error", async () => {
       const plugin = PluginThumbnailGenerator({})
 
-      // Mock toBlob to fail
-      global.HTMLCanvasElement.prototype.toBlob = vi.fn((callback) => {
-        callback(null)
-      })
+      // Create a custom canvas mock that throws on toDataURL
+      class MockCanvasFail {
+        width = 0
+        height = 0
+
+        getContext() {
+          return {
+            drawImage: vi.fn(),
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+          }
+        }
+
+        toDataURL() {
+          throw new Error("Canvas error")
+        }
+
+        toBlob() {}
+      }
+
+      global.HTMLCanvasElement = MockCanvasFail as any
 
       const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
 
@@ -334,7 +387,7 @@ describe("PluginThumbnailGenerator", () => {
 
       expect(result).toBe(file)
       expect(result.meta.thumbnail).toBeUndefined()
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Thumbnail generation failed"), expect.any(Error))
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[ThumbnailGenerator] Failed for"), expect.any(Error))
 
       consoleSpy.mockRestore()
     })
@@ -373,15 +426,23 @@ describe("PluginThumbnailGenerator", () => {
       const plugin = PluginThumbnailGenerator({})
 
       // Mock Video to fail loading
+      const OriginalVideo = global.HTMLVideoElement
       global.HTMLVideoElement = class MockVideo {
         onloadedmetadata: (() => void) | null = null
         onseeked: (() => void) | null = null
-        onerror: (() => void) | null = null
-        src = ""
+        onerror: ((event?: any) => void) | null = null
+        private _src = ""
+        preload = ""
+        muted = false
 
-        constructor() {
+        get src() {
+          return this._src
+        }
+
+        set src(value: string) {
+          this._src = value
           setTimeout(() => {
-            if (this.onerror) this.onerror()
+            if (this.onerror) this.onerror(new Error("Video load failed"))
           }, 0)
         }
 
@@ -408,6 +469,7 @@ describe("PluginThumbnailGenerator", () => {
       expect(consoleSpy).toHaveBeenCalled()
 
       consoleSpy.mockRestore()
+      global.HTMLVideoElement = OriginalVideo
     })
   })
 
