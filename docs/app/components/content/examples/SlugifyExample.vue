@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { slugify } from '#std'
+  import { slugify } from "#std"
 
-const input = ref('Hello World! How are you?')
+  const input = ref("Hello World! How are you?")
 
-const output = computed(() => slugify(input.value))
+  const output = computed(() => slugify(input.value))
 </script>
 
 <template>
