@@ -155,6 +155,218 @@ describe("useUploadManager", () => {
     expect(file!.progress.percentage).toBe(100)
   })
 
+  describe("File Data Access Methods", () => {
+    it("getFileData returns blob for local files", async () => {
+      const { addFile, getFileData } = useUploadManager()
+      const file = new File(["test content"], "test.txt", { type: "text/plain" })
+      const addedFile = await addFile(file)
+
+      const blob = await getFileData(addedFile!.id)
+
+      expect(blob).toBeInstanceOf(Blob)
+      expect(blob.size).toBe(file.size)
+      expect(blob.type).toBe(file.type)
+    })
+
+    it("getFileData throws for non-existent file", async () => {
+      const { getFileData } = useUploadManager()
+
+      await expect(getFileData("non-existent")).rejects.toThrow("File not found")
+    })
+
+    it("getFileURL returns object URL for local files", async () => {
+      const { addFile, getFileURL } = useUploadManager()
+      const file = new File(["content"], "test.png", { type: "image/png" })
+      const addedFile = await addFile(file)
+
+      const url = await getFileURL(addedFile!.id)
+
+      expect(url).toMatch(/^blob:/)
+    })
+
+    it("getFileURL returns remote URL for remote files", async () => {
+      const { initializeExistingFiles, onGetRemoteFile, getFileURL } = useUploadManager()
+
+      onGetRemoteFile(async (_id) => ({
+        mimeType: "image/jpeg",
+        size: 1024,
+        remoteUrl: "https://example.com/image.jpg",
+      }))
+
+      await initializeExistingFiles([{ id: "remote-id" }])
+      const url = await getFileURL("remote-id")
+
+      expect(url).toBe("https://example.com/image.jpg")
+    })
+
+    it("getFileURL caches object URLs and doesn't create duplicates", async () => {
+      const { addFile, getFileURL } = useUploadManager()
+      const file = new File(["content"], "test.png", { type: "image/png" })
+      const addedFile = await addFile(file)
+
+      const url1 = await getFileURL(addedFile!.id)
+      const url2 = await getFileURL(addedFile!.id)
+
+      expect(url1).toBe(url2)
+    })
+
+    it("getFileStream returns readable stream", async () => {
+      const { addFile, getFileStream } = useUploadManager()
+      const file = new File(["test content"], "test.txt", { type: "text/plain" })
+      const addedFile = await addFile(file)
+
+      const stream = await getFileStream(addedFile!.id)
+
+      expect(stream).toBeInstanceOf(ReadableStream)
+    })
+
+    it("replaceFileData replaces file content and marks as waiting", async () => {
+      const { addFile, replaceFileData, files } = useUploadManager()
+      const file = new File(["original"], "test.txt", { type: "text/plain" })
+      const addedFile = await addFile(file)
+
+      const newBlob = new Blob(["replaced content"])
+      await replaceFileData(addedFile!.id, newBlob, "new-name.txt")
+
+      const updatedFile = files.value[0]
+      expect(updatedFile!.name).toBe("new-name.txt")
+      expect(updatedFile!.size).toBe(newBlob.size)
+      expect(updatedFile!.status).toBe("waiting")
+      expect(updatedFile!.source).toBe("local")
+    })
+  })
+
+  describe("Memory Management", () => {
+    it("cleans up object URLs when file is removed", async () => {
+      const { addFile, getFileURL, removeFile } = useUploadManager()
+      const file = new File(["content"], "test.png", { type: "image/png" })
+      const addedFile = await addFile(file)
+
+      const url = await getFileURL(addedFile!.id)
+      expect(url).toMatch(/^blob:/)
+
+      // Spy on URL.revokeObjectURL
+      const revokeSpy = vi.spyOn(URL, "revokeObjectURL")
+
+      await removeFile(addedFile!.id)
+
+      expect(revokeSpy).toHaveBeenCalledWith(url)
+      revokeSpy.mockRestore()
+    })
+
+    it("cleans up all object URLs when clearFiles is called", async () => {
+      const { addFile, getFileURL, clearFiles } = useUploadManager()
+      const file1 = new File(["content1"], "test1.png", { type: "image/png" })
+      const file2 = new File(["content2"], "test2.png", { type: "image/png" })
+      const added1 = await addFile(file1)
+      const added2 = await addFile(file2)
+
+      await getFileURL(added1!.id)
+      await getFileURL(added2!.id)
+
+      const revokeSpy = vi.spyOn(URL, "revokeObjectURL")
+
+      clearFiles()
+
+      expect(revokeSpy).toHaveBeenCalledTimes(2)
+      revokeSpy.mockRestore()
+    })
+
+    it("cleans up object URLs when reset is called", async () => {
+      const { addFile, getFileURL, reset } = useUploadManager()
+      const file = new File(["content"], "test.png", { type: "image/png" })
+      const addedFile = await addFile(file)
+
+      await getFileURL(addedFile!.id)
+
+      const revokeSpy = vi.spyOn(URL, "revokeObjectURL")
+
+      reset()
+
+      expect(revokeSpy).toHaveBeenCalled()
+      revokeSpy.mockRestore()
+    })
+  })
+
+  describe("Error Handling", () => {
+    it("addFile throws when validation fails", async () => {
+      const { addFile } = useUploadManager({
+        maxFileSize: 100, // Very small limit
+      })
+      const file = new File(["a".repeat(200)], "large.txt", { type: "text/plain" })
+
+      await expect(addFile(file)).rejects.toThrow()
+    })
+
+    it("getFile throws for non-existent file", () => {
+      const { getFile } = useUploadManager()
+
+      expect(() => getFile("non-existent")).toThrow("File not found")
+    })
+
+    it("handles upload errors gracefully", async () => {
+      const { addFile, upload, onUpload, files } = useUploadManager()
+      const file = new File(["content"], "test.txt", { type: "text/plain" })
+      await addFile(file)
+
+      onUpload(async () => {
+        throw new Error("Network error")
+      })
+
+      await upload()
+
+      const uploadedFile = files.value[0]
+      expect(uploadedFile!.status).toBe("error")
+      expect(uploadedFile!.error?.message).toBe("Network error")
+    })
+  })
+
+  describe("Event System", () => {
+    it("emits file:added event when file is added", async () => {
+      const { addFile, on } = useUploadManager()
+      const handler = vi.fn()
+      on("file:added", handler)
+
+      const file = new File(["content"], "test.txt", { type: "text/plain" })
+      await addFile(file)
+
+      expect(handler).toHaveBeenCalledTimes(1)
+      expect(handler).toHaveBeenCalledWith(expect.objectContaining({
+        name: "test.txt",
+        status: "waiting",
+      }))
+    })
+
+    it("emits file:removed event when file is removed", async () => {
+      const { addFile, removeFile, on } = useUploadManager()
+      const handler = vi.fn()
+      on("file:removed", handler)
+
+      const file = new File(["content"], "test.txt", { type: "text/plain" })
+      const addedFile = await addFile(file)
+      await removeFile(addedFile!.id)
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it("emits upload:start and upload:complete events", async () => {
+      const { addFile, upload, onUpload, on } = useUploadManager()
+      const startHandler = vi.fn()
+      const completeHandler = vi.fn()
+      on("upload:start", startHandler)
+      on("upload:complete", completeHandler)
+
+      const file = new File(["content"], "test.txt", { type: "text/plain" })
+      await addFile(file)
+
+      onUpload(async () => ({ url: "https://example.com/uploaded.txt" }))
+      await upload()
+
+      expect(startHandler).toHaveBeenCalledTimes(1)
+      expect(completeHandler).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe("PluginAzureDataLake", () => {
     beforeEach(() => {
       vi.clearAllMocks()
@@ -185,8 +397,8 @@ describe("useUploadManager", () => {
     }
 
     it("should initialize with static SAS URL", async () => {
-      const plugin = PluginAzureDataLake({ sasURL: "https://example.com/sas" })
-      const { upload } = plugin.hooks
+      const storage = PluginAzureDataLake({ sasURL: "https://example.com/sas" })
+      const { upload } = storage.hooks
 
       if (!upload) throw new Error("Upload hook not defined")
       await upload(createMockFile(), mockContext)
@@ -383,15 +595,29 @@ describe("useUploadManager", () => {
       })
     })
 
-    it("should handle Azure errors gracefully", async () => {
-      const plugin = PluginAzureDataLake({ sasURL: "https://example.com/sas" })
-      const { upload } = plugin.hooks
+    it(
+      "should handle Azure errors gracefully with retries",
+      async () => {
+        const plugin = PluginAzureDataLake({
+          sasURL: "https://example.com/sas",
+          retries: 2,
+          retryDelay: 10, // Short delay for testing
+        })
+        const { upload } = plugin.hooks
 
-      const error = new Error("Azure Error")
-      AzureMocks.mockUpload.mockRejectedValueOnce(error)
+        const error = new Error("Azure Error")
+        // Mock to fail all retry attempts
+        AzureMocks.mockUpload.mockRejectedValue(error)
 
-      if (!upload) throw new Error("Upload hook not defined")
-      await expect(upload(createMockFile(), mockContext)).rejects.toThrow("Azure Error")
-    })
+        if (!upload) throw new Error("Upload hook not defined")
+
+        // With retries, the error message will be wrapped
+        await expect(upload(createMockFile(), mockContext)).rejects.toThrow(/failed after \d+ attempts/)
+
+        // Verify it attempted retries (1 initial + 2 retries = 3 total attempts)
+        expect(AzureMocks.mockUpload).toHaveBeenCalledTimes(3)
+      },
+      10000
+    ) // 10 second timeout for retries
   })
 })
