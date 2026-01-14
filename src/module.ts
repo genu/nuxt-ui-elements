@@ -1,4 +1,4 @@
-import { defineNuxtModule, addImportsDir, addImports, createResolver } from "@nuxt/kit"
+import { defineNuxtModule, addImportsDir, createResolver } from "@nuxt/kit"
 import { addTemplates } from "./templates"
 
 // Export all types from runtime
@@ -57,14 +57,6 @@ export default defineNuxtModule<ModuleOptions>({
 
     // Basic composables
     addImportsDir(resolver.resolve("./runtime/composables"))
-
-    // Advanced composables
-    addImports([
-      {
-        name: "useUploadManager",
-        from: resolver.resolve("./runtime/composables/useUploadManager"),
-      },
-    ])
 
     // Add #std alias for standard utilities (tree-shakeable)
     nuxt.options.alias["#std"] = resolver.resolve("./runtime/utils/std")
