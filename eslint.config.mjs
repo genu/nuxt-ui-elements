@@ -25,7 +25,7 @@ export default createConfigForNuxt(eslintPluginPrettierRecommended, {
     "@stylistic/quote-props": "off",
 
     // Vue
-    "vue/max-attributes-per-line": ["error", { singleline: 5 }],
+    "vue/max-attributes-per-line": ["off"],
     "vue/space-infix-ops": ["error"],
     "vue/multi-word-component-names": "off",
     "vue/html-self-closing": "off",
