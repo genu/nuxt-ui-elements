@@ -11,6 +11,10 @@
       to: "/docs/composables",
     },
     {
+      label: "Components",
+      to: "/docs/components",
+    },
+    {
       label: "Utilities",
       to: "/docs/standard-library",
     },

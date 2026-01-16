@@ -8,7 +8,7 @@ export interface NavigationItem {
 export interface ComponentItem {
   name: string
   path: string
-  category: "overlays" | "backgrounds" | "buttons" | "animations" | "composables" | "other"
+  category: "overlays" | "forms" | "backgrounds" | "buttons" | "animations" | "composables" | "other"
 }
 
 export function useNavigation() {
@@ -16,7 +16,7 @@ export function useNavigation() {
   const components: ComponentItem[] = [
     { name: "Dialog", path: "/components/dialog", category: "overlays" },
     { name: "Dialog Alert", path: "/components/dialog-alert", category: "overlays" },
-    { name: "Uploader", path: "/components/uploader", category: "composables" },
+    { name: "Toggle Group", path: "/components/toggle-group", category: "forms" },
   ]
 
   // Group components by category
@@ -47,6 +47,18 @@ export function useNavigation() {
         label: "Overlays",
         icon: "i-heroicons-rectangle-stack",
         children: componentsByCategory.value.overlays.map((c) => ({
+          label: c.name,
+          to: c.path,
+        })),
+      })
+    }
+
+    // Add Forms section
+    if (componentsByCategory.value.forms?.length) {
+      links.push({
+        label: "Forms",
+        icon: "i-heroicons-pencil-square",
+        children: componentsByCategory.value.forms.map((c) => ({
           label: c.name,
           to: c.path,
         })),
