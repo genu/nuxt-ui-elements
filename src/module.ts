@@ -1,4 +1,4 @@
-import { defineNuxtModule, addImportsDir, createResolver } from "@nuxt/kit"
+import { defineNuxtModule, addImportsDir, addComponentsDir, createResolver } from "@nuxt/kit"
 import { addTemplates } from "./templates"
 
 // Export all types from runtime
@@ -63,5 +63,11 @@ export default defineNuxtModule<ModuleOptions>({
 
     // Add #uiElements alias for types and runtime
     nuxt.options.alias["#ui-elements"] = resolver.resolve("./runtime")
+
+    // Auto-register components with prefix
+    addComponentsDir({
+      path: resolver.resolve("./runtime/components"),
+      prefix: options.prefix,
+    })
   },
 })

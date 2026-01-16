@@ -1,3 +1,5 @@
 export * from "../components/DialogConfirm.vue"
 export * from "../components/DialogAlert.vue"
+export * from "../components/ToggleGroup.vue"
 export * from "./tv"
+export * from "./utils"
