@@ -62,7 +62,9 @@
   }
 
   export interface ToggleGroupSlots<T extends ToggleGroupItem[] = ToggleGroupItem[], I extends NestedItem<T> = NestedItem<T>> {
+    leading(): any
     default(props: { item: I; selected: boolean }): any
+    trailing(): any
   }
 </script>
 
@@ -196,6 +198,7 @@
     data-slot="root"
     :class="ui.root({ class: [propUi?.root] })"
     @update:model-value="onUpdate">
+    <slot name="leading" />
     <RekaToggleGroupItem
       v-for="(item, index) in items"
       :key="getKeyValue(item, index)"
@@ -206,5 +209,6 @@
       #="{ pressed }">
       <slot v-if="item" :item="item as NestedItem<T>" :selected="pressed" />
     </RekaToggleGroupItem>
+    <slot name="trailing" />
   </ToggleGroupRoot>
 </template>
