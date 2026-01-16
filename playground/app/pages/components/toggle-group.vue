@@ -395,12 +395,6 @@
                     <td class="py-2 font-sans text-sm">Layout direction (affects keyboard nav)</td>
                   </tr>
                   <tr class="border-b border-gray-100 dark:border-gray-800">
-                    <td class="py-2 pr-4 text-primary">rovingFocus</td>
-                    <td class="py-2 pr-4 text-gray-500">boolean</td>
-                    <td class="py-2 pr-4 text-gray-500">true</td>
-                    <td class="py-2 font-sans text-sm">Enable arrow key navigation</td>
-                  </tr>
-                  <tr class="border-b border-gray-100 dark:border-gray-800">
                     <td class="py-2 pr-4 text-primary">loop</td>
                     <td class="py-2 pr-4 text-gray-500">boolean</td>
                     <td class="py-2 pr-4 text-gray-500">true</td>

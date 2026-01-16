@@ -19,7 +19,7 @@
     T extends ToggleGroupItem[] = ToggleGroupItem[],
     VK extends GetItemKeys<T> | undefined = "value",
     M extends boolean = true,
-  > extends Pick<ToggleGroupRootProps, "rovingFocus" | "loop" | "disabled" | "name" | "required"> {
+  > extends Pick<ToggleGroupRootProps, "loop" | "disabled" | "name" | "required"> {
     /**
      * The items to display
      */
@@ -49,10 +49,6 @@
      * @defaultValue 'horizontal'
      */
     orientation?: "horizontal" | "vertical"
-    /**
-     * The reading direction.
-     */
-    dir?: "ltr" | "rtl"
     ui?: ToggleGroup["slots"]
   }
 
@@ -78,7 +74,6 @@
     multiple = true as M,
     valueKey = "value" as VK,
     orientation = "horizontal",
-    rovingFocus = true,
     loop = true,
     disabled = false,
     required = false,
@@ -194,8 +189,6 @@
     :model-value="internalValue"
     :default-value="defaultValue"
     :orientation="orientation"
-    :dir="dir"
-    :roving-focus="rovingFocus"
     :loop="loop"
     :disabled="formDisabled"
     :name="formFieldName"

@@ -188,12 +188,10 @@ ToggleGroup integrates with Nuxt UI's `UForm` via `useFormField`. Wrap it in a `
 | `defaultValue` | `string \| string[]` | - | Initial value when uncontrolled |
 | `multiple` | `boolean` | `true` | Allow multiple items to be selected |
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Layout direction (affects keyboard navigation) |
-| `rovingFocus` | `boolean` | `true` | Enable arrow key navigation |
 | `loop` | `boolean` | `true` | Loop focus from last to first item |
 | `disabled` | `boolean` | `false` | Disable all interactions |
 | `name` | `string` | - | Form field name for form integration |
 | `required` | `boolean` | `false` | Mark as required for form validation |
-| `dir` | `'ltr' \| 'rtl'` | - | Reading direction |
 | `ui` | `{ root?, item? }` | - | Custom classes for root and item wrappers |
 
 ### Events
