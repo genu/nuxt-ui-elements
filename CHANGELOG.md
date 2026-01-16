@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.37
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.36...v0.1.37)
+
+### 🩹 Fixes
+
+- Update button styles in DialogConfirm component for better visibility ([7463ac9](https://github.com/genu/nuxt-ui-elements/commit/7463ac9))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.36
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.35...v0.1.36)
