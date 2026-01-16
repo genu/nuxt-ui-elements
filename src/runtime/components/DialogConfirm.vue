@@ -164,7 +164,7 @@
           v-bind="closeButtonProps"
           data-slot="close"
           :ui="{
-            base: 'text-white hover:bg-white/10 active:bg-white/20',
+            base: 'text-inverted hover:bg-black/10 active:bg-inverted/20',
           }"
           @click="handleClose" />
       </div>
@@ -178,7 +178,7 @@
         color="neutral"
         variant="ghost"
         :ui="{
-          base: 'text-white hover:bg-white/10 active:bg-white/20',
+          base: 'text-inverted hover:bg-black/10 active:bg-inverted/20',
         }"
         @click="dismiss" />
 
