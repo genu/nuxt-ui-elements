@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.36
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.35...v0.1.36)
+
+### 🚀 Enhancements
+
+- Add leading and trailing slots to ToggleGroup component ([2b65d6e](https://github.com/genu/nuxt-ui-elements/commit/2b65d6e))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.35
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.34...v0.1.35)
