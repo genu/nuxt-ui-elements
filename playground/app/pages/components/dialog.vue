@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  const { confirm, confirmNavigate } = useDialog()
+  const { confirm } = useDialog()
 
   type Color = "primary" | "secondary" | "success" | "info" | "warning" | "error" | (string & {})
   type Variant = "solid" | "outline"
