@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.1.35
+
+[compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.34...v0.1.35)
+
+### 🚀 Enhancements
+
+- Add ToggleGroup component with theme support and auto-registration ([15ffda4](https://github.com/genu/nuxt-ui-elements/commit/15ffda4))
+
+### 🩹 Fixes
+
+- Remove unused confirmNavigate import from dialog component ([e75b0ca](https://github.com/genu/nuxt-ui-elements/commit/e75b0ca))
+
+### 💅 Refactors
+
+- Remove rovingFocus and dir props from ToggleGroup component ([46bee93](https://github.com/genu/nuxt-ui-elements/commit/46bee93))
+
+### 📖 Documentation
+
+- Add ToggleGroup component documentation ([d8d2001](https://github.com/genu/nuxt-ui-elements/commit/d8d2001))
+
+### 🏡 Chore
+
+- Disable vue/require-default-prop rule in ESLint configuration ([7b50c7e](https://github.com/genu/nuxt-ui-elements/commit/7b50c7e))
+
+### ❤️ Contributors
+
+- Eugen Istoc <eugenistoc@gmail.com>
+
 ## v0.1.34
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.33...v0.1.34)
