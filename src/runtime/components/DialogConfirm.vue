@@ -138,8 +138,6 @@
   <UModal
     :dismissible="false"
     :close="false"
-    :title="title"
-    :description="description"
     :ui="{
       content: ui.content({ class: uiProps?.content }),
       header: ui.header({ class: uiProps?.header }),
@@ -154,9 +152,8 @@
             {{ title }}
           </DialogTitle>
 
-          <DialogDescription v-if="description" :class="ui.description({ class: uiProps?.description })">
-            {{ description }}
-          </DialogDescription>
+          <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component, vue/no-v-html -->
+          <DialogDescription v-if="description" :class="ui.description({ class: uiProps?.description })" v-html="description" />
         </div>
 
         <UButton
