@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.38](https://github.com/genu/nuxt-ui-elements/compare/v0.1.37...v0.1.38) (2026-02-09)
+
+
+### Bug Fixes
+
+* remove title and description props from UModal and update DialogDescription to use v-html ([3cec456](https://github.com/genu/nuxt-ui-elements/commit/3cec4562b414ce764a4cf352c17265111ffea1d8))
+* update button styles in DialogConfirm component for better visibility ([7463ac9](https://github.com/genu/nuxt-ui-elements/commit/7463ac9b74d035a3c910ffda3067f7d6c023d769))
+
+
+### Dependencies
+
+* remove changelogen dependency in favor of release-please ([eb75d9d](https://github.com/genu/nuxt-ui-elements/commit/eb75d9d38d128fd56b4190bd4c3f6269c79fcc67))
+
 ## v0.1.37
 
 [compare changes](https://github.com/genu/nuxt-ui-elements/compare/v0.1.36...v0.1.37)
