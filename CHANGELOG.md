@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.39](https://github.com/genu/nuxt-ui-elements/compare/v0.1.38...v0.1.39) (2026-02-09)
+
+
+### Bug Fixes
+
+* **DialogConfirm:** update dialog description rendering to use v-html ([8b64aa2](https://github.com/genu/nuxt-ui-elements/commit/8b64aa28264bb053d096f31f486a0038f4c9dc75))
+
 ## [0.1.38](https://github.com/genu/nuxt-ui-elements/compare/v0.1.37...v0.1.38) (2026-02-09)
 
 
