@@ -11,7 +11,12 @@
     {
       "description": "Group Nuxt ecosystem packages",
       "groupName": "nuxt",
-      "matchPackageNames": ["nuxt", "nuxi", "@nuxt/kit", "@nuxt/schema"]
+      "matchPackageNames": ["/^@nuxt//", "/^nuxt$/", "/^nuxi$/"]
+    },
+    {
+      "description": "Group VueUse packages",
+      "groupName": "vueuse",
+      "matchPackageNames": ["/^@vueuse//"]
     },
     {
       "description": "Group Vitest packages",
