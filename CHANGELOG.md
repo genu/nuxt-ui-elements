@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.40](https://github.com/genu/nuxt-ui-elements/compare/v0.1.39...v0.1.40) (2026-02-19)
+
+
+### Features
+
+* **date:** add getWeekStartLocale function for locale-based week start ([2275af7](https://github.com/genu/nuxt-ui-elements/commit/2275af75c0793b72e740c5fe817de24c14a89edc))
+
 ## [0.1.39](https://github.com/genu/nuxt-ui-elements/compare/v0.1.38...v0.1.39) (2026-02-09)
 
 
