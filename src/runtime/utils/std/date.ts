@@ -591,6 +591,16 @@ export function parse(dateString: string): CalendarDate {
 }
 
 /**
+ * Maps a weekStartsOn value to a locale string that
+ * @internationalized/date uses for week-start calculation.
+ *
+ * @param weekStartsOn - 0 for Sunday, 1 for Monday
+ */
+export function getWeekStartLocale(weekStartsOn: 0 | 1 = 0): string {
+  return weekStartsOn === 1 ? "en-GB" : "en-US"
+}
+
+/**
  * Re-export useful utilities from @internationalized/date
  * that complement (not duplicate) the main API
  */
