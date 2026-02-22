@@ -5,7 +5,7 @@ category: composable
 links:
   - label: GitHub
     icon: i-simple-icons-github
-    to: https://github.com/your-username/nuxt-ui-elements/blob/main/src/runtime/composables/useDialog.ts
+    to: https://github.com/genu/nuxt-ui-elements/blob/main/src/runtime/composables/useDialog.ts
 ---
 
 ## Usage

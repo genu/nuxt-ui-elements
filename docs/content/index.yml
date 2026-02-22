@@ -11,7 +11,7 @@ hero:
       trailingIcon: i-lucide-arrow-right
     - label: View on GitHub
       icon: i-simple-icons-github
-      to: https://github.com/your-username/nuxt-ui-elements
+      to: https://github.com/genu/nuxt-ui-elements
       target: _blank
       color: neutral
       variant: outline
@@ -33,14 +33,14 @@ features:
     description: Powerful alert and confirm dialogs with async support and customizable styling.
     icon: i-lucide-message-square
     to: /docs/composables/use-dialog
-  - title: Upload Manager
-    description: Comprehensive file upload management with plugins for compression, thumbnails, and more.
-    icon: i-lucide-upload
-    to: /docs/composables/use-upload-manager
   - title: Date Utilities
     description: Tree-shakeable date manipulation functions built on @internationalized/date.
     icon: i-lucide-calendar
-    to: /docs/utilities/date
+    to: /docs/standard-library/date
+  - title: Pro Components
+    description: Advanced components like EventCalendar for professional applications.
+    icon: i-lucide-sparkles
+    to: /docs/pro
 
 sections:
   - title: Built on Nuxt UI

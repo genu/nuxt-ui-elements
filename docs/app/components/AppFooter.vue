@@ -11,7 +11,7 @@
 
     <template #right>
       <UButton
-        to="https://github.com/your-username/nuxt-ui-elements"
+        to="https://github.com/genu/nuxt-ui-elements"
         target="_blank"
         icon="i-simple-icons-github"
         color="neutral"

@@ -62,6 +62,7 @@ ${data?.code ?? "// Example source code not found"}
   const { data: ast } = await useAsyncData(
     `component-example-${camelName}`,
     async () => {
+      const { parseMarkdown } = await import("@nuxtjs/mdc/runtime")
       return parseMarkdown(code.value)
     },
     { watch: [code] },

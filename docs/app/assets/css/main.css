@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "nuxt-ui-elements-pro";
 
 /* Custom styles for documentation */
 .prose {

@@ -5,7 +5,7 @@ category: component
 links:
   - label: GitHub
     icon: i-simple-icons-github
-    to: https://github.com/your-username/nuxt-ui-elements/blob/main/src/runtime/components/ToggleGroup.vue
+    to: https://github.com/genu/nuxt-ui-elements/blob/main/src/runtime/components/ToggleGroup.vue
 ---
 
 ## Overview

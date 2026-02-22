@@ -5,7 +5,7 @@ category: utility
 links:
   - label: GitHub
     icon: i-simple-icons-github
-    to: https://github.com/your-username/nuxt-ui-elements/blob/main/src/runtime/utils/std/date.ts
+    to: https://github.com/genu/nuxt-ui-elements/blob/main/src/runtime/utils/std/date.ts
   - label: "@internationalized/date"
     icon: i-lucide-external-link
     to: https://react-spectrum.adobe.com/internationalized/date/

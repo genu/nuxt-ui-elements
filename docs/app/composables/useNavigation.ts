@@ -11,6 +11,7 @@ const categoryLabels: Record<string, string> = {
   composables: "Composables",
   "standard-library": "Standard Library",
   utilities: "Utilities",
+  pro: "Pro",
 }
 
 function getCategorySlug(path: string): string {
