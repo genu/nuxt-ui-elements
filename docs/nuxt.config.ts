@@ -5,6 +5,7 @@ const { resolve } = createResolver(import.meta.url)
 export default defineNuxtConfig({
   modules: [
     "../src/module",
+    "nuxt-ui-elements-pro",
     "@nuxt/ui",
     "@nuxt/content",
     "@nuxt/image",

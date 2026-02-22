@@ -36,13 +36,13 @@
     {
       icon: "i-lucide-file-pen",
       label: "Edit this page",
-      to: `https://github.com/your-username/nuxt-ui-elements/edit/main/docs/content/${page?.value?.stem}.md`,
+      to: `https://github.com/genu/nuxt-ui-elements/edit/main/docs/content/${page?.value?.stem}.md`,
       target: "_blank",
     },
     {
       icon: "i-lucide-star",
       label: "Star on GitHub",
-      to: `https://github.com/your-username/nuxt-ui-elements`,
+      to: `https://github.com/genu/nuxt-ui-elements`,
       target: "_blank",
     },
   ])

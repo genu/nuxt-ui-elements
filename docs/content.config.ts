@@ -65,6 +65,12 @@ export const collections = {
       navigation: z
         .object({
           title: z.string().optional(),
+          badge: z
+            .object({
+              label: z.string(),
+              color: z.string().optional(),
+            })
+            .optional(),
         })
         .optional(),
       links: z.array(Button).optional(),
