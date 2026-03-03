@@ -69,5 +69,46 @@ export default defineNuxtModule<ModuleOptions>({
       path: resolver.resolve("./runtime/components"),
       prefix: options.prefix,
     })
+
+    // Vue Flow integration: add CSS and transpile if installed
+    try {
+      const vueFlowCorePath = resolver.resolve("@vue-flow/core")
+      if (vueFlowCorePath) {
+        nuxt.options.css.push("@vue-flow/core/dist/style.css")
+        nuxt.options.css.push("@vue-flow/core/dist/theme-default.css")
+        nuxt.options.build.transpile.push("@vue-flow/core")
+      }
+    } catch {
+      // @vue-flow/core not installed, skip
+    }
+
+    try {
+      const bgPath = resolver.resolve("@vue-flow/background")
+      if (bgPath) {
+        nuxt.options.build.transpile.push("@vue-flow/background")
+      }
+    } catch {
+      // @vue-flow/background not installed, skip
+    }
+
+    try {
+      const controlsPath = resolver.resolve("@vue-flow/controls")
+      if (controlsPath) {
+        nuxt.options.css.push("@vue-flow/controls/dist/style.css")
+        nuxt.options.build.transpile.push("@vue-flow/controls")
+      }
+    } catch {
+      // @vue-flow/controls not installed, skip
+    }
+
+    try {
+      const minimapPath = resolver.resolve("@vue-flow/minimap")
+      if (minimapPath) {
+        nuxt.options.css.push("@vue-flow/minimap/dist/style.css")
+        nuxt.options.build.transpile.push("@vue-flow/minimap")
+      }
+    } catch {
+      // @vue-flow/minimap not installed, skip
+    }
   },
 })
