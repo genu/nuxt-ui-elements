@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.41](https://github.com/genu/nuxt-ui-elements/compare/v0.1.40...v0.1.41) (2026-03-03)
+
+
+### Features
+
+* Add Vue Flow wrapper components with Nuxt UI theming ([#38](https://github.com/genu/nuxt-ui-elements/issues/38)) ([23e6ffc](https://github.com/genu/nuxt-ui-elements/commit/23e6ffcc4c5da190345c17ac8dfc20114f0fc2d8))
+
 ## [0.1.40](https://github.com/genu/nuxt-ui-elements/compare/v0.1.39...v0.1.40) (2026-02-19)
 
 
