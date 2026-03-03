@@ -21,6 +21,7 @@ This module extends Nuxt UI with additional components and utilities designed to
 - 🔄 **Auto-import** - Components and composables are automatically available
 - 🎯 **TypeScript** - Full type safety out of the box
 - 🌙 **Dark Mode** - Automatic theme switching compatible with Nuxt UI
+- 🔀 **Vue Flow Integration** - Themed wrapper components for interactive flowcharts and diagrams
 
 ## Requirements
 
@@ -153,6 +154,225 @@ async function handleDelete() {
 | `ui` | `object` | `{}` | Custom UI classes override |
 
 **Async Support**: When `onConfirm` returns a Promise, the dialog automatically shows loading state and displays success/error feedback before closing.
+
+### Flow Components
+
+Themed wrapper components for [Vue Flow](https://vueflow.dev/), providing interactive flowcharts and node-based diagrams with Nuxt UI theming integration.
+
+#### Prerequisites
+
+Flow components require the `@vue-flow` packages. Install them alongside `nuxt-ui-elements`:
+
+```bash
+pnpm add @vue-flow/core @vue-flow/background @vue-flow/controls @vue-flow/minimap
+```
+
+#### Flow
+
+The main container component that wraps Vue Flow with Nuxt UI theming and SSR safety via `<ClientOnly>`.
+
+```vue
+<script setup>
+const nodes = ref([
+  { id: '1', type: 'custom', position: { x: 0, y: 0 }, data: { label: 'Start' } },
+  { id: '2', type: 'custom', position: { x: 250, y: 100 }, data: { label: 'Process' } },
+])
+
+const edges = ref([
+  { id: 'e1-2', source: '1', target: '2', animated: true },
+])
+</script>
+
+<template>
+  <UEFlow :nodes="nodes" :edges="edges" @connect="onConnect">
+    <template #node-custom="{ data }">
+      <UEFlowNode :label="data.label" color="primary" variant="outline">
+        <UEFlowHandle type="target" position="left" />
+        <UEFlowHandle type="source" position="right" />
+      </UEFlowNode>
+    </template>
+
+    <UEFlowBackground />
+    <UEFlowControls />
+    <UEFlowMiniMap />
+  </UEFlow>
+</template>
+```
+
+**Flow API:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `nodes` | `Node[]` | `[]` | Array of node objects |
+| `edges` | `Edge[]` | `[]` | Array of edge objects |
+| `nodeTypes` | `Record<string, any>` | `undefined` | Map of custom node type components |
+| `edgeTypes` | `Record<string, any>` | `undefined` | Map of custom edge type components |
+| `fitViewOnInit` | `boolean` | `true` | Fit view on initialization |
+| `minZoom` | `number` | `0.2` | Minimum zoom level |
+| `maxZoom` | `number` | `4` | Maximum zoom level |
+| `nodesDraggable` | `boolean` | `true` | Whether nodes are draggable |
+| `nodesConnectable` | `boolean` | `true` | Whether nodes are connectable |
+| `elementsSelectable` | `boolean` | `true` | Whether elements are selectable |
+| `connectionMode` | `ConnectionMode` | `undefined` | Connection mode |
+| `defaultEdgeOptions` | `Record<string, any>` | `undefined` | Default options for edges |
+| `ui` | `object` | `{}` | Custom UI classes override |
+
+**Events:**
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `update:nodes` | `Node[]` | Emitted when nodes change |
+| `update:edges` | `Edge[]` | Emitted when edges change |
+| `nodeClick` | `event` | Emitted on node click |
+| `edgeClick` | `event` | Emitted on edge click |
+| `paneClick` | `event` | Emitted on pane click |
+| `connect` | `params` | Emitted when a connection is made |
+
+**Slots:** All Vue Flow slots are forwarded, including custom node/edge type slots (e.g., `#node-custom`).
+
+#### FlowNode
+
+A styled node component with color and variant theming. Use inside custom node type slots.
+
+```vue
+<template #node-custom="{ data, selected }">
+  <UEFlowNode :label="data.label" color="success" variant="soft" :selected="selected">
+    <UEFlowHandle type="target" position="top" />
+    <template #default>
+      <p>Custom content here</p>
+    </template>
+    <UEFlowHandle type="source" position="bottom" />
+  </UEFlowNode>
+</template>
+```
+
+**FlowNode API:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | `string` | `undefined` | Node label text |
+| `color` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warning' \| 'error' \| 'neutral'` | `'primary'` | Theme color |
+| `variant` | `'solid' \| 'outline' \| 'soft' \| 'subtle'` | `'outline'` | Visual variant |
+| `selected` | `boolean` | `false` | Whether the node is selected (adds ring indicator) |
+| `ui` | `object` | `{}` | Custom UI classes override |
+
+**Slots:**
+
+| Slot | Description |
+|------|-------------|
+| `default` | Custom content rendered below the label |
+
+#### FlowHandle
+
+A themed connection handle for nodes. Place inside `FlowNode` to define source/target connection points.
+
+```vue
+<UEFlowNode label="My Node" color="primary">
+  <UEFlowHandle type="target" position="top" color="primary" />
+  <UEFlowHandle type="source" position="bottom" color="primary" :connected="true" />
+</UEFlowNode>
+```
+
+**FlowHandle API:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `type` | `'source' \| 'target'` | **(required)** | Handle type |
+| `position` | `Position \| 'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Handle position on the node |
+| `id` | `string` | `undefined` | Handle ID (required when a node has multiple handles of the same type) |
+| `color` | `'primary' \| 'secondary' \| 'success' \| 'info' \| 'warning' \| 'error' \| 'neutral'` | `'primary'` | Theme color |
+| `connected` | `boolean` | `false` | Whether a connection is active (fills the handle with color) |
+| `ui` | `object` | `{}` | Custom UI classes override |
+
+#### FlowBackground
+
+A themed background pattern for the flow canvas.
+
+```vue
+<UEFlow :nodes="nodes" :edges="edges">
+  <!-- Dot pattern (default) -->
+  <UEFlowBackground />
+
+  <!-- Line pattern with custom settings -->
+  <UEFlowBackground pattern="lines" :gap="30" :size="2" color="#ccc" />
+</UEFlow>
+```
+
+**FlowBackground API:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `pattern` | `'dots' \| 'lines'` | `'dots'` | Background pattern |
+| `gap` | `number \| number[]` | `20` | Pattern gap spacing |
+| `size` | `number` | `1` | Pattern element size |
+| `color` | `string` | `undefined` | Pattern color |
+| `lineWidth` | `number` | `undefined` | Line width (only for `lines` pattern) |
+| `ui` | `object` | `{}` | Custom UI classes override |
+
+#### FlowControls
+
+A themed control panel for zoom, fit view, and interactivity toggles.
+
+```vue
+<UEFlow :nodes="nodes" :edges="edges">
+  <!-- Default controls (all visible) -->
+  <UEFlowControls />
+
+  <!-- Only zoom and fit view -->
+  <UEFlowControls :show-interactive="false" position="top-left" />
+</UEFlow>
+```
+
+**FlowControls API:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `showZoom` | `boolean` | `true` | Show zoom in/out buttons |
+| `showFitView` | `boolean` | `true` | Show fit-view button |
+| `showInteractive` | `boolean` | `true` | Show interactive toggle |
+| `fitViewParams` | `FitViewParams` | `undefined` | Parameters for fit view action |
+| `position` | `PanelPositionType` | `'bottom-left'` | Panel position on the canvas |
+| `ui` | `object` | `{}` | Custom UI classes override |
+
+**Slots:**
+
+| Slot | Description |
+|------|-------------|
+| `default` | Additional custom controls |
+
+#### FlowMiniMap
+
+A themed minimap for navigating large flow diagrams.
+
+```vue
+<UEFlow :nodes="nodes" :edges="edges">
+  <!-- Default minimap -->
+  <UEFlowMiniMap />
+
+  <!-- Customized minimap -->
+  <UEFlowMiniMap
+    :pannable="true"
+    :zoomable="true"
+    position="top-right"
+    :node-border-radius="8"
+  />
+</UEFlow>
+```
+
+**FlowMiniMap API:**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `pannable` | `boolean` | `true` | Enable drag to pan the viewport |
+| `zoomable` | `boolean` | `true` | Enable scroll to zoom the viewport |
+| `position` | `PanelPositionType` | `'bottom-right'` | Panel position on the canvas |
+| `nodeColor` | `string` | `undefined` | Node fill color in the minimap |
+| `nodeStrokeColor` | `string` | `undefined` | Node stroke color in the minimap |
+| `nodeBorderRadius` | `number` | `4` | Node border radius in the minimap |
+| `maskColor` | `string` | `undefined` | Viewport mask overlay color |
+| `width` | `number` | `undefined` | Minimap width |
+| `height` | `number` | `undefined` | Minimap height |
+| `ui` | `object` | `{}` | Custom UI classes override |
 
 ## Standard Utilities (`#std`)
 
