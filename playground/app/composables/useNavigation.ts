@@ -8,7 +8,7 @@ export interface NavigationItem {
 export interface ComponentItem {
   name: string
   path: string
-  category: "overlays" | "forms" | "backgrounds" | "buttons" | "animations" | "composables" | "other"
+  category: "overlays" | "forms" | "data-display" | "backgrounds" | "buttons" | "animations" | "composables" | "other"
 }
 
 export function useNavigation() {
@@ -17,6 +17,7 @@ export function useNavigation() {
     { name: "Dialog", path: "/components/dialog", category: "overlays" },
     { name: "Dialog Alert", path: "/components/dialog-alert", category: "overlays" },
     { name: "Toggle Group", path: "/components/toggle-group", category: "forms" },
+    { name: "Flow", path: "/components/flow", category: "data-display" },
   ]
 
   // Group components by category
@@ -59,6 +60,18 @@ export function useNavigation() {
         label: "Forms",
         icon: "i-heroicons-pencil-square",
         children: componentsByCategory.value.forms.map((c) => ({
+          label: c.name,
+          to: c.path,
+        })),
+      })
+    }
+
+    // Add Data Display section
+    if (componentsByCategory.value["data-display"]?.length) {
+      links.push({
+        label: "Data Display",
+        icon: "i-heroicons-chart-bar",
+        children: componentsByCategory.value["data-display"].map((c) => ({
           label: c.name,
           to: c.path,
         })),
