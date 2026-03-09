@@ -51,7 +51,7 @@
     "tailwind-variants": "3.2.2"
   },
   "devDependencies": {
-    "@nuxt/devtools": "3.2.2",
+    "@nuxt/devtools": "3.2.3",
     "@nuxt/eslint-config": "1.15.2",
     "@nuxt/module-builder": "1.0.2",
     "@nuxt/schema": "4.3.1",
