@@ -90,12 +90,7 @@
       @update:view="currentView = $event"
       @date-click="onDateClick"
       @event-click="onEventClick"
-      @event-drop="onEventDrop">
-      <UEEventCalendarHeader />
-      <UEEventCalendarMonthView />
-      <UEEventCalendarTimeGrid />
-      <UEEventCalendarListView />
-    </UEEventCalendar>
+      @event-drop="onEventDrop" />
 
     <div v-if="lastAction" class="p-3 bg-muted rounded-lg font-mono text-sm">
       <span class="text-muted">Last action: </span>
