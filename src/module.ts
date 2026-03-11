@@ -1,4 +1,4 @@
-import { defineNuxtModule, addImportsDir, addComponentsDir, createResolver } from "@nuxt/kit"
+import { defineNuxtModule, addImportsDir, addComponentsDir, createResolver, tryResolveModule } from "@nuxt/kit"
 import { addTemplates } from "./templates"
 
 // Export all types from runtime
@@ -33,7 +33,7 @@ export default defineNuxtModule<ModuleOptions>({
   moduleDependencies: {
     "@nuxt/ui": {},
   },
-  setup(options, nuxt) {
+  async setup(options, nuxt) {
     const resolver = createResolver(import.meta.url)
     // const logger = useLogger("nuxt-ui-elements")
 
@@ -70,45 +70,27 @@ export default defineNuxtModule<ModuleOptions>({
       prefix: options.prefix,
     })
 
-    // Vue Flow integration: add CSS and transpile if installed
-    try {
-      const vueFlowCorePath = resolver.resolve("@vue-flow/core")
-      if (vueFlowCorePath) {
-        nuxt.options.css.push("@vue-flow/core/dist/style.css")
-        nuxt.options.css.push("@vue-flow/core/dist/theme-default.css")
-        nuxt.options.build.transpile.push("@vue-flow/core")
-      }
-    } catch {
-      // @vue-flow/core not installed, skip
+    // Vue Flow integration: add CSS and transpile only when packages are actually installed
+    const moduleDirs = nuxt.options.modulesDir
+
+    if (await tryResolveModule("@vue-flow/core", moduleDirs)) {
+      nuxt.options.css.push("@vue-flow/core/dist/style.css")
+      nuxt.options.css.push("@vue-flow/core/dist/theme-default.css")
+      nuxt.options.build.transpile.push("@vue-flow/core")
     }
 
-    try {
-      const bgPath = resolver.resolve("@vue-flow/background")
-      if (bgPath) {
-        nuxt.options.build.transpile.push("@vue-flow/background")
-      }
-    } catch {
-      // @vue-flow/background not installed, skip
+    if (await tryResolveModule("@vue-flow/background", moduleDirs)) {
+      nuxt.options.build.transpile.push("@vue-flow/background")
     }
 
-    try {
-      const controlsPath = resolver.resolve("@vue-flow/controls")
-      if (controlsPath) {
-        nuxt.options.css.push("@vue-flow/controls/dist/style.css")
-        nuxt.options.build.transpile.push("@vue-flow/controls")
-      }
-    } catch {
-      // @vue-flow/controls not installed, skip
+    if (await tryResolveModule("@vue-flow/controls", moduleDirs)) {
+      nuxt.options.css.push("@vue-flow/controls/dist/style.css")
+      nuxt.options.build.transpile.push("@vue-flow/controls")
     }
 
-    try {
-      const minimapPath = resolver.resolve("@vue-flow/minimap")
-      if (minimapPath) {
-        nuxt.options.css.push("@vue-flow/minimap/dist/style.css")
-        nuxt.options.build.transpile.push("@vue-flow/minimap")
-      }
-    } catch {
-      // @vue-flow/minimap not installed, skip
+    if (await tryResolveModule("@vue-flow/minimap", moduleDirs)) {
+      nuxt.options.css.push("@vue-flow/minimap/dist/style.css")
+      nuxt.options.build.transpile.push("@vue-flow/minimap")
     }
   },
 })

@@ -161,11 +161,14 @@ Themed wrapper components for [Vue Flow](https://vueflow.dev/), providing intera
 
 #### Prerequisites
 
-Flow components require the `@vue-flow` packages. Install them alongside `nuxt-ui-elements`:
+The Vue Flow packages are **optional peer dependencies**. The module automatically detects which packages are installed and only registers the corresponding CSS and components. Install the ones you need:
 
 ```bash
+# Install all Vue Flow packages
 pnpm add @vue-flow/core @vue-flow/background @vue-flow/controls @vue-flow/minimap
 ```
+
+> **Note:** `@vue-flow/core` is required for any Flow functionality. The other packages (`@vue-flow/background`, `@vue-flow/controls`, `@vue-flow/minimap`) are optional and can be installed individually as needed.
 
 #### Flow
 
