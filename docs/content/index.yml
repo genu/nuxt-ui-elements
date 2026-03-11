@@ -1,4 +1,4 @@
-title: Nuxt UI Elements
+title: Nuxt Elements
 description: A collection of beautiful, animated UI components designed to work seamlessly on top of Nuxt UI.
 
 hero:
@@ -44,7 +44,7 @@ features:
 
 sections:
   - title: Built on Nuxt UI
-    description: Nuxt UI Elements is designed to complement and extend Nuxt UI, not replace it.
+    description: Nuxt Elements is designed to complement and extend Nuxt UI, not replace it.
     features:
       - title: Seamless Integration
         description: Works perfectly alongside your existing Nuxt UI components.

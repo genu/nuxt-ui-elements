@@ -1,2 +1,45 @@
 @import "#build/ui-elements.css";
 @source './components';
+
+/* Vue Flow controls dark mode overrides */
+.vue-flow__controls {
+  box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.08);
+  border-radius: var(--ui-radius);
+  overflow: hidden;
+  border: 1px solid var(--ui-border);
+}
+
+.vue-flow__controls-button {
+  background: var(--ui-bg);
+  border: none;
+  border-bottom: 1px solid var(--ui-border);
+  cursor: pointer;
+  padding: 6px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.vue-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+.vue-flow__controls-button:hover {
+  background: var(--ui-bg-elevated);
+}
+
+.vue-flow__controls-button svg {
+  fill: var(--ui-text);
+  width: 100%;
+  max-width: 12px;
+  max-height: 12px;
+}
+
+/* Vue Flow minimap dark mode overrides */
+.vue-flow__minimap {
+  border-radius: var(--ui-radius);
+  overflow: hidden;
+  border: 1px solid var(--ui-border);
+}

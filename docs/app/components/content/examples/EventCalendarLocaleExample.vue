@@ -10,7 +10,7 @@
     { label: "French", value: "fr-FR", weekStart: 1 as const },
     { label: "German", value: "de-DE", weekStart: 1 as const },
     { label: "Japanese", value: "ja-JP", weekStart: 0 as const },
-    { label: "Arabic", value: "ar-SA", weekStart: 6 as const },
+    { label: "Arabic", value: "ar-SA", weekStart: 0 as const },
   ]
 
   const events = shallowRef<CalendarEvent[]>([
@@ -32,7 +32,7 @@
 
   function setLocale(l: (typeof locales)[number]) {
     locale.value = l.value
-    weekStartsOn.value = l.weekStart as 0 | 1
+    weekStartsOn.value = l.weekStart
   }
 </script>
 

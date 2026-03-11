@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { AppConfig } from "@nuxt/schema"
   import theme from "#build/ui-elements/flow-background"
-  import type { ComponentConfig } from "../types"
+  import type { ComponentConfig } from "../../types"
 
   type FlowBackground = ComponentConfig<typeof theme, AppConfig, "flowBackground">
 
@@ -24,7 +24,7 @@
 <script lang="ts" setup>
   import { computed } from "vue"
   import { Background } from "@vue-flow/background"
-  import { tv } from "../utils/tv"
+  import { tv } from "../../utils/tv"
 
   const {
     pattern = "dots",

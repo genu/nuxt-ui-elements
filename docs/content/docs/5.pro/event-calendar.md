@@ -14,16 +14,7 @@ links:
 
 ## Overview
 
-`EventCalendar` is a composable calendar system with three view modes (month, week, day), drag-and-drop event management, and full keyboard navigation. It's built as a set of coordinated sub-components that communicate via provide/inject.
-
-**Component hierarchy:**
-
-```
-UEEventCalendar          (root — state, context provider)
-├── UEEventCalendarHeader       (navigation, view switcher)
-├── UEEventCalendarMonthView    (month grid)
-└── UEEventCalendarTimeGrid     (week/day time grid)
-```
+`EventCalendar` is a full-featured calendar with three view modes (month, week, day), drag-and-drop event management, and full keyboard navigation. It includes a built-in header, month grid, and time grid — all rendered automatically based on the active view.
 
 ## Demo
 
@@ -167,6 +158,28 @@ interface EventDropPayload {
   oldEnd: CalendarDate | CalendarDateTime
   newStart: CalendarDate | CalendarDateTime
   newEnd: CalendarDate | CalendarDateTime
+}
+```
+
+### EventResizePayload
+
+```ts
+interface EventResizePayload {
+  event: CalendarEvent       // The original event object
+  oldStart: CalendarDate | CalendarDateTime
+  oldEnd: CalendarDate | CalendarDateTime
+  newStart: CalendarDate | CalendarDateTime
+  newEnd: CalendarDate | CalendarDateTime
+}
+```
+
+### SelectPayload
+
+```ts
+interface SelectPayload {
+  start: CalendarDate | CalendarDateTime
+  end: CalendarDate | CalendarDateTime
+  allDay: boolean
 }
 ```
 

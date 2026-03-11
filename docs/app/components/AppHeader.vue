@@ -30,7 +30,7 @@
     <template #left>
       <NuxtLink to="/" class="flex items-center gap-2">
         <UIcon name="i-lucide-box" class="w-6 h-6 text-primary" />
-        <span class="font-bold text-lg">Nuxt UI Elements</span>
+        <span class="font-bold text-lg">Nuxt Elements</span>
       </NuxtLink>
     </template>
 

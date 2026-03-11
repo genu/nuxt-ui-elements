@@ -25,9 +25,9 @@
   const description = page.value?.description
 
   useSeoMeta({
-    titleTemplate: "%s - Nuxt UI Elements",
+    titleTemplate: "%s - Nuxt Elements",
     title,
-    ogTitle: `${title} - Nuxt UI Elements`,
+    ogTitle: `${title} - Nuxt Elements`,
     description,
     ogDescription: description,
   })
