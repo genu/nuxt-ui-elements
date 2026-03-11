@@ -2,6 +2,10 @@
 @import "@nuxt/ui";
 @import "nuxt-ui-elements-pro";
 
+:root {
+  --ui-radius: 0.5rem;
+}
+
 /* Custom styles for documentation */
 .prose {
   @apply max-w-none;

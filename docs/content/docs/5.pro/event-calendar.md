@@ -14,16 +14,7 @@ links:
 
 ## Overview
 
-`EventCalendar` is a composable calendar system with three view modes (month, week, day), drag-and-drop event management, and full keyboard navigation. It's built as a set of coordinated sub-components that communicate via provide/inject.
-
-**Component hierarchy:**
-
-```
-UEEventCalendar          (root — state, context provider)
-├── UEEventCalendarHeader       (navigation, view switcher)
-├── UEEventCalendarMonthView    (month grid)
-└── UEEventCalendarTimeGrid     (week/day time grid)
-```
+`EventCalendar` is a full-featured calendar with three view modes (month, week, day), drag-and-drop event management, and full keyboard navigation. It includes a built-in header, month grid, and time grid — all rendered automatically based on the active view.
 
 ## Demo
 
@@ -31,144 +22,41 @@ Try switching between month, week, and day views. You can drag events to move th
 
 :component-example{name="EventCalendarExample"}
 
-## Usage
+## Week View
 
-### Basic Calendar
+The week view displays a time grid with events positioned by time. Configure visible hours and slot duration with `weekOptions`.
 
-```vue
-<script setup>
-const date = ref(new Date())
-const view = ref<'month' | 'week' | 'day'>('month')
+:component-example{name="EventCalendarWeekViewExample"}
 
-const events = ref([
-  {
-    id: 1,
-    title: 'Team Meeting',
-    start: '2025-03-15T10:00',
-    end: '2025-03-15T11:00',
-    color: 'primary'
-  },
-  {
-    id: 2,
-    title: 'Launch Day',
-    start: '2025-03-20',
-    allDay: true,
-    color: 'success'
-  }
-])
-</script>
+## Drag and Drop
 
-<template>
-  <UEEventCalendar
-    v-model="date"
-    v-model:view="view"
-    :events="events"
-  >
-    <UEEventCalendarHeader />
-    <UEEventCalendarMonthView v-if="view === 'month'" />
-    <UEEventCalendarTimeGrid v-else />
-  </UEEventCalendar>
-</template>
-```
+Events can be dragged to reschedule them. Set `draggable: false` on individual events to lock them in place, or disable globally with `:editable="false"`.
 
-### Handling Events
+:component-example{name="EventCalendarDragDropExample"}
 
-```vue
-<script setup>
-import type { CalendarEvent, EventDropPayload } from 'nuxt-ui-elements-pro'
+## Resize
 
-function onDateClick(date: CalendarDate) {
-  console.log('Date clicked:', date.toString())
-}
+In day and week views, drag the bottom edge of timed events to change their duration. Set `resizable: false` on individual events to prevent resizing.
 
-function onEventClick(event: CalendarEvent) {
-  console.log('Event clicked:', event.title)
-}
+:component-example{name="EventCalendarResizeExample"}
 
-function onEventDrop(payload: EventDropPayload) {
-  // Update event in your data source
-  const event = events.value.find(e => e.id === payload.event.id)
-  if (event) {
-    event.start = payload.newStart
-    event.end = payload.newEnd
-  }
-}
-</script>
+## Click Events
 
-<template>
-  <UEEventCalendar
-    v-model="date"
-    :events="events"
-    @date-click="onDateClick"
-    @event-click="onEventClick"
-    @event-drop="onEventDrop"
-  >
-    <UEEventCalendarHeader />
-    <UEEventCalendarMonthView />
-  </UEEventCalendar>
-</template>
-```
+Listen to `@date-click` and `@event-click` to respond to user interactions. This example disables editing to show click-only mode.
 
-### Localization
+:component-example{name="EventCalendarClickEventsExample"}
 
-The calendar supports localization via the `locale` prop and configurable week start day:
+## Date Selection
 
-```vue
-<template>
-  <UEEventCalendar
-    v-model="date"
-    :events="events"
-    locale="fr-FR"
-    :week-starts-on="1"
-  >
-    <UEEventCalendarHeader />
-    <UEEventCalendarMonthView />
-  </UEEventCalendar>
-</template>
-```
+Click and drag on empty time slots to select a date range. The `@select` event fires with the start, end, and whether it's an all-day selection — useful for creating new events.
 
-### View-Specific Options
+:component-example{name="EventCalendarSelectExample"}
 
-Each view mode has its own configuration options:
+## Localization
 
-```vue
-<template>
-  <UEEventCalendar
-    v-model="date"
-    :events="events"
-    :month-options="{ maxEvents: 4, fixedWeeks: true }"
-    :week-options="{ startHour: 8, endHour: 20, slotDuration: 30 }"
-    :day-options="{ startHour: 6, endHour: 23, slotDuration: 15 }"
-  >
-    <!-- ... -->
-  </UEEventCalendar>
-</template>
-```
+The calendar supports localization via the `locale` prop and configurable week start day with `weekStartsOn`.
 
-### Disabling Drag-and-Drop
-
-Set `editable` to `false` to disable all drag-and-drop functionality:
-
-```vue
-<template>
-  <UEEventCalendar
-    v-model="date"
-    :events="events"
-    :editable="false"
-  >
-    <!-- ... -->
-  </UEEventCalendar>
-</template>
-```
-
-You can also disable drag on individual events:
-
-```ts
-const events = [
-  { id: 1, title: 'Fixed Event', start: '2025-03-15', draggable: false },
-  { id: 2, title: 'Movable Event', start: '2025-03-16' } // draggable by default
-]
-```
+:component-example{name="EventCalendarLocaleExample"}
 
 ## CalendarEvent Interface
 
@@ -190,6 +78,8 @@ interface CalendarEvent {
   allDay?: boolean
   /** Whether this event can be dragged. Defaults to true */
   draggable?: boolean
+  /** Whether this event can be resized. Defaults to true */
+  resizable?: boolean
 }
 ```
 
@@ -256,6 +146,8 @@ The `start` and `end` fields accept multiple formats:
 | `dateClick` | `CalendarDate` | Fired when a date cell is clicked |
 | `eventClick` | `CalendarEvent` | Fired when an event chip is clicked |
 | `eventDrop` | `EventDropPayload` | Fired after a drag-and-drop operation |
+| `eventResize` | `EventResizePayload` | Fired after a resize operation |
+| `select` | `SelectPayload` | Fired after a click or drag date range selection |
 
 ### EventDropPayload
 
@@ -269,6 +161,28 @@ interface EventDropPayload {
 }
 ```
 
+### EventResizePayload
+
+```ts
+interface EventResizePayload {
+  event: CalendarEvent       // The original event object
+  oldStart: CalendarDate | CalendarDateTime
+  oldEnd: CalendarDate | CalendarDateTime
+  newStart: CalendarDate | CalendarDateTime
+  newEnd: CalendarDate | CalendarDateTime
+}
+```
+
+### SelectPayload
+
+```ts
+interface SelectPayload {
+  start: CalendarDate | CalendarDateTime
+  end: CalendarDate | CalendarDateTime
+  allDay: boolean
+}
+```
+
 ### Slots
 
 The root `UEEventCalendar` component exposes a default slot with the full `EventCalendarContext`:
@@ -279,32 +193,6 @@ The root `UEEventCalendar` component exposes a default slot with the full `Event
     <!-- Access ctx.displayDate, ctx.monthWeeks, ctx.goToNext(), etc. -->
   </template>
 </UEEventCalendar>
-```
-
-## Sub-Components
-
-### EventCalendarHeader
-
-Navigation controls and view switcher. Uses the calendar context automatically.
-
-```vue
-<UEEventCalendarHeader />
-```
-
-### EventCalendarMonthView
-
-Month grid with day cells, event chips, and overflow indicators. Use when `view === 'month'`.
-
-```vue
-<UEEventCalendarMonthView />
-```
-
-### EventCalendarTimeGrid
-
-Time-based grid for week and day views. Renders time slots, all-day event rows, and positioned timed events with overlap handling. Use when `view === 'week'` or `view === 'day'`.
-
-```vue
-<UEEventCalendarTimeGrid />
 ```
 
 ## Keyboard Navigation

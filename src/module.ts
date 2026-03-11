@@ -64,10 +64,11 @@ export default defineNuxtModule<ModuleOptions>({
     // Add #uiElements alias for types and runtime
     nuxt.options.alias["#ui-elements"] = resolver.resolve("./runtime")
 
-    // Auto-register components with prefix
+    // Auto-register public components with prefix (internal sub-components live in subdirectories)
     addComponentsDir({
       path: resolver.resolve("./runtime/components"),
       prefix: options.prefix,
+      ignore: ["**/flow/**"],
     })
 
     // Vue Flow integration: add CSS and transpile only when packages are actually installed

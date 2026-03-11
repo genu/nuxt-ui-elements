@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { AppConfig } from "@nuxt/schema"
   import theme from "#build/ui-elements/flow-controls"
-  import type { ComponentConfig } from "../types"
+  import type { ComponentConfig } from "../../types"
   import type { PanelPositionType, FitViewParams } from "@vue-flow/core"
 
   type FlowControls = ComponentConfig<typeof theme, AppConfig, "flowControls">
@@ -25,7 +25,7 @@
 <script lang="ts" setup>
   import { computed } from "vue"
   import { Controls } from "@vue-flow/controls"
-  import { tv } from "../utils/tv"
+  import { tv } from "../../utils/tv"
 
   const {
     showZoom = true,

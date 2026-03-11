@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { AppConfig } from "@nuxt/schema"
   import theme from "#build/ui-elements/flow-mini-map"
-  import type { ComponentConfig } from "../types"
+  import type { ComponentConfig } from "../../types"
   import type { PanelPositionType } from "@vue-flow/core"
 
   type FlowMiniMap = ComponentConfig<typeof theme, AppConfig, "flowMiniMap">
@@ -33,7 +33,7 @@
 <script lang="ts" setup>
   import { computed } from "vue"
   import { MiniMap } from "@vue-flow/minimap"
-  import { tv } from "../utils/tv"
+  import { tv } from "../../utils/tv"
 
   const {
     pannable = true,

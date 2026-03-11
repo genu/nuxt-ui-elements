@@ -3,6 +3,9 @@
   import theme from "#build/ui-elements/flow"
   import type { ComponentConfig } from "../types"
   import type { Node, Edge, ConnectionMode } from "@vue-flow/core"
+  import type { FlowBackgroundProps } from "./flow/FlowBackground.vue"
+  import type { FlowControlsProps } from "./flow/FlowControls.vue"
+  import type { FlowMiniMapProps } from "./flow/FlowMiniMap.vue"
 
   type Flow = ComponentConfig<typeof theme, AppConfig, "flow">
 
@@ -31,6 +34,12 @@
     connectionMode?: ConnectionMode
     /** Default edge options */
     defaultEdgeOptions?: Record<string, any>
+    /** Show background (true for defaults, or pass config object) */
+    background?: boolean | Omit<FlowBackgroundProps, "ui">
+    /** Show controls (true for defaults, or pass config object) */
+    controls?: boolean | Omit<FlowControlsProps, "ui">
+    /** Show minimap (true for defaults, or pass config object) */
+    minimap?: boolean | Omit<FlowMiniMapProps, "ui">
     /** Theme slot overrides */
     ui?: Flow["slots"]
   }
@@ -43,12 +52,19 @@
     paneClick: [event: any]
     connect: [params: any]
   }
+
+  export type { FlowBackgroundProps, FlowControlsProps, FlowMiniMapProps }
+  export type { FlowNodeProps } from "./FlowNode.vue"
+  export type { FlowHandleProps } from "./FlowHandle.vue"
 </script>
 
 <script lang="ts" setup>
   import { computed } from "vue"
   import { VueFlow } from "@vue-flow/core"
   import { tv } from "../utils/tv"
+  import FlowBackground from "./flow/FlowBackground.vue"
+  import FlowControls from "./flow/FlowControls.vue"
+  import FlowMiniMap from "./flow/FlowMiniMap.vue"
 
   const {
     nodes = [],
@@ -59,12 +75,33 @@
     nodesDraggable = true,
     nodesConnectable = true,
     elementsSelectable = true,
+    background = true,
+    controls = true,
+    minimap = false,
     ui: uiProps = {},
   } = defineProps<FlowProps>()
 
   const emit = defineEmits<FlowEmits>()
 
   const ui = computed(() => tv({ extend: tv(theme) })({}))
+
+  const backgroundProps = computed(() => {
+    if (background === false) return null
+    if (background === true) return {}
+    return background
+  })
+
+  const controlsProps = computed(() => {
+    if (controls === false) return null
+    if (controls === true) return {}
+    return controls
+  })
+
+  const minimapProps = computed(() => {
+    if (minimap === false) return null
+    if (minimap === true) return {}
+    return minimap
+  })
 </script>
 
 <template>
@@ -93,6 +130,10 @@
         <template v-for="(_, name) in $slots" #[name]="slotData">
           <slot :name="name" v-bind="slotData ?? {}" />
         </template>
+
+        <FlowBackground v-if="backgroundProps" v-bind="backgroundProps" />
+        <FlowControls v-if="controlsProps" v-bind="controlsProps" />
+        <FlowMiniMap v-if="minimapProps" v-bind="minimapProps" />
       </VueFlow>
     </div>
 

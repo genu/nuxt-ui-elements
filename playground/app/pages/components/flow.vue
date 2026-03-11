@@ -87,8 +87,8 @@
   ])
 
   useSeoMeta({
-    title: "Flow - Nuxt UI Elements",
-    description: "Themed vue-flow wrapper components for Nuxt UI",
+    title: "Flow - Nuxt Elements",
+    description: "Themed vue-flow wrapper component for Nuxt UI",
   })
 </script>
 
@@ -96,7 +96,7 @@
   <div class="p-8 space-y-8">
     <div>
       <h1 class="text-3xl font-bold mb-2">Flow</h1>
-      <p class="text-muted">Themed wrapper components for vue-flow, providing a familiar Nuxt UI API with generous defaults.</p>
+      <p class="text-muted">A single themed wrapper around vue-flow with built-in background, controls, and minimap.</p>
     </div>
 
     <!-- Basic Usage -->
@@ -106,7 +106,7 @@
       </template>
 
       <p class="text-sm text-muted mb-4">
-        A simple flow graph with three connected nodes. Includes background, minimap, and controls out of the box.
+        A simple flow graph with three connected nodes. Background and controls are enabled by default.
       </p>
 
       <UEFlow :nodes="simpleNodes" :edges="simpleEdges" :ui="{ root: 'h-[350px] rounded-lg border border-accented' }">
@@ -115,9 +115,6 @@
           <UEFlowNode :label="data.label" :color="data.color" :variant="data.variant" :selected="selected" />
           <UEFlowHandle type="source" position="right" />
         </template>
-
-        <UEFlowBackground />
-        <UEFlowControls />
       </UEFlow>
     </UCard>
 
@@ -128,10 +125,15 @@
       </template>
 
       <p class="text-sm text-muted mb-4">
-        A more complex flow with multiple colors, variants, background, minimap, and controls. Try dragging nodes and connecting handles.
+        A more complex flow with multiple colors, variants, and minimap enabled. Try dragging nodes and connecting handles.
       </p>
 
-      <UEFlow :nodes="nodes" :edges="edges" :ui="{ root: 'h-[500px] rounded-lg border border-accented' }">
+      <UEFlow
+        :nodes="nodes"
+        :edges="edges"
+        :background="{ pattern: 'dots', gap: 20 }"
+        :minimap="true"
+        :ui="{ root: 'h-[500px] rounded-lg border border-accented' }">
         <template #node-custom="{ data, selected }">
           <UEFlowHandle type="target" position="left" :color="data.color" />
           <UEFlowNode
@@ -143,10 +145,6 @@
           </UEFlowNode>
           <UEFlowHandle type="source" position="right" :color="data.color" />
         </template>
-
-        <UEFlowBackground pattern="dots" :gap="20" />
-        <UEFlowControls />
-        <UEFlowMiniMap />
       </UEFlow>
     </UCard>
 

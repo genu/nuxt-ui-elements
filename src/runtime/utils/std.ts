@@ -13,6 +13,8 @@ import plur from "plur"
 import slugify from "@sindresorhus/slugify"
 import * as date from "./std/date"
 
+export { plur, slugify, date }
+
 export default {
   plur,
   slugify,
