@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.3.1](https://github.com/genu/nuxt-ui-elements/compare/v0.3.0...v0.3.1) (2026-03-13)
+
+
+### Features
+
+* add @azure/storage-file-datalake as a devDependency ([96e6ca0](https://github.com/genu/nuxt-ui-elements/commit/96e6ca0660544d0aa9dd2cdd898bfd41dade894d))
+* add #std alias for standard utilities and create utility library ([69093d5](https://github.com/genu/nuxt-ui-elements/commit/69093d5c12d20484fcdabc7b0df978983c7d4f77))
+* add `@internationalized/date` utilities ([b2ea684](https://github.com/genu/nuxt-ui-elements/commit/b2ea684af29a93b95815baa4881cf49d308e7992))
+* add alert dialog component ([ba0cc8f](https://github.com/genu/nuxt-ui-elements/commit/ba0cc8f53727bf839dbcbd836cad2b13dccf5c89))
+* add Azure Data Lake storage plugin with upload and management capabilities ([596c9d6](https://github.com/genu/nuxt-ui-elements/commit/596c9d618e30d31d87a3aacfd9cedf852628c7f6))
+* add comprehensive tests for upload manager and validators ([5c48693](https://github.com/genu/nuxt-ui-elements/commit/5c4869316111a7d333164889189285dc009f13e5))
+* add documentation ([bfbbe15](https://github.com/genu/nuxt-ui-elements/commit/bfbbe15c4e42bd34c17a1e08532405ab1a9398db))
+* add ESLint and Prettier configuration files for improved code quality ([7b33888](https://github.com/genu/nuxt-ui-elements/commit/7b33888228768c83269d18f462f8947edd04d763))
+* add Flickering Grid component with customizable parameters and controls ([c68e72b](https://github.com/genu/nuxt-ui-elements/commit/c68e72bac52db646c498660d34160c58bcc7c8b2))
+* add leading and trailing slots to ToggleGroup component ([2b65d6e](https://github.com/genu/nuxt-ui-elements/commit/2b65d6e24b186ed078fb4b1b6b7d1a677014ed74))
+* add slugify utility ([a96c932](https://github.com/genu/nuxt-ui-elements/commit/a96c93225a3be16aab4ed4492a14ba7c7d1da7c7))
+* add ToggleGroup component with theme support and auto-registration ([15ffda4](https://github.com/genu/nuxt-ui-elements/commit/15ffda4900492d240ff10bfb9a27418a4af181f5))
+* Add Vue Flow wrapper components with Nuxt UI theming ([#38](https://github.com/genu/nuxt-ui-elements/issues/38)) ([23e6ffc](https://github.com/genu/nuxt-ui-elements/commit/23e6ffcc4c5da190345c17ac8dfc20114f0fc2d8))
+* **date:** add getWeekStartLocale function for locale-based week start ([2275af7](https://github.com/genu/nuxt-ui-elements/commit/2275af75c0793b72e740c5fe817de24c14a89edc))
+* enhance date parsing and manipulation functions with timezone support ([3ecbbce](https://github.com/genu/nuxt-ui-elements/commit/3ecbbce7a7fe22dd08166213681fcb6c07047fb6))
+* enhance dialog component with customizable colors and variants ([fcaf69e](https://github.com/genu/nuxt-ui-elements/commit/fcaf69e1dfa8e01b00644b8b81ae2c4548a226b6))
+* implement theme management and add utility types for Tailwind variants ([37ed361](https://github.com/genu/nuxt-ui-elements/commit/37ed3614fea553e9ec1983b8c3c37c69e736cedd))
+* re-architect the plugin system ([2cf90e5](https://github.com/genu/nuxt-ui-elements/commit/2cf90e5866d20c91ebb9949e921338796073098b))
+* set up pnpm workspace and fix dialog closing animations ([#53](https://github.com/genu/nuxt-ui-elements/issues/53)) ([72276da](https://github.com/genu/nuxt-ui-elements/commit/72276da82086303bcf72a97214bfd08287c4c3d5))
+* **upload-manager:** enhance file handling with preview support and processing hooks ([69a408c](https://github.com/genu/nuxt-ui-elements/commit/69a408ccf42963dac580778d6fc8ee748c923eb8))
+* **upload-manager:** enhance file handling with source tracking and new file access methods ([bdbbd77](https://github.com/genu/nuxt-ui-elements/commit/bdbbd77fe4117f53e18360b98c34a3e6823169c3))
+* **uploader:** implement useUploader composable with file management and upload functionality ([5c859e1](https://github.com/genu/nuxt-ui-elements/commit/5c859e11f2609e5a7d3288f5cdfe8b3a83e65fb9))
+* **video-compressor:** add video compression plugin with customizable options ([7364622](https://github.com/genu/nuxt-ui-elements/commit/7364622900d9c23445381d66fc95c1d9217f4d93))
+* wrap canvas element in ClientOnly for improved SSR handling ([ea997b8](https://github.com/genu/nuxt-ui-elements/commit/ea997b8b676d3751bfef325d6bb2a5ad287afde5))
+
+
+### Bug Fixes
+
+* **dependencies:** add @ffmpeg/ffmpeg and @ffmpeg/util as optional dependencies ([0e124dc](https://github.com/genu/nuxt-ui-elements/commit/0e124dc446ed6b731111a50135d5fcec90f9aa25))
+* **dependencies:** update vitest and coverage-v8 to latest versions ([9490aa4](https://github.com/genu/nuxt-ui-elements/commit/9490aa40b8617bc1c6962223e5f3ef06b1e6f87f))
+* **DialogConfirm:** update dialog description rendering to use v-html ([8b64aa2](https://github.com/genu/nuxt-ui-elements/commit/8b64aa28264bb053d096f31f486a0038f4c9dc75))
+* disable vue/html-self-closing rule in ESLint configuration ([5f08b3d](https://github.com/genu/nuxt-ui-elements/commit/5f08b3d0e69f68cbc9b851a8918884b4186dac0f))
+* formatting ([906dfde](https://github.com/genu/nuxt-ui-elements/commit/906dfdec7f65648c7423f18fb475c18dda4af4cc))
+* lint ([29344c8](https://github.com/genu/nuxt-ui-elements/commit/29344c88fa79c9667fe3fddb40085d03c5d18b8b))
+* **release:** add [skip ci] to manual bump commit ([#52](https://github.com/genu/nuxt-ui-elements/issues/52)) ([771a75a](https://github.com/genu/nuxt-ui-elements/commit/771a75a267b38898cb430bbbc20b7575bc67a066))
+* remove title and description props from UModal and update DialogDescription to use v-html ([3cec456](https://github.com/genu/nuxt-ui-elements/commit/3cec4562b414ce764a4cf352c17265111ffea1d8))
+* remove unused confirmNavigate import from dialog component ([e75b0ca](https://github.com/genu/nuxt-ui-elements/commit/e75b0ca0745b0186e5ecd15164ef3dd8fa6f3766))
+* **std:** update dayjs import to use ESM version for better tree-shaking ([974265f](https://github.com/genu/nuxt-ui-elements/commit/974265f298bc17565eadf202b84bacba6998a544))
+* update button styles in DialogConfirm component for better visibility ([7463ac9](https://github.com/genu/nuxt-ui-elements/commit/7463ac9b74d035a3c910ffda3067f7d6c023d769))
+* update ESLint rule for max attributes per line and format uploader component ([3f8c845](https://github.com/genu/nuxt-ui-elements/commit/3f8c845d4bfa6c99555317decbf2e40381dabac7))
+* update formatting and improve readability in various files ([8191442](https://github.com/genu/nuxt-ui-elements/commit/8191442aca988b924b2d722d83bc681a0185f11a))
+* **uploader:** update UProgress binding to use model-value for progress percentage ([d21b3b5](https://github.com/genu/nuxt-ui-elements/commit/d21b3b53bf7d373b4bfab7b18371ca9818b501e5))
+* **video-compressor:** set default plugin options and simplify FFMpeg initialization ([0f48069](https://github.com/genu/nuxt-ui-elements/commit/0f48069c99a2ccf04b5dae451d8b57d088e1c929))
+
+
+### Dependencies
+
+* remove changelogen dependency in favor of release-please ([eb75d9d](https://github.com/genu/nuxt-ui-elements/commit/eb75d9d38d128fd56b4190bd4c3f6269c79fcc67))
+
 ## [0.1.41](https://github.com/genu/nuxt-ui-elements/compare/v0.1.40...v0.1.41) (2026-03-03)
 
 
