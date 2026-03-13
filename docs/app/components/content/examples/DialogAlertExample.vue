@@ -1,42 +1,46 @@
 <script setup lang="ts">
   const dialog = useDialog()
 
-  const colors = ["primary", "success", "warning", "error", "info", "neutral"] as const
-  const selectedColor = ref<(typeof colors)[number]>("primary")
-
-  const colorIcons: Record<(typeof colors)[number], string> = {
-    primary: "i-lucide-info",
-    success: "i-lucide-check-circle",
-    warning: "i-lucide-alert-triangle",
-    error: "i-lucide-x-circle",
-    info: "i-lucide-info",
-    neutral: "i-lucide-message-circle",
+  function showInfoAlert() {
+    dialog.alert({
+      icon: "i-lucide-info",
+      title: "Information",
+      description: "This is an informational alert dialog.",
+      color: "primary",
+    })
   }
 
-  function showAlert() {
+  function showSuccessAlert() {
     dialog.alert({
-      icon: colorIcons[selectedColor.value],
-      title: `${selectedColor.value.charAt(0).toUpperCase() + selectedColor.value.slice(1)} Alert`,
-      description: `This is a ${selectedColor.value} alert dialog example.`,
-      color: selectedColor.value,
+      icon: "i-lucide-check-circle",
+      title: "Success",
+      description: "The operation completed successfully.",
+      color: "success",
+    })
+  }
+
+  function showWarningAlert() {
+    dialog.alert({
+      icon: "i-lucide-alert-triangle",
+      title: "Warning",
+      description: "Please review before continuing.",
+      color: "warning",
     })
   }
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="flex flex-wrap gap-2">
-      <UButton
-        v-for="color in colors"
-        :key="color"
-        :color="color"
-        :variant="selectedColor === color ? 'solid' : 'outline'"
-        size="sm"
-        @click="selectedColor = color">
-        {{ color }}
-      </UButton>
-    </div>
+  <div class="flex flex-wrap gap-2">
+    <UButton @click="showInfoAlert">
+      Info Alert
+    </UButton>
 
-    <UButton @click="showAlert"> Show {{ selectedColor }} Alert </UButton>
+    <UButton color="success" @click="showSuccessAlert">
+      Success Alert
+    </UButton>
+
+    <UButton color="warning" @click="showWarningAlert">
+      Warning Alert
+    </UButton>
   </div>
 </template>
