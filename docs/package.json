@@ -20,7 +20,7 @@
     "@vue-flow/core": "1.48.2",
     "@vue-flow/minimap": "1.5.4",
     "@vueuse/nuxt": "14.2.1",
-    "better-sqlite3": "12.6.2",
+    "better-sqlite3": "12.8.0",
     "nuxt": "4.3.1",
     "nuxt-component-meta": "0.17.2",
     "nuxt-ui-elements-pro": "0.1.11",
