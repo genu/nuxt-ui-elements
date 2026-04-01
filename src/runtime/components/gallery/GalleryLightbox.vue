@@ -3,10 +3,11 @@
 </script>
 
 <script lang="ts" setup>
-  import { onMounted, onBeforeUnmount, ref } from "vue"
+  import { onBeforeUnmount, ref, watch } from "vue"
 
   const {
     items,
+    open = false,
     startIndex = 0,
     loop = true,
     arrows = true,
@@ -14,6 +15,7 @@
     ui,
   } = defineProps<{
     items: NormalizedGalleryItem[]
+    open?: boolean
     startIndex?: number
     loop?: boolean
     arrows?: boolean
@@ -53,10 +55,19 @@
     }
   }
 
-  onMounted(() => {
-    document.addEventListener("keydown", onKeydown)
-    document.body.style.overflow = "hidden"
-  })
+  watch(
+    () => open,
+    (isOpen) => {
+      if (isOpen) {
+        document.addEventListener("keydown", onKeydown)
+        document.body.style.overflow = "hidden"
+      } else {
+        document.removeEventListener("keydown", onKeydown)
+        document.body.style.overflow = ""
+      }
+    },
+    { immediate: true },
+  )
 
   onBeforeUnmount(() => {
     document.removeEventListener("keydown", onKeydown)
@@ -68,12 +79,13 @@
   <Teleport to="body">
     <Transition
       enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
       leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0">
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95">
       <div
+        v-if="open"
         :class="ui.overlay()"
         @click="onBackdropClick">
         <UButton

@@ -155,7 +155,8 @@
     </div>
 
     <GalleryLightbox
-      v-if="lightbox && isOpen"
+      v-if="lightbox"
+      :open="isOpen"
       :items="normalizedItems"
       :start-index="lightboxIndex"
       :loop="loop"
