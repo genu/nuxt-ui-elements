@@ -68,7 +68,7 @@ export default defineNuxtModule<ModuleOptions>({
     addComponentsDir({
       path: resolver.resolve("./runtime/components"),
       prefix: options.prefix,
-      ignore: ["**/flow/**"],
+      ignore: ["**/flow/**", "**/gallery/**"],
     })
 
     // Vue Flow integration: add CSS and transpile only when packages are actually installed

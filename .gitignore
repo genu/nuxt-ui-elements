@@ -56,3 +56,7 @@ Temporary Items
 .apdisk
 
 /.claude/settings.local.json
+
+# Superpowers
+docs/superpowers
+.superpowers
