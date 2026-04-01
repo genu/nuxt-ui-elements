@@ -65,7 +65,7 @@
     })({
       columns,
       gap,
-      ratio: layout === "masonry" ? undefined : ratio,
+      ratio: layout === "masonry" ? "auto" : ratio,
       layout,
     }),
   )

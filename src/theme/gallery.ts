@@ -11,7 +11,7 @@ export default (_options: ThemeOptions) => ({
     item: "overflow-hidden rounded-lg cursor-pointer transition-opacity hover:opacity-80",
     image: "w-full h-full object-cover",
     overlay: "fixed inset-0 z-50 bg-black/80 flex items-center justify-center",
-    lightbox: "relative w-full h-full p-4 sm:p-8",
+    lightbox: "relative w-full h-full px-12 sm:px-16 py-4 sm:py-8 overflow-hidden",
     lightboxImage: "object-contain max-h-full max-w-full mx-auto",
     close: "absolute top-4 right-4 z-10",
     counter: "absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm",

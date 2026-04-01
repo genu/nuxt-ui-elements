@@ -18,6 +18,7 @@ export function useNavigation() {
     { name: "Dialog Alert", path: "/components/dialog-alert", category: "overlays" },
     { name: "Toggle Group", path: "/components/toggle-group", category: "forms" },
     { name: "Flow", path: "/components/flow", category: "data-display" },
+    { name: "Gallery", path: "/components/gallery", category: "data-display" },
   ]
 
   // Group components by category

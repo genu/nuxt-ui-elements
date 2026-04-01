@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts" setup>
-  import { onBeforeUnmount, ref, watch } from "vue"
+  import { onBeforeUnmount, ref, watch, useTemplateRef } from "vue"
 
   const {
     items,
@@ -37,15 +37,28 @@
     item(props: { item: NormalizedGalleryItem; index: number }): any
   }>()
 
+  const carouselRef = useTemplateRef("carouselRef")
   const currentIndex = ref(startIndex)
 
   function onCarouselSelect(index: number) {
     currentIndex.value = index
   }
 
+  function scrollPrev() {
+    carouselRef.value?.emblaApi?.scrollPrev()
+  }
+
+  function scrollNext() {
+    carouselRef.value?.emblaApi?.scrollNext()
+  }
+
   function onKeydown(e: KeyboardEvent) {
     if (e.key === "Escape") {
       emit("close")
+    } else if (e.key === "ArrowLeft") {
+      scrollPrev()
+    } else if (e.key === "ArrowRight") {
+      scrollNext()
     }
   }
 
@@ -96,10 +109,30 @@
           :ui="{ base: 'text-white hover:bg-white/20' }"
           @click="emit('close')" />
 
+        <!-- Prev/Next arrows positioned on the overlay -->
+        <UButton
+          v-if="arrows"
+          icon="i-lucide-chevron-left"
+          color="neutral"
+          variant="ghost"
+          class="absolute start-4 top-1/2 -translate-y-1/2 z-10"
+          :ui="{ base: 'text-white hover:bg-white/20' }"
+          @click="scrollPrev" />
+
+        <UButton
+          v-if="arrows"
+          icon="i-lucide-chevron-right"
+          color="neutral"
+          variant="ghost"
+          class="absolute end-4 top-1/2 -translate-y-1/2 z-10"
+          :ui="{ base: 'text-white hover:bg-white/20' }"
+          @click="scrollNext" />
+
         <div :class="ui.lightbox()">
           <UCarousel
+            ref="carouselRef"
             :items="items"
-            :arrows="arrows"
+            :arrows="false"
             :dots="dots"
             :loop="loop"
             :start-index="startIndex"
