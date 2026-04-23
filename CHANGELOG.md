@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/genu/nuxt-ui-elements/compare/v0.3.1...v0.3.2) (2026-04-23)
+
+
+### Features
+
+* **gallery:** add Gallery component with lightbox ([#70](https://github.com/genu/nuxt-ui-elements/issues/70)) ([1663527](https://github.com/genu/nuxt-ui-elements/commit/16635270a5e32ca840db737fb0484c58bb788ad9))
+
 ## [0.3.1](https://github.com/genu/nuxt-ui-elements/compare/v0.3.0...v0.3.1) (2026-03-13)
 
 
